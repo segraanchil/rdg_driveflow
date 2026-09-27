@@ -4,6 +4,13 @@ Dealership Management System with a 360-degree virtual showroom for **RDG Car
 Deals & Services**, a secondhand car dealership. This file orients future
 sessions — read it before making structural changes.
 
+## Git commit conventions
+
+Do **not** add a `Co-Authored-By: Claude ...` trailer to commit messages or
+pull request descriptions in this repository — commit as the repository
+owner only. This overrides Claude Code's default attribution behavior for
+this project specifically.
+
 ## Tech stack
 
 - **Frontend**: `frontend/` — React 18 + Vite + Tailwind CSS, installable PWA
