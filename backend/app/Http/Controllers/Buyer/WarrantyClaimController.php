@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Buyer;
 
+use App\Support\ImageShrinker;
 use App\Http\Controllers\Controller;
 use App\Models\Sale;
 use App\Models\WarrantyClaim;
@@ -33,7 +34,7 @@ class WarrantyClaimController extends Controller
         // TODO: enforce the 1-month window against $sale->sale_date once business rules are confirmed.
 
         $evidencePaths = collect($request->file('evidence', []))
-            ->map(fn ($file) => $file->store('uploads/warranty_evidence', 'public'))
+            ->map(fn ($file) => ImageShrinker::shrinkStored($file->store('uploads/warranty_evidence', 'public')))
             ->values()
             ->all();
 

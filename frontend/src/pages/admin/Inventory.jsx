@@ -66,7 +66,7 @@ export default function Inventory() {
 
   return (
     <div>
-      <h1 className="mb-4 text-2xl font-bold text-brand">Inventory Management</h1>
+      <h1 className="mb-6">Inventory Management</h1>
 
       <form onSubmit={submit} className="mb-6 grid grid-cols-2 gap-2 rounded border border-slate-200 bg-white p-4 md:grid-cols-4">
         {['make', 'model', 'year', 'mileage', 'acquisition_cost', 'repair_fees'].map((field) => (
@@ -115,7 +115,7 @@ export default function Inventory() {
 
       <table className="w-full border-collapse text-sm">
         <thead>
-          <tr className="border-b text-left text-slate-500">
+          <tr className="text-left">
             <th className="py-2">Vehicle</th>
             <th>Status</th>
             <th>Selling Price</th>
@@ -131,7 +131,7 @@ export default function Inventory() {
               <td>₱{Number(v.selling_price).toLocaleString()}</td>
               <td>{v.media?.length ?? 0}</td>
               <td className="space-x-3">
-                <button onClick={() => startEdit(v)} className="text-brand underline">Edit</button>
+                <button onClick={() => startEdit(v)} className="font-semibold text-emerald-700 hover:underline">Edit</button>
                 <button onClick={() => remove(v.id)} className="text-red-600">Delete</button>
               </td>
             </tr>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import {
   Car,
   ClipboardCheck,
@@ -15,6 +15,8 @@ import {
   Percent,
   UserCog,
   LogOut,
+  Menu,
+  X,
 } from 'lucide-react'
 import apiClient from '../../api/client'
 import { useAuth } from '../../context/AuthContext'
@@ -98,6 +100,9 @@ export default function AdminLayout() {
   const isCeo = user?.role === 'ceo'
   const sections = isCeo ? CEO_SECTIONS : ADMIN_SECTIONS
   const counts = useSidebarCounts(isCeo)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const { pathname } = useLocation()
+  useEffect(() => setMenuOpen(false), [pathname])
 
   const initials = (user?.name ?? '?')
     .split(' ')
@@ -108,12 +113,20 @@ export default function AdminLayout() {
 
   return (
     <div className="flex min-h-screen bg-slate-50">
-      <aside className="flex w-64 flex-shrink-0 flex-col bg-slate-900 text-slate-300">
+      {/* Phones: the sidebar slides in over the page. Sized to the visible screen (100dvh) so the
+          account row at the bottom is never hidden behind the browser's address bar. */}
+      {menuOpen && <div className="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-[1px] lg:hidden" onClick={() => setMenuOpen(false)} />}
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 flex h-[100dvh] w-64 flex-shrink-0 flex-col bg-slate-900 text-slate-300 shadow-2xl transition-transform duration-200 lg:sticky lg:top-0 lg:z-auto lg:h-screen lg:translate-x-0 lg:shadow-none ${
+          menuOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
         <div className="flex items-center gap-2.5 border-b border-white/10 px-5 py-5">
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500 text-white">
             <Car size={18} />
           </span>
           <span className="text-base font-bold text-white">RDG {isCeo ? 'Executive' : 'Admin'}</span>
+          <button onClick={() => setMenuOpen(false)} aria-label="Close menu" className="ml-auto rounded p-1.5 text-slate-400 hover:bg-white/10 hover:text-white lg:hidden"><X size={18} /></button>
         </div>
 
         <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-5">
@@ -161,7 +174,7 @@ export default function AdminLayout() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-3 border-t border-white/10 px-4 py-4">
+        <div className="flex items-center gap-3 border-t border-white/10 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
           <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500 text-sm font-bold text-white">
             {initials}
           </span>
@@ -179,9 +192,18 @@ export default function AdminLayout() {
         </div>
       </aside>
 
-      <main className="flex-1 overflow-y-auto p-8">
-        <Outlet />
-      </main>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <div className="sticky top-0 z-30 flex items-center gap-3 border-b border-white/10 bg-slate-900 px-4 py-3 text-white lg:hidden">
+          <button onClick={() => setMenuOpen(true)} aria-label="Open menu" className="rounded-lg p-1.5 hover:bg-white/10"><Menu size={22} /></button>
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500"><Car size={15} /></span>
+          <span className="font-bold">RDG {isCeo ? 'Executive' : 'Admin'}</span>
+        </div>
+        <main className="rdg-pattern min-w-0 flex-1 overflow-x-auto p-4 sm:p-6 lg:p-8">
+          <div className="animate-rdg-fade-up">
+            <Outlet />
+          </div>
+        </main>
+      </div>
     </div>
   )
 }

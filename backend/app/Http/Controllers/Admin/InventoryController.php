@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Support\ImageShrinker;
 use App\Http\Controllers\Controller;
 use App\Models\Vehicle;
 use App\Models\VehicleMedia;
@@ -110,7 +111,7 @@ class InventoryController extends Controller
         foreach ($photos as $i => $photo) {
             VehicleMedia::create([
                 'vehicle_id' => $vehicle->id,
-                'file_path' => $photo->store('uploads/vehicle_media', 'public'),
+                'file_path' => ImageShrinker::shrinkStored($photo->store('uploads/vehicle_media', 'public')),
                 'type' => VehicleMedia::TYPE_360_FRAME,
                 'sort_order' => $nextOrder + $i,
             ]);

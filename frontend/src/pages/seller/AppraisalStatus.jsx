@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import apiClient from '../../api/client'
+import PageLoader from '../../components/ui/PageLoader'
 
 const STEPS = ['submitted', 'under_appraisal', 'offer_made', 'accepted']
 
@@ -12,7 +13,7 @@ export default function AppraisalStatus() {
     apiClient.get(`/seller/acquisition-leads/${id}`).then(({ data }) => setLead(data))
   }, [id])
 
-  if (!lead) return <p className="text-slate-400">Loading…</p>
+  if (!lead) return <PageLoader />
 
   const currentStep = STEPS.indexOf(lead.status)
 

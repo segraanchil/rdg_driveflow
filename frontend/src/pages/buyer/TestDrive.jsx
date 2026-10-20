@@ -29,7 +29,7 @@ export default function TestDrive() {
   if (testDrive) {
     return (
       <div className="mx-auto max-w-md text-center">
-        <h1 className="mb-2 text-2xl font-bold text-brand">Test drive requested</h1>
+        <h1 className="mb-4">Test drive requested</h1>
         <p className="text-slate-500">
           We'll email you once Admin confirms or declines your preferred time.
         </p>
@@ -39,7 +39,7 @@ export default function TestDrive() {
 
   return (
     <div className="mx-auto max-w-md">
-      <h1 className="mb-2 text-2xl font-bold text-brand">Schedule Test Drive #{vehicleId}</h1>
+      <h1 className="mb-4">Schedule Test Drive #{vehicleId}</h1>
       <p className="mb-4 rounded border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800">
         Scheduling a test drive does <strong>not</strong> reserve this vehicle — it can still be
         reserved or sold to another buyer before your scheduled time.
@@ -66,7 +66,7 @@ export default function TestDrive() {
           />
         </label>
         {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
-        <button type="submit" className="rounded bg-brand px-4 py-2 text-white">
+        <button type="submit" className="rdg-btn">
           Request Test Drive
         </button>
       </form>

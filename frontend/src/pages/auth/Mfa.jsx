@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import apiClient from '../../api/client'
+import AuthShell from '../../components/layout/AuthShell'
 
 const ROLE_FALLBACK = {
   admin: '/admin/inventory',
@@ -47,9 +48,9 @@ export default function Mfa() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100">
-      <form onSubmit={submit} className="w-80 space-y-4 rounded-lg bg-white p-6 shadow">
-        <h1 className="text-xl font-bold text-brand">Check your email</h1>
+    <AuthShell>
+      <form onSubmit={submit} className="space-y-4">
+        <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">Check your email</h1>
         <p className="text-sm text-slate-500">
           We sent a 6-digit code to {user?.email ?? 'your email'}. It expires in 5 minutes.
         </p>
@@ -64,13 +65,13 @@ export default function Mfa() {
         />
         {error && <p className="text-sm text-red-600">{error}</p>}
         {resent && <p className="text-sm text-green-600">New code sent.</p>}
-        <button type="submit" className="w-full rounded bg-brand py-2 text-white">
+        <button type="submit" className="rdg-btn w-full py-3">
           Verify
         </button>
-        <button type="button" onClick={resend} className="w-full text-sm text-brand underline">
+        <button type="button" onClick={resend} className="w-full text-sm font-semibold text-emerald-700 hover:underline">
           Resend code
         </button>
       </form>
-    </div>
+    </AuthShell>
   )
 }

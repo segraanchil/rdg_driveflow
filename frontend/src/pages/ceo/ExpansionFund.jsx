@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import apiClient from '../../api/client'
+import PageLoader from '../../components/ui/PageLoader'
 
 /** Expansion Fund balance tracker. */
 export default function ExpansionFund() {
@@ -9,18 +10,18 @@ export default function ExpansionFund() {
     apiClient.get('/ceo/expansion-fund').then(({ data }) => setFund(data))
   }, [])
 
-  if (!fund) return <p className="text-slate-400">Loading…</p>
+  if (!fund) return <PageLoader />
 
   return (
     <div>
-      <h1 className="mb-2 text-2xl font-bold text-brand">Expansion Fund</h1>
+      <h1 className="mb-4">Expansion Fund</h1>
       <p className="mb-6 text-3xl font-bold text-brand-accent">
         ₱{Number(fund.current_balance).toLocaleString()}
       </p>
 
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b text-left text-slate-500">
+          <tr className="text-left">
             <th className="py-2">Date</th>
             <th>Amount</th>
             <th>Running Balance</th>

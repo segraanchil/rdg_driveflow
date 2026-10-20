@@ -26,7 +26,7 @@ export default function SellYourCar() {
 
   return (
     <form onSubmit={submit} className="mx-auto max-w-lg space-y-4">
-      <h1 className="text-2xl font-bold text-brand">Sell Your Car</h1>
+      <h1 >Sell Your Car</h1>
 
       <div className="grid grid-cols-2 gap-4">
         <input
@@ -80,7 +80,7 @@ export default function SellYourCar() {
         />
       </label>
 
-      <button type="submit" className="rounded bg-brand px-4 py-2 text-white">
+      <button type="submit" className="rdg-btn">
         Submit for Appraisal
       </button>
     </form>

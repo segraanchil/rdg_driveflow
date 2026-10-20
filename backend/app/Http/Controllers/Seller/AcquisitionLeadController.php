@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Seller;
 
+use App\Support\ImageShrinker;
 use App\Http\Controllers\Controller;
 use App\Models\AcquisitionLead;
 use Illuminate\Http\Request;
@@ -26,7 +27,7 @@ class AcquisitionLeadController extends Controller
         ]);
 
         $photoPaths = collect($request->file('photos', []))
-            ->map(fn ($file) => $file->store('uploads/acquisition_photos', 'public'))
+            ->map(fn ($file) => ImageShrinker::shrinkStored($file->store('uploads/acquisition_photos', 'public')))
             ->values()
             ->all();
 

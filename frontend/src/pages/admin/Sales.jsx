@@ -54,7 +54,7 @@ export default function Sales() {
 
   return (
     <div>
-      <h1 className="mb-4 text-2xl font-bold text-brand">Sales</h1>
+      <h1 className="mb-6">Sales</h1>
 
       <form onSubmit={submit} className="mb-6 grid grid-cols-2 gap-3 rounded border border-slate-200 bg-white p-4 md:grid-cols-4">
         <select
@@ -111,7 +111,7 @@ export default function Sales() {
 
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b text-left text-slate-500">
+          <tr className="text-left">
             <th className="py-2">Vehicle</th>
             <th>Buyer</th>
             <th>Payment</th>

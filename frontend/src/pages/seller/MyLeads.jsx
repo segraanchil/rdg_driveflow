@@ -13,7 +13,7 @@ export default function MyLeads() {
   return (
     <div className="mx-auto max-w-lg">
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-brand">My Submissions</h1>
+        <h1 >My Submissions</h1>
         <Link to="/sell-your-car" className="text-sm text-brand underline">Submit another car</Link>
       </div>
 
@@ -30,7 +30,7 @@ export default function MyLeads() {
                 <span>
                   {lead.vehicle_specs?.year} {lead.vehicle_specs?.make} {lead.vehicle_specs?.model}
                 </span>
-                <span className="text-xs uppercase text-slate-400">{lead.status.replace('_', ' ')}</span>
+                <span className="rdg-chip bg-slate-100 text-slate-600">{lead.status.replace('_', ' ')}</span>
               </Link>
             </li>
           ))}

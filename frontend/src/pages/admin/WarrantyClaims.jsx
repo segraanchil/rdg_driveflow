@@ -20,18 +20,18 @@ export default function WarrantyClaims() {
 
   return (
     <div>
-      <h1 className="mb-4 text-2xl font-bold text-brand">Warranty Claims</h1>
+      <h1 className="mb-6">Warranty Claims</h1>
       <div className="space-y-3">
         {claims.map((claim) => (
-          <div key={claim.id} className="rounded border border-slate-200 bg-white p-3 text-sm">
+          <div key={claim.id} className="rdg-card p-4 text-sm">
             <p className="font-medium">{claim.sale?.buyer?.name}</p>
             <p className="text-slate-500">{claim.issue_description}</p>
             <div className="mt-2 flex items-center justify-between">
-              <span className="text-xs uppercase text-slate-400">{claim.status}</span>
+              <span className="rdg-chip bg-slate-100 text-slate-600">{claim.status}</span>
               <select
                 onChange={(e) => setStatus(claim.id, e.target.value)}
                 defaultValue=""
-                className="rounded border border-slate-300 px-2 py-1 text-xs"
+                className="rdg-btn-ghost px-3 py-1.5 text-xs"
               >
                 <option value="" disabled>Update status</option>
                 {STATUSES.map((s) => (

@@ -33,7 +33,7 @@ export default function Reservation() {
 
   return (
     <div className="mx-auto max-w-md">
-      <h1 className="mb-4 text-2xl font-bold text-brand">Reserve Vehicle #{vehicleId}</h1>
+      <h1 className="mb-6">Reserve Vehicle #{vehicleId}</h1>
       <form onSubmit={submit}>
         <label className="mb-4 block text-sm">
           Proof of payment
@@ -46,7 +46,7 @@ export default function Reservation() {
           />
         </label>
         {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
-        <button type="submit" className="rounded bg-brand px-4 py-2 text-white">
+        <button type="submit" className="rdg-btn">
           Submit Reservation
         </button>
       </form>
@@ -63,7 +63,7 @@ function CountdownTimer({ reservation }) {
   // TODO: tick this live with a setInterval instead of a static render.
   return (
     <div className="mx-auto max-w-md text-center">
-      <h1 className="mb-2 text-2xl font-bold text-brand">Reservation submitted</h1>
+      <h1 className="mb-4">Reservation submitted</h1>
       <p className="text-slate-500">Awaiting admin verification of your payment proof.</p>
       <p className="mt-4 text-3xl font-bold text-brand-accent">
         {hours}h {minutes}m remaining

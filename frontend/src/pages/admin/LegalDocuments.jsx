@@ -21,10 +21,10 @@ export default function LegalDocuments() {
 
   return (
     <div>
-      <h1 className="mb-4 text-2xl font-bold text-brand">Legal Documents</h1>
+      <h1 className="mb-6">Legal Documents</h1>
       <div className="space-y-3">
         {sales.map((sale) => (
-          <div key={sale.id} className="flex items-center justify-between rounded border border-slate-200 bg-white p-3 text-sm">
+          <div key={sale.id} className="rdg-card flex flex-wrap items-center justify-between gap-3 p-4 text-sm">
             <span>{sale.vehicle?.year} {sale.vehicle?.make} {sale.vehicle?.model} — {sale.buyer?.name}</span>
             <span className="flex gap-2">
               {DOC_TYPES.map((type) => (

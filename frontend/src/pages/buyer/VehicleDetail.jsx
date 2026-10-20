@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import apiClient from '../../api/client'
 import { useAuth } from '../../context/AuthContext'
 import Viewer360 from '../../components/vehicles/Viewer360'
+import PageLoader from '../../components/ui/PageLoader'
+import { Star, Gauge, BadgeCheck, Banknote, Landmark, CalendarCheck } from 'lucide-react'
 
 export default function VehicleDetail() {
   const { id } = useParams()
@@ -31,56 +33,64 @@ export default function VehicleDetail() {
     setSaved(!saved)
   }
 
-  if (!vehicle) return <p className="text-slate-400">Loading…</p>
+  if (!vehicle) return <PageLoader />
 
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-      <Viewer360 vehicle={vehicle} />
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.15fr_1fr]">
+      <div className="rdg-card overflow-hidden p-3">
+        <Viewer360 vehicle={vehicle} />
+      </div>
 
-      <div>
-        <div className="flex items-start justify-between">
-          <h1 className="text-2xl font-bold text-brand">
-            {vehicle.year} {vehicle.make} {vehicle.model}
-          </h1>
+      <div className="rdg-card p-6">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-emerald-600">{vehicle.year}</p>
+            <h1 className="no-bar block">{vehicle.make} {vehicle.model}</h1>
+          </div>
           {user?.role === 'buyer' && (
             <button
               onClick={toggleSaved}
-              className={`shrink-0 rounded border px-3 py-1 text-sm ${
-                saved ? 'border-brand-accent bg-brand-accent text-white' : 'border-slate-300 text-slate-600'
+              className={`flex shrink-0 items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-semibold ${
+                saved ? 'border-amber-400 bg-amber-50 text-amber-700' : 'border-slate-300 text-slate-600 hover:border-emerald-400'
               }`}
             >
-              {saved ? '★ Saved' : '☆ Save'}
+              <Star size={15} className={saved ? 'fill-amber-400 text-amber-500' : ''} /> {saved ? 'Saved' : 'Save'}
             </button>
           )}
         </div>
-        <p className="text-slate-500">{vehicle.mileage?.toLocaleString()} km</p>
-        <p className="mt-2 text-2xl font-bold text-brand-accent">
-          ₱{Number(vehicle.selling_price).toLocaleString()}
-        </p>
+
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <div className="rounded-xl bg-slate-50 p-3">
+            <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-slate-400"><Gauge size={13} /> Mileage</p>
+            <p className="mt-1 font-bold text-slate-800">{vehicle.mileage != null ? `${Number(vehicle.mileage).toLocaleString()} km` : '—'}</p>
+          </div>
+          <div className="rounded-xl bg-slate-50 p-3">
+            <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-slate-400"><BadgeCheck size={13} /> Status</p>
+            <p className="mt-1 font-bold capitalize text-slate-800">{vehicle.status ?? 'available'}</p>
+          </div>
+        </div>
+
+        <div className="mt-5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 p-4 text-white">
+          <p className="text-xs font-bold uppercase tracking-wider text-emerald-50">Selling price</p>
+          <p className="text-3xl font-extrabold">₱{Number(vehicle.selling_price).toLocaleString()}</p>
+        </div>
 
         {/* Straight Cash vs. Bank Financing payment path selection */}
-        <div className="mt-6 flex flex-wrap gap-3">
-          <button
-            onClick={() => navigate(`/reservation?vehicle_id=${vehicle.id}&payment=cash`)}
-            className="rounded bg-brand px-4 py-2 text-white"
-          >
-            Reserve — Straight Cash
+        <div className="mt-5 grid gap-2.5">
+          <button onClick={() => navigate(`/reservation?vehicle_id=${vehicle.id}&payment=cash`)} className="rdg-btn py-3">
+            <Banknote size={18} /> Reserve — Straight Cash
           </button>
-          <button
-            onClick={() => navigate(`/financing-application?vehicle_id=${vehicle.id}`)}
-            className="rounded border border-brand px-4 py-2 text-brand"
-          >
-            Bank Financing
-          </button>
-          <button
-            onClick={() => navigate(`/test-drive?vehicle_id=${vehicle.id}`)}
-            className="rounded border border-slate-300 px-4 py-2 text-slate-600"
-          >
-            Schedule Test Drive
-          </button>
+          <div className="grid grid-cols-2 gap-2.5">
+            <button onClick={() => navigate(`/financing-application?vehicle_id=${vehicle.id}`)} className="rdg-btn-dark">
+              <Landmark size={16} /> Bank Financing
+            </button>
+            <button onClick={() => navigate(`/test-drive?vehicle_id=${vehicle.id}`)} className="rdg-btn-ghost">
+              <CalendarCheck size={16} /> Test Drive
+            </button>
+          </div>
         </div>
-        <p className="mt-2 text-xs text-slate-400">
-          Scheduling a test drive doesn't reserve this vehicle — it may still be sold or reserved
+        <p className="mt-3 rounded-lg bg-slate-50 p-3 text-xs text-slate-500">
+          Scheduling a test drive doesn&apos;t reserve this vehicle. It may still be sold or reserved
           by another buyer before your scheduled time.
         </p>
       </div>

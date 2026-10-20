@@ -29,7 +29,7 @@ export default function WarrantyClaim() {
   if (submitted) {
     return (
       <div className="mx-auto max-w-md text-center">
-        <h1 className="mb-2 text-2xl font-bold text-brand">Claim submitted</h1>
+        <h1 className="mb-4">Claim submitted</h1>
         <p className="text-slate-500">Our team will review your warranty claim shortly.</p>
       </div>
     )
@@ -37,7 +37,7 @@ export default function WarrantyClaim() {
 
   return (
     <form onSubmit={submit} className="mx-auto max-w-md space-y-4">
-      <h1 className="text-2xl font-bold text-brand">Warranty Claim</h1>
+      <h1 >Warranty Claim</h1>
 
       <label className="block text-sm">
         Which purchase?

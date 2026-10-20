@@ -25,7 +25,7 @@ export default function LoanCalculator() {
 
   return (
     <div className="mx-auto max-w-lg">
-      <h1 className="mb-4 text-2xl font-bold text-brand">Auto-Loan Calculator</h1>
+      <h1 className="mb-6">Auto-Loan Calculator</h1>
       {vehicleId && <p className="mb-4 text-sm text-slate-500">For vehicle #{vehicleId}</p>}
 
       <label className="mb-3 block text-sm">

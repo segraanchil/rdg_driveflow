@@ -22,7 +22,7 @@ export default function Financing() {
 
   return (
     <div>
-      <h1 className="mb-4 text-2xl font-bold text-brand">Financing Applications</h1>
+      <h1 className="mb-6">Financing Applications</h1>
       <div className="space-y-4">
         {applications.map((app) => (
           <div key={app.id} className="rounded border border-slate-200 bg-white p-4 text-sm">
@@ -39,12 +39,12 @@ export default function Financing() {
                   <span className="flex gap-3">
                     <a
                       href={backendUrl(`/api/admin/financing-documents/${doc.id}/download`)}
-                      className="text-brand underline"
+                      className="font-semibold text-emerald-700 hover:underline"
                     >
                       Download
                     </a>
                     {!doc.verified && (
-                      <button onClick={() => verifyDocument(doc.id)} className="text-brand underline">
+                      <button onClick={() => verifyDocument(doc.id)} className="font-semibold text-emerald-700 hover:underline">
                         Mark verified
                       </button>
                     )}

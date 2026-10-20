@@ -23,19 +23,19 @@ export default function Reservations() {
 
   return (
     <div>
-      <h1 className="mb-4 text-2xl font-bold text-brand">Reservation Queue</h1>
+      <h1 className="mb-6">Reservation Queue</h1>
       <ul className="space-y-2">
         {reservations.map((r) => (
-          <li key={r.id} className="flex items-center justify-between rounded border border-slate-200 bg-white p-3 text-sm">
+          <li key={r.id} className="rdg-card flex flex-wrap items-center justify-between gap-3 p-4 text-sm">
             <span>
               {r.vehicle?.year} {r.vehicle?.make} {r.vehicle?.model} — {r.buyer?.name}
             </span>
             <span className="flex gap-2">
-              <a href={backendUrl(`/storage/${r.payment_proof_path}`)} target="_blank" rel="noreferrer" className="text-brand underline">
+              <a href={backendUrl(`/storage/${r.payment_proof_path}`)} target="_blank" rel="noreferrer" className="font-semibold text-emerald-700 hover:underline">
                 View proof
               </a>
-              <button onClick={() => verify(r.id)} className="rounded bg-green-600 px-2 py-1 text-white">Verify</button>
-              <button onClick={() => reject(r.id)} className="rounded bg-red-600 px-2 py-1 text-white">Reject</button>
+              <button onClick={() => verify(r.id)} className="inline-flex items-center rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-600">Verify</button>
+              <button onClick={() => reject(r.id)} className="inline-flex items-center rounded-lg bg-red-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-red-600">Reject</button>
             </span>
           </li>
         ))}

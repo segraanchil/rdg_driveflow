@@ -20,20 +20,20 @@ export default function AcquisitionLeads() {
 
   return (
     <div>
-      <h1 className="mb-4 text-2xl font-bold text-brand">Acquisition Leads</h1>
+      <h1 className="mb-6">Acquisition Leads</h1>
       <div className="space-y-3">
         {leads.map((lead) => (
-          <div key={lead.id} className="rounded border border-slate-200 bg-white p-3 text-sm">
+          <div key={lead.id} className="rdg-card p-4 text-sm">
             <p className="font-medium">
               {lead.vehicle_specs?.year} {lead.vehicle_specs?.make} {lead.vehicle_specs?.model} — {lead.seller?.name}
             </p>
             <p className="text-slate-500">{lead.vehicle_specs?.mileage?.toLocaleString()} km</p>
             <div className="mt-2 flex items-center justify-between">
-              <span className="text-xs uppercase text-slate-400">{lead.status}</span>
+              <span className="rdg-chip bg-slate-100 text-slate-600">{lead.status}</span>
               <select
                 onChange={(e) => setStatus(lead.id, e.target.value)}
                 defaultValue=""
-                className="rounded border border-slate-300 px-2 py-1 text-xs"
+                className="rdg-btn-ghost px-3 py-1.5 text-xs"
               >
                 <option value="" disabled>Update status</option>
                 {STATUSES.map((s) => (

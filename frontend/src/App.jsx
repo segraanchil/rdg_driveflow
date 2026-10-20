@@ -1,43 +1,46 @@
+import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import BuyerLayout from './components/layout/BuyerLayout'
 import AdminLayout from './components/layout/AdminLayout'
 import ProtectedRoute from './routes/ProtectedRoute'
+import PageLoader from './components/ui/PageLoader'
 
-import Home from './pages/buyer/Home'
-import Inventory from './pages/buyer/Inventory'
-import VehicleDetail from './pages/buyer/VehicleDetail'
-import LoanCalculator from './pages/buyer/LoanCalculator'
-import FinancingApplication from './pages/buyer/FinancingApplication'
-import Reservation from './pages/buyer/Reservation'
-import TestDrive from './pages/buyer/TestDrive'
-import MyGarage from './pages/buyer/MyGarage'
-import WarrantyClaim from './pages/buyer/WarrantyClaim'
+const Home = lazy(() => import('./pages/buyer/Home'))
+const Inventory = lazy(() => import('./pages/buyer/Inventory'))
+const VehicleDetail = lazy(() => import('./pages/buyer/VehicleDetail'))
+const LoanCalculator = lazy(() => import('./pages/buyer/LoanCalculator'))
+const FinancingApplication = lazy(() => import('./pages/buyer/FinancingApplication'))
+const Reservation = lazy(() => import('./pages/buyer/Reservation'))
+const TestDrive = lazy(() => import('./pages/buyer/TestDrive'))
+const MyGarage = lazy(() => import('./pages/buyer/MyGarage'))
+const WarrantyClaim = lazy(() => import('./pages/buyer/WarrantyClaim'))
 
-import SellYourCar from './pages/seller/SellYourCar'
-import AppraisalStatus from './pages/seller/AppraisalStatus'
-import MyLeads from './pages/seller/MyLeads'
+const SellYourCar = lazy(() => import('./pages/seller/SellYourCar'))
+const AppraisalStatus = lazy(() => import('./pages/seller/AppraisalStatus'))
+const MyLeads = lazy(() => import('./pages/seller/MyLeads'))
 
-import Login from './pages/auth/Login'
-import Register from './pages/auth/Register'
-import Mfa from './pages/auth/Mfa'
-import EmailVerified from './pages/auth/EmailVerified'
-import AdminInventory from './pages/admin/Inventory'
-import AdminReservations from './pages/admin/Reservations'
-import Sales from './pages/admin/Sales'
-import Financing from './pages/admin/Financing'
-import Invoices from './pages/admin/Invoices'
-import LegalDocuments from './pages/admin/LegalDocuments'
-import AdminWarrantyClaims from './pages/admin/WarrantyClaims'
-import AdminTestDrives from './pages/admin/TestDrives'
-import AcquisitionLeads from './pages/admin/AcquisitionLeads'
+const Login = lazy(() => import('./pages/auth/Login'))
+const Register = lazy(() => import('./pages/auth/Register'))
+const Mfa = lazy(() => import('./pages/auth/Mfa'))
+const EmailVerified = lazy(() => import('./pages/auth/EmailVerified'))
+const AdminInventory = lazy(() => import('./pages/admin/Inventory'))
+const AdminReservations = lazy(() => import('./pages/admin/Reservations'))
+const Sales = lazy(() => import('./pages/admin/Sales'))
+const Financing = lazy(() => import('./pages/admin/Financing'))
+const Invoices = lazy(() => import('./pages/admin/Invoices'))
+const LegalDocuments = lazy(() => import('./pages/admin/LegalDocuments'))
+const AdminWarrantyClaims = lazy(() => import('./pages/admin/WarrantyClaims'))
+const AdminTestDrives = lazy(() => import('./pages/admin/TestDrives'))
+const AcquisitionLeads = lazy(() => import('./pages/admin/AcquisitionLeads'))
 
-import CeoDashboard from './pages/ceo/Dashboard'
-import ExpansionFund from './pages/ceo/ExpansionFund'
-import MarginSettings from './pages/ceo/MarginSettings'
-import StaffManagement from './pages/ceo/StaffManagement'
+const CeoDashboard = lazy(() => import('./pages/ceo/Dashboard'))
+const ExpansionFund = lazy(() => import('./pages/ceo/ExpansionFund'))
+const MarginSettings = lazy(() => import('./pages/ceo/MarginSettings'))
+const StaffManagement = lazy(() => import('./pages/ceo/StaffManagement'))
 
 export default function App() {
   return (
+    <Suspense fallback={<div className="mx-auto max-w-6xl p-6"><PageLoader /></div>}>
     <Routes>
       {/* Buyer/seller — browsing is public; account-gated pages require login + MFA */}
       <Route element={<BuyerLayout />}>
@@ -132,5 +135,6 @@ export default function App() {
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </Suspense>
   )
 }

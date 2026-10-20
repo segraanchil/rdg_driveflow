@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Buyer;
 
+use App\Support\ImageShrinker;
 use App\Http\Controllers\Controller;
 use App\Models\Reservation;
 use App\Models\Vehicle;
@@ -42,7 +43,7 @@ class ReservationController extends Controller
                 ]);
             }
 
-            $path = $request->file('payment_proof')->store('uploads/payment_proofs', 'public');
+            $path = ImageShrinker::shrinkStored($request->file('payment_proof')->store('uploads/payment_proofs', 'public'));
 
             $reservation = Reservation::create([
                 'vehicle_id' => $vehicle->id,

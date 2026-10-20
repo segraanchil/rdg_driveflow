@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { LayoutDashboard, Car, TrendingUp, DollarSign, FileSignature, Users, CalendarCheck } from 'lucide-react'
 import apiClient from '../../api/client'
+import PageLoader from '../../components/ui/PageLoader'
 
 const ACTIVITY_ICON = {
   document: { Icon: FileSignature, className: 'bg-emerald-100 text-emerald-600' },
@@ -16,7 +17,7 @@ export default function Dashboard() {
     apiClient.get('/ceo/dashboard').then(({ data }) => setStats(data))
   }, [])
 
-  if (!stats) return <p className="text-slate-400">Loading…</p>
+  if (!stats) return <PageLoader />
 
   return (
     <div>

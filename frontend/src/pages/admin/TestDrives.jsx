@@ -23,10 +23,10 @@ export default function TestDrives() {
 
   return (
     <div>
-      <h1 className="mb-4 text-2xl font-bold text-brand">Test Drive Requests</h1>
+      <h1 className="mb-6">Test Drive Requests</h1>
       <ul className="space-y-2">
         {testDrives.map((t) => (
-          <li key={t.id} className="flex items-center justify-between rounded border border-slate-200 bg-white p-3 text-sm">
+          <li key={t.id} className="rdg-card flex flex-wrap items-center justify-between gap-3 p-4 text-sm">
             <span>
               {t.vehicle?.year} {t.vehicle?.make} {t.vehicle?.model} — {t.buyer?.name} —{' '}
               {new Date(t.preferred_at).toLocaleString()}
@@ -34,11 +34,11 @@ export default function TestDrives() {
             </span>
             {t.status === 'pending' ? (
               <span className="flex gap-2">
-                <button onClick={() => confirm(t.id)} className="rounded bg-green-600 px-2 py-1 text-white">Confirm</button>
-                <button onClick={() => decline(t.id)} className="rounded bg-red-600 px-2 py-1 text-white">Decline</button>
+                <button onClick={() => confirm(t.id)} className="inline-flex items-center rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-600">Confirm</button>
+                <button onClick={() => decline(t.id)} className="inline-flex items-center rounded-lg bg-red-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-red-600">Decline</button>
               </span>
             ) : (
-              <span className="text-xs uppercase text-slate-400">{t.status}</span>
+              <span className="rdg-chip bg-slate-100 text-slate-600">{t.status}</span>
             )}
           </li>
         ))}

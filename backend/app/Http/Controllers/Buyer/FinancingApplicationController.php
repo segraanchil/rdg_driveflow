@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Buyer;
 
+use App\Support\ImageShrinker;
 use App\Http\Controllers\Controller;
 use App\Models\FinancingApplication;
 use App\Models\FinancingDocument;
@@ -59,7 +60,7 @@ class FinancingApplicationController extends Controller
             'file' => ['required', 'file', 'max:10240'],
         ]);
 
-        $path = $request->file('file')->store('uploads/financing_documents', 'public');
+        $path = ImageShrinker::shrinkStored($request->file('file')->store('uploads/financing_documents', 'public'));
 
         $document = FinancingDocument::create([
             'application_id' => $application->id,

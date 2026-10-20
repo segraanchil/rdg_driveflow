@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import apiClient, { backendUrl } from '../../api/client'
+import PageLoader from '../../components/ui/PageLoader'
 
 /** "My Garage": saved vehicles, active reservations, purchase/loan history, warranty claims. */
 export default function MyGarage() {
@@ -25,14 +26,14 @@ export default function MyGarage() {
     loadGarage()
   }
 
-  if (!garage) return <p className="text-slate-400">Loading…</p>
+  if (!garage) return <PageLoader />
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold text-brand">My Garage</h1>
+      <h1 >My Garage</h1>
 
       <section>
-        <h2 className="mb-2 font-semibold text-slate-700">Saved Vehicles</h2>
+        <h2 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-slate-500">Saved Vehicles</h2>
         {garage.saved_vehicles.length === 0 ? (
           <p className="text-sm text-slate-400">
             Nothing saved yet — tap ☆ Save on any vehicle's detail page.
@@ -63,13 +64,13 @@ export default function MyGarage() {
       </section>
 
       <section>
-        <h2 className="mb-2 font-semibold text-slate-700">Active Reservations</h2>
+        <h2 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-slate-500">Active Reservations</h2>
         {garage.active_reservations.length === 0 ? (
           <p className="text-sm text-slate-400">No active reservations.</p>
         ) : (
           <ul className="space-y-2">
             {garage.active_reservations.map((r) => (
-              <li key={r.id} className="rounded border border-slate-200 bg-white p-3 text-sm">
+              <li key={r.id} className="rdg-card p-4 text-sm">
                 {r.vehicle?.year} {r.vehicle?.make} {r.vehicle?.model} — {r.status}
               </li>
             ))}
@@ -78,13 +79,13 @@ export default function MyGarage() {
       </section>
 
       <section>
-        <h2 className="mb-2 font-semibold text-slate-700">Test Drives</h2>
+        <h2 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-slate-500">Test Drives</h2>
         {testDrives.length === 0 ? (
           <p className="text-sm text-slate-400">No test drives scheduled.</p>
         ) : (
           <ul className="space-y-2">
             {testDrives.map((t) => (
-              <li key={t.id} className="rounded border border-slate-200 bg-white p-3 text-sm">
+              <li key={t.id} className="rdg-card p-4 text-sm">
                 {t.vehicle?.year} {t.vehicle?.make} {t.vehicle?.model} —{' '}
                 {new Date(t.preferred_at).toLocaleString()} — {t.status}
               </li>
@@ -94,13 +95,13 @@ export default function MyGarage() {
       </section>
 
       <section>
-        <h2 className="mb-2 font-semibold text-slate-700">Purchase History</h2>
+        <h2 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-slate-500">Purchase History</h2>
         {sales.length === 0 ? (
           <p className="text-sm text-slate-400">No completed purchases yet.</p>
         ) : (
           <ul className="space-y-2">
             {sales.map((s) => (
-              <li key={s.id} className="rounded border border-slate-200 bg-white p-3 text-sm">
+              <li key={s.id} className="rdg-card p-4 text-sm">
                 {s.vehicle?.year} {s.vehicle?.make} {s.vehicle?.model} — ₱{Number(s.total_amount).toLocaleString()} on {s.sale_date}
               </li>
             ))}
@@ -109,13 +110,13 @@ export default function MyGarage() {
       </section>
 
       <section>
-        <h2 className="mb-2 font-semibold text-slate-700">Loan History</h2>
+        <h2 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-slate-500">Loan History</h2>
         {garage.loan_history.length === 0 ? (
           <p className="text-sm text-slate-400">No financing applications yet.</p>
         ) : (
           <ul className="space-y-2">
             {garage.loan_history.map((l) => (
-              <li key={l.id} className="rounded border border-slate-200 bg-white p-3 text-sm">
+              <li key={l.id} className="rdg-card p-4 text-sm">
                 {l.vehicle?.year} {l.vehicle?.make} {l.vehicle?.model} — {l.status}
               </li>
             ))}
@@ -124,13 +125,13 @@ export default function MyGarage() {
       </section>
 
       <section>
-        <h2 className="mb-2 font-semibold text-slate-700">Warranty Claims</h2>
+        <h2 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-slate-500">Warranty Claims</h2>
         {claims.length === 0 ? (
           <p className="text-sm text-slate-400">No warranty claims filed.</p>
         ) : (
           <ul className="space-y-2">
             {claims.map((c) => (
-              <li key={c.id} className="rounded border border-slate-200 bg-white p-3 text-sm">
+              <li key={c.id} className="rdg-card p-4 text-sm">
                 <p>{c.issue_description}</p>
                 <p className="mt-1 text-xs uppercase text-slate-400">{c.status}</p>
               </li>

@@ -17,10 +17,10 @@ export default function Invoices() {
 
   return (
     <div>
-      <h1 className="mb-4 text-2xl font-bold text-brand">Invoices</h1>
+      <h1 className="mb-6">Invoices</h1>
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b text-left text-slate-500">
+          <tr className="text-left">
             <th className="py-2">Sale</th>
             <th>Amount</th>
             <th></th>
@@ -33,7 +33,7 @@ export default function Invoices() {
               <td>₱{Number(sale.total_amount).toLocaleString()}</td>
               <td>
                 {generated[sale.id] ? (
-                  <a href={backendUrl(`/storage/${generated[sale.id]}`)} target="_blank" rel="noreferrer" className="text-brand underline">
+                  <a href={backendUrl(`/storage/${generated[sale.id]}`)} target="_blank" rel="noreferrer" className="font-semibold text-emerald-700 hover:underline">
                     View PDF
                   </a>
                 ) : (

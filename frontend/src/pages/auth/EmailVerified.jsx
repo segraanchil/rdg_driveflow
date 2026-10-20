@@ -1,4 +1,5 @@
 import { Link, useSearchParams } from 'react-router-dom'
+import AuthShell from '../../components/layout/AuthShell'
 
 /** Landing page for the signed link in VerifyEmailMail — backend redirects here after checking it. */
 export default function EmailVerified() {
@@ -6,9 +7,9 @@ export default function EmailVerified() {
   const success = params.get('status') === 'success'
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100">
-      <div className="w-80 space-y-4 rounded-lg bg-white p-6 text-center shadow">
-        <h1 className="text-xl font-bold text-brand">
+    <AuthShell>
+      <div className="space-y-4 text-center">
+        <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">
           {success ? 'Email verified' : 'Link invalid or expired'}
         </h1>
         <p className="text-sm text-slate-500">
@@ -16,10 +17,10 @@ export default function EmailVerified() {
             ? 'Your email address is confirmed. You can continue using your account.'
             : "This verification link didn't work. It may have expired — you can still use your account as normal."}
         </p>
-        <Link to="/login" className="block w-full rounded bg-brand py-2 text-white">
+        <Link to="/login" className="rdg-btn w-full py-3">
           Go to login
         </Link>
       </div>
-    </div>
+    </AuthShell>
   )
 }

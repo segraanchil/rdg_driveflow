@@ -18,7 +18,7 @@ export default function MarginSettings() {
 
   return (
     <div className="max-w-md">
-      <h1 className="mb-4 text-2xl font-bold text-brand">Global Margin Setting</h1>
+      <h1 className="mb-6">Global Margin Setting</h1>
       <label className="block text-sm">
         Margin: {margin}%
         <input

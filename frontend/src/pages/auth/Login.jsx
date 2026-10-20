@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import AuthShell from '../../components/layout/AuthShell'
 
 /** Step 1 (password) login — shared by all four roles; MFA step lives at /mfa. */
 export default function Login() {
@@ -26,16 +27,16 @@ export default function Login() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100">
-      <form onSubmit={submit} className="w-80 space-y-4 rounded-lg bg-white p-6 shadow">
-        <h1 className="text-xl font-bold text-brand">Log In</h1>
+    <AuthShell>
+      <form onSubmit={submit} className="space-y-4">
+        <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">Log In</h1>
         <input
           type="email"
           placeholder="Email"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded border border-slate-300 px-3 py-2"
+          className="w-full"
         />
         <input
           type="password"
@@ -43,16 +44,16 @@ export default function Login() {
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded border border-slate-300 px-3 py-2"
+          className="w-full"
         />
         {error && <p className="text-sm text-red-600">{error}</p>}
-        <button type="submit" className="w-full rounded bg-brand py-2 text-white">
+        <button type="submit" className="rdg-btn w-full py-3">
           Continue
         </button>
         <p className="text-center text-sm text-slate-500">
-          No account? <Link to="/register" className="text-brand underline">Sign up</Link>
+          No account? <Link to="/register" className="font-semibold text-emerald-700 hover:underline">Sign up</Link>
         </p>
       </form>
-    </div>
+    </AuthShell>
   )
 }

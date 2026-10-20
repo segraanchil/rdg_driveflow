@@ -80,7 +80,7 @@ export default function FinancingApplication() {
 
   return (
     <div className="mx-auto max-w-lg">
-      <h1 className="mb-4 text-2xl font-bold text-brand">Bank Financing Application</h1>
+      <h1 className="mb-6">Bank Financing Application</h1>
       {vehicle && (
         <p className="mb-4 text-sm text-slate-500">
           {vehicle.year} {vehicle.make} {vehicle.model} — ₱{Number(vehicle.selling_price).toLocaleString()}
@@ -114,7 +114,7 @@ export default function FinancingApplication() {
           </div>
 
           {employmentProfile && (
-            <div className="rounded border border-slate-200 bg-white p-3 text-sm">
+            <div className="rdg-card p-4 text-sm">
               <p className="mb-1 font-medium">You'll need to upload:</p>
               <ul className="list-inside list-disc text-slate-600">
                 {checklist.map((doc) => (
@@ -154,7 +154,7 @@ export default function FinancingApplication() {
             Estimated monthly: <strong>₱{estimate.toLocaleString(undefined, { maximumFractionDigits: 2 })}</strong>
           </p>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
 
           <button
             type="submit"
@@ -170,7 +170,7 @@ export default function FinancingApplication() {
             Application submitted. Upload each required document below.
           </p>
           {checklist.map((doc) => (
-            <div key={doc} className="flex items-center justify-between rounded border border-slate-200 bg-white p-3 text-sm">
+            <div key={doc} className="rdg-card flex flex-wrap items-center justify-between gap-3 p-4 text-sm">
               <span className="capitalize">{doc.replace(/_/g, ' ')} {uploaded[doc] ? '✅' : ''}</span>
               {!uploaded[doc] && (
                 <input

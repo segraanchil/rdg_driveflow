@@ -1,12 +1,13 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import PageLoader from '../components/ui/PageLoader'
 
 /** Gates any route behind login + (optionally) a verified MFA session. */
 export default function ProtectedRoute({ children, roles, requireMfa = false }) {
   const { user, loading, mfaRequired, mfaVerified } = useAuth()
   const location = useLocation()
 
-  if (loading) return null // TODO: swap for a real loading skeleton
+  if (loading) return <div className="mx-auto max-w-6xl p-6"><PageLoader /></div>
 
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />
