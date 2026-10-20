@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Buyer;
 
+use App\Support\AdminAlert;
 use App\Support\ImageShrinker;
 use App\Http\Controllers\Controller;
 use App\Models\FinancingApplication;
@@ -68,6 +69,8 @@ class FinancingApplicationController extends Controller
             'doc_type' => $data['doc_type'],
             'verified' => false,
         ]);
+
+        AdminAlert::notify('financing', 'Financing document uploaded', "{$request->user()->name} uploaded " . str_replace('_', ' ', $data['doc_type']) . " for application #{$application->id}.", '/admin/financing');
 
         return response()->json($document, 201);
     }

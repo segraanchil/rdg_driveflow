@@ -7,7 +7,8 @@ export default function WarrantyClaim() {
   const [saleId, setSaleId] = useState('')
   const [issueDescription, setIssueDescription] = useState('')
   const [evidence, setEvidence] = useState([])
-  const [submitted, setSubmitted] = useState(false)
+  const [submitted, setSubmitted] = useState(null)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     apiClient.get('/buyer/sales').then(({ data }) => setSales(data))
@@ -20,17 +21,25 @@ export default function WarrantyClaim() {
     form.append('issue_description', issueDescription)
     evidence.forEach((file) => form.append('evidence[]', file))
 
-    await apiClient.post('/buyer/warranty-claims', form, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
-    setSubmitted(true)
+    setError(null)
+    try {
+      const { data } = await apiClient.post('/buyer/warranty-claims', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        loadingText: 'Filing your claim…',
+      })
+      setSubmitted(data)
+    } catch (err) {
+      setError(err.response?.data?.message ?? 'Could not submit the claim.')
+    }
   }
 
   if (submitted) {
     return (
       <div className="mx-auto max-w-md text-center">
-        <h1 className="mb-4">Claim submitted</h1>
-        <p className="text-slate-500">Our team will review your warranty claim shortly.</p>
+        <h1 className="no-bar mb-2 block">Claim submitted</h1>
+        <p className="text-slate-500">Your ticket number is</p>
+        <p className="my-3 rounded-xl border-2 border-dashed border-emerald-400 bg-emerald-50 py-3 font-mono text-2xl font-extrabold tracking-wider text-emerald-700">{submitted.ticket_number}</p>
+        <p className="text-sm text-slate-500">Our team will review your claim. You can follow it in My Garage.</p>
       </div>
     )
   }
@@ -82,6 +91,7 @@ export default function WarrantyClaim() {
           className="mt-1 block"
         />
       </label>
+      {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
 
       <button type="submit" disabled={!saleId} className="rounded bg-brand px-4 py-2 text-white disabled:opacity-50">
         Submit Claim

@@ -21,6 +21,7 @@ class WarrantyClaim extends Model
     public const STATUS_REFUNDED = 'refunded';
 
     protected $fillable = [
+        'ticket_number',
         'sale_id',
         'issue_description',
         'evidence_path',

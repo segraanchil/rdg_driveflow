@@ -28,6 +28,10 @@ class AcquisitionLeadReviewController extends Controller
                 AcquisitionLead::STATUS_ACCEPTED,
                 AcquisitionLead::STATUS_DECLINED,
             ])],
+            'offer_amount' => ['nullable', 'numeric', 'min:0', 'required_if:status,' . AcquisitionLead::STATUS_OFFER_MADE],
+            'admin_notes' => ['nullable', 'string', 'max:2000'],
+        ], [
+            'offer_amount.required_if' => 'Enter the offer amount before marking an offer as made.',
         ]);
 
         $lead->update($data);

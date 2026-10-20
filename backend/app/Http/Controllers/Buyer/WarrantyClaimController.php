@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Buyer;
 
+use App\Support\AdminAlert;
 use App\Support\ImageShrinker;
 use App\Http\Controllers\Controller;
 use App\Models\Sale;
@@ -31,7 +32,12 @@ class WarrantyClaimController extends Controller
         $sale = Sale::findOrFail($data['sale_id']);
         abort_unless($sale->buyer_id === $request->user()->id, 403);
 
-        // TODO: enforce the 1-month window against $sale->sale_date once business rules are confirmed.
+        // 1-month money-back guarantee: claims are accepted within one month of the sale date.
+        if ($sale->sale_date && now()->greaterThan(\Illuminate\Support\Carbon::parse($sale->sale_date)->addMonth()->endOfDay())) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'sale_id' => ['The 1-month warranty period for this purchase has ended.'],
+            ]);
+        }
 
         $evidencePaths = collect($request->file('evidence', []))
             ->map(fn ($file) => ImageShrinker::shrinkStored($file->store('uploads/warranty_evidence', 'public')))
@@ -44,6 +50,10 @@ class WarrantyClaimController extends Controller
             'evidence_path' => $evidencePaths,
             'status' => WarrantyClaim::STATUS_SUBMITTED,
         ]);
+
+        // Ticket number, e.g. WC-2026-000042, generated from the claim's own id.
+        $claim->update(['ticket_number' => sprintf('WC-%s-%06d', now()->format('Y'), $claim->id)]);
+        AdminAlert::notify('warranty', 'New warranty claim ' . $claim->ticket_number, $request->user()->name . ': ' . \Illuminate\Support\Str::limit($data['issue_description'], 90), '/admin/warranty-claims');
 
         return response()->json($claim, 201);
     }

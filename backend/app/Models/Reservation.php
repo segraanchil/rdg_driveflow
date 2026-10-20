@@ -23,6 +23,7 @@ class Reservation extends Model
     protected $fillable = [
         'vehicle_id',
         'buyer_id',
+        'payment_method',
         'payment_proof_path',
         'status',
         'expires_at',

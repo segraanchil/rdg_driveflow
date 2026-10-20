@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import apiClient from '../../api/client'
 import { useAuth } from '../../context/AuthContext'
+import NotificationBell from './NotificationBell'
 
 const ADMIN_SECTIONS = [
   {
@@ -197,6 +198,11 @@ export default function AdminLayout() {
           <button onClick={() => setMenuOpen(true)} aria-label="Open menu" className="rounded-lg p-1.5 hover:bg-white/10"><Menu size={22} /></button>
           <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500"><Car size={15} /></span>
           <span className="font-bold">RDG {isCeo ? 'Executive' : 'Admin'}</span>
+          <div className="ml-auto"><NotificationBell /></div>
+        </div>
+        <div className="relative z-40 hidden items-center justify-end gap-3 border-b border-slate-200 bg-white/80 px-8 py-2.5 backdrop-blur lg:flex">
+          <span className="text-sm text-slate-500">Welcome back, <strong className="text-slate-800">{user?.name}</strong></span>
+          <NotificationBell tone="light" />
         </div>
         <main className="rdg-pattern min-w-0 flex-1 overflow-x-auto p-4 sm:p-6 lg:p-8">
           <div className="animate-rdg-fade-up">

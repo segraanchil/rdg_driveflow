@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Buyer;
 
+use App\Support\AdminAlert;
 use App\Http\Controllers\Controller;
 use App\Services\Firebase\FirebaseService;
 use Illuminate\Http\Request;
@@ -44,10 +45,8 @@ class ChatController extends Controller
             'escalated' => true,
         ]);
 
-        $this->firebase->pushDashboardNotification('admin', [
-            'type' => 'chat_escalation',
-            'session_id' => $data['session_id'],
-        ]);
+        // Stored + pushed (Firebase when configured) so an available admin is alerted.
+        AdminAlert::notify('chat', 'A visitor wants to talk to a person', 'Chat session ' . substr($data['session_id'], 0, 8) . ' asked for a human agent.', null);
 
         return response()->json(['message' => 'escalated']);
     }

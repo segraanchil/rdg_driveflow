@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Ceo\MarginSettingController;
 use App\Support\ImageShrinker;
 use App\Http\Controllers\Controller;
 use App\Models\Vehicle;
@@ -27,7 +28,7 @@ class InventoryController extends Controller
             'mileage' => ['required', 'integer', 'min:0'],
             'acquisition_cost' => ['required', 'numeric', 'min:0'],
             'repair_fees' => ['nullable', 'numeric', 'min:0'],
-            'margin_percent' => ['required', 'numeric', 'min:10', 'max:18'],
+            'margin_percent' => ['nullable', 'numeric', 'min:10', 'max:18'],
             'photos.*' => ['nullable', 'image', 'max:10240'],
         ]);
 
@@ -35,6 +36,7 @@ class InventoryController extends Controller
         unset($data['photos']);
 
         $data['repair_fees'] ??= 0;
+        $data['margin_percent'] ??= MarginSettingController::current(); // CEO's global margin by default
         $data['selling_price'] = $this->calculateSellingPrice(
             $data['acquisition_cost'],
             $data['repair_fees'],

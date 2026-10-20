@@ -20,9 +20,14 @@ class MarginSettingController extends Controller
 
     private const DEFAULT_MARGIN = 12.0;
 
+    public static function current(): float
+    {
+        return (float) Cache::get(self::CACHE_KEY, self::DEFAULT_MARGIN);
+    }
+
     public function show(Request $request)
     {
-        return response()->json(['margin_percent' => Cache::get(self::CACHE_KEY, self::DEFAULT_MARGIN)]);
+        return response()->json(['margin_percent' => self::current()]);
     }
 
     public function update(Request $request)
@@ -33,6 +38,18 @@ class MarginSettingController extends Controller
 
         Cache::forever(self::CACHE_KEY, $data['margin_percent']);
 
-        return response()->json(['margin_percent' => $data['margin_percent']]);
+        // Apply the new margin to every car still for sale; reserved and sold cars keep their agreed price.
+        $repriced = 0;
+        \App\Models\Vehicle::where('status', \App\Models\Vehicle::STATUS_AVAILABLE)->get()->each(function ($v) use ($data, &$repriced) {
+            $cost = (float) $v->acquisition_cost + (float) $v->repair_fees;
+            $v->update([
+                'margin_percent' => $data['margin_percent'],
+                'selling_price' => round($cost + $cost * $data['margin_percent'] / 100, 2),
+                'last_updated' => now(),
+            ]);
+            $repriced++;
+        });
+
+        return response()->json(['margin_percent' => $data['margin_percent'], 'repriced' => $repriced]);
     }
 }

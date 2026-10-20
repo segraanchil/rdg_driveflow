@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Buyer;
 
+use App\Support\AdminAlert;
 use App\Support\ImageShrinker;
 use App\Http\Controllers\Controller;
 use App\Models\Reservation;
@@ -29,6 +30,7 @@ class ReservationController extends Controller
         $data = $request->validate([
             'vehicle_id' => ['required', 'exists:vehicles,id'],
             'payment_proof' => ['required', 'file', 'image', 'max:10240'],
+            'payment_method' => ['nullable', 'in:cash,financing'],
         ]);
 
         $reservation = DB::transaction(function () use ($data, $request) {
@@ -48,6 +50,7 @@ class ReservationController extends Controller
             $reservation = Reservation::create([
                 'vehicle_id' => $vehicle->id,
                 'buyer_id' => $request->user()->id,
+                'payment_method' => $data['payment_method'] ?? 'cash',
                 'payment_proof_path' => $path,
                 'status' => Reservation::STATUS_PENDING,
                 'expires_at' => now()->addHours(48),
@@ -61,6 +64,9 @@ class ReservationController extends Controller
 
             return $reservation;
         });
+
+        $v = $reservation->vehicle;
+        AdminAlert::notify('reservation', 'New reservation to verify', "{$request->user()->name} reserved the {$v->year} {$v->make} {$v->model}. Check the proof of payment within 48 hours.", '/admin/reservations');
 
         return response()->json($reservation, 201);
     }

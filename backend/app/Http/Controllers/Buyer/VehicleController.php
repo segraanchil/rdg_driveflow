@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Buyer;
 
+use App\Models\Reservation;
 use App\Http\Controllers\Controller;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
@@ -11,6 +12,7 @@ class VehicleController extends Controller
 {
     public function index(Request $request)
     {
+        Reservation::expireOverdue(); // release cars whose 48-hour hold ran out
         $vehicles = Vehicle::query()
             ->with(['media' => fn ($q) => $q->limit(1)])
             ->where('status', Vehicle::STATUS_AVAILABLE)
@@ -27,6 +29,7 @@ class VehicleController extends Controller
     /** Vehicle detail + 360 viewer payload, including the "Last Updated" stamp. */
     public function show(Vehicle $vehicle)
     {
+        Reservation::expireOverdue();
         return response()->json($vehicle->load('media'));
     }
 }

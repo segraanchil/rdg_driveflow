@@ -25,6 +25,7 @@ export default function WarrantyClaims() {
         {claims.map((claim) => (
           <div key={claim.id} className="rdg-card p-4 text-sm">
             <p className="font-medium">{claim.sale?.buyer?.name}</p>
+            {claim.ticket_number && <p className="font-mono text-xs font-bold text-emerald-700">{claim.ticket_number}</p>}
             <p className="text-slate-500">{claim.issue_description}</p>
             <div className="mt-2 flex items-center justify-between">
               <span className="rdg-chip bg-slate-100 text-slate-600">{claim.status}</span>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Seller;
 
+use App\Support\AdminAlert;
 use App\Support\ImageShrinker;
 use App\Http\Controllers\Controller;
 use App\Models\AcquisitionLead;
@@ -43,6 +44,8 @@ class AcquisitionLeadController extends Controller
             'photos_path' => $photoPaths,
             'status' => AcquisitionLead::STATUS_SUBMITTED,
         ]);
+
+        AdminAlert::notify('lead', 'New car submitted for appraisal', "{$request->user()->name} submitted a {$data['year']} {$data['make']} {$data['model']}.", '/admin/acquisition-leads', 'both');
 
         return response()->json($lead, 201);
     }

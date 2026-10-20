@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AcquisitionLeadReviewController;
 use App\Http\Controllers\Admin\FinancingReviewController;
 use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\InvoiceController;
+use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\LegalDocumentController;
 use App\Http\Controllers\Admin\ReservationQueueController;
 use App\Http\Controllers\Admin\SaleController;
@@ -162,5 +163,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware(['role:admin,ceo', 'mfa'])->prefix('shared')->group(function () {
         Route::get('/acquisition-leads', [AcquisitionLeadReviewController::class, 'index']);
         Route::patch('/acquisition-leads/{lead}', [AcquisitionLeadReviewController::class, 'update']);
+        Route::get('/margin-setting', [MarginSettingController::class, 'show']); // default margin for new cars
+
+        Route::get('/notifications', [NotificationController::class, 'index']);
+        Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead']);
+        Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead']);
     });
 });

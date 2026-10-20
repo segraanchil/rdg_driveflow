@@ -16,6 +16,16 @@ export default function Inventory() {
 
   useEffect(load, [])
 
+  // New cars start at the CEO's global margin (still adjustable within 10–18%).
+  const [globalMargin, setGlobalMargin] = useState(12)
+  useEffect(() => {
+    apiClient.get('/shared/margin-setting', { silent: true }).then(({ data }) => {
+      const m = Number(data.margin_percent)
+      setGlobalMargin(m)
+      setForm((f) => ({ ...f, margin_percent: m }))
+    }).catch(() => {})
+  }, [])
+
   function startEdit(vehicle) {
     setEditingId(vehicle.id)
     setForm({
@@ -33,7 +43,7 @@ export default function Inventory() {
 
   function cancelEdit() {
     setEditingId(null)
-    setForm(BLANK_FORM)
+    setForm({ ...BLANK_FORM, margin_percent: globalMargin })
     setPhotos([])
   }
 

@@ -25,11 +25,14 @@ class AcquisitionLead extends Model
         'vehicle_specs',
         'photos_path',
         'status',
+        'offer_amount',
+        'admin_notes',
     ];
 
     protected $casts = [
         'vehicle_specs' => 'array',
         'photos_path' => 'array',
+        'offer_amount' => 'decimal:2',
     ];
 
     public function seller(): BelongsTo

@@ -8,7 +8,8 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      devOptions: { enabled: true },
+      // Off in dev so testing never shows stale cached screens; the production build still installs it.
+      devOptions: { enabled: false },
       includeAssets: ['favicon.svg', 'icons/icon-192.svg', 'icons/icon-512.svg', 'icons/apple-touch-icon.png'],
       manifest: {
         name: 'RDG DriveFlow',

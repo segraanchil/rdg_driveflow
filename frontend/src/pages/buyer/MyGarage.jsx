@@ -2,9 +2,12 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import apiClient, { backendUrl } from '../../api/client'
 import PageLoader from '../../components/ui/PageLoader'
+import { useAuth } from '../../context/AuthContext'
+import { Mail, BadgeCheck, CalendarDays, AlertCircle } from 'lucide-react'
 
 /** "My Garage": saved vehicles, active reservations, purchase/loan history, warranty claims. */
 export default function MyGarage() {
+  const { user } = useAuth()
   const [garage, setGarage] = useState(null)
   const [sales, setSales] = useState([])
   const [claims, setClaims] = useState([])
@@ -31,6 +34,27 @@ export default function MyGarage() {
   return (
     <div className="space-y-8">
       <h1 >My Garage</h1>
+
+      {/* Profile */}
+      <section className="rdg-card flex flex-wrap items-center gap-4 p-5">
+        <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500 text-xl font-extrabold text-white">
+          {(user?.name ?? '?').split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase()}
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-lg font-extrabold text-slate-900">{user?.name}</p>
+          <p className="flex items-center gap-1.5 truncate text-sm text-slate-500"><Mail size={14} /> {user?.email}</p>
+        </div>
+        <div className="flex flex-wrap gap-2 text-xs">
+          {user?.email_verified_at ? (
+            <span className="rdg-chip bg-emerald-50 text-emerald-700"><BadgeCheck size={13} /> Email verified</span>
+          ) : (
+            <span className="rdg-chip bg-amber-50 text-amber-700"><AlertCircle size={13} /> Email not verified yet</span>
+          )}
+          {user?.created_at && (
+            <span className="rdg-chip bg-slate-100 text-slate-600"><CalendarDays size={13} /> Member since {new Date(user.created_at).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}</span>
+          )}
+        </div>
+      </section>
 
       <section>
         <h2 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-slate-500">Saved Vehicles</h2>

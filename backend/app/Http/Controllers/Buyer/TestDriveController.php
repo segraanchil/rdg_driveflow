@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Buyer;
 
+use App\Support\AdminAlert;
 use App\Http\Controllers\Controller;
 use App\Models\TestDrive;
 use App\Models\Vehicle;
@@ -39,6 +40,8 @@ class TestDriveController extends Controller
             'note' => $data['note'] ?? null,
             'status' => TestDrive::STATUS_PENDING,
         ]);
+
+        AdminAlert::notify('test_drive', 'New test drive request', "{$request->user()->name} asked for a test drive on " . $testDrive->preferred_at?->format('M j, g:i A') . '.', '/admin/test-drives');
 
         return response()->json($testDrive, 201);
     }
