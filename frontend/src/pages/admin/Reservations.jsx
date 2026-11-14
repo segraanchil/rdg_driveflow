@@ -8,6 +8,7 @@ import { formatDateTime, peso, vehicleName } from '../../lib/format'
 import { toast } from '../../lib/toast'
 
 const HOLD_MS = 48 * 3_600_000
+const CHANNEL = { gcash: 'GCash', bank_transfer: 'Bank transfer' }
 
 /** Reservation & payment proof verification queue, with the live 48-hour hold timer (Stories 18–19). */
 export default function Reservations() {
@@ -100,14 +101,15 @@ export default function Reservations() {
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="font-bold text-slate-900">{vehicleName(r.vehicle)}</p>
                     <StatusBadge kind="reservation" status={r.status} />
-                    <Chip tone={r.payment_method === 'financing' ? 'blue' : 'green'}>{r.payment_method === 'financing' ? 'Bank financing' : 'Straight cash'}</Chip>
+                    <Chip tone={r.payment_method === 'financing' ? 'blue' : 'slate'}>{r.payment_method === 'financing' ? 'Bank financing' : 'Straight cash'}</Chip>
+                    {r.payment_channel && <Chip tone="violet">Paid via {CHANNEL[r.payment_channel] ?? r.payment_channel}</Chip>}
                   </div>
                   <p className="mt-0.5 flex flex-wrap items-center gap-x-3 text-sm text-slate-500">
                     <span>{r.buyer?.name}</span>
                     <a href={`mailto:${r.buyer?.email}`} className="flex items-center gap-1 hover:text-emerald-700"><Mail size={13} /> {r.buyer?.email}</a>
                   </p>
                   <p className="mt-1 text-xs text-slate-400">
-                    Submitted {formatDateTime(r.created_at)} · Fee {r.fee_amount ? peso(r.fee_amount) : '—'} · Car price {peso(r.vehicle?.selling_price)}
+                    Submitted {formatDateTime(r.created_at)} · Fee {r.fee_amount ? peso(r.fee_amount) : '—'}{r.payment_reference ? ` · Ref. ${r.payment_reference}` : ''} · Car price {peso(r.vehicle?.selling_price)}
                   </p>
                 </div>
 
@@ -156,9 +158,11 @@ export default function Reservations() {
               <Info label="Buyer" value={<>{proof.buyer?.name}<br /><span className="text-slate-500">{proof.buyer?.email}</span></>} />
               <Info label="Expected fee" value={proof.fee_amount ? peso(proof.fee_amount) : '—'} />
               <Info label="Payment path" value={proof.payment_method === 'financing' ? 'Bank financing' : 'Straight cash'} />
+              <Info label="Paid via" value={CHANNEL[proof.payment_channel] ?? 'Not specified'} />
+              {proof.payment_reference && <Info label="Reference no." value={<span className="font-mono font-bold">{proof.payment_reference}</span>} />}
               <Info label="Submitted" value={formatDateTime(proof.created_at)} />
               {proof.status === 'pending' && <Info label="Hold ends" value={<span className="font-bold text-amber-700">{formatDateTime(proof.expires_at)}</span>} />}
-              <p className="rounded-lg bg-slate-50 p-3 text-xs text-slate-500">Check the amount, the date and that the receiving account is ours before verifying.</p>
+              <p className="rounded-lg bg-slate-50 p-3 text-xs text-slate-500">Open the {CHANNEL[proof.payment_channel] ?? 'GCash or bank'} app and confirm the amount, date and reference number reached our account before verifying.</p>
             </dl>
           </div>
         )}

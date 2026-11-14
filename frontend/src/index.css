@@ -3,19 +3,19 @@
 @tailwind utilities;
 
 /*
- * RDG DriveFlow design system.
- * The admin panel's look (slate-900 surfaces, emerald actions, rounded cards) applied everywhere.
+ * RDG DriveFlow design system, matched to the RDG logo: black ink on white, monochrome.
+ * Neutral surfaces, black actions, condensed display type for titles (like the logo lettering).
  * Base rules below style every page automatically: page titles, form fields, file pickers,
  * tables and buttons, so no screen falls back to plain browser defaults.
  */
 @layer base {
   html { -webkit-tap-highlight-color: transparent; }
-  body { @apply bg-slate-50 font-sans text-slate-700 antialiased; }
+  body { @apply bg-brand-paper font-sans text-slate-700 antialiased; }
   ::selection { @apply bg-emerald-200 text-slate-900; }
 
   /* Page titles: every page's h1 gets the RDG title treatment (emerald accent bar). */
-  main h1 { @apply flex items-center gap-3 text-2xl font-extrabold tracking-tight text-slate-900; }
-  main h1::before { content: ''; @apply inline-block h-7 w-1.5 shrink-0 rounded-full bg-gradient-to-b from-emerald-400 to-emerald-600; }
+  main h1 { @apply flex items-center gap-3 font-display text-3xl font-bold uppercase tracking-wide text-slate-900; }
+  main h1::before { content: ''; @apply inline-block h-7 w-1.5 shrink-0 -skew-x-12 rounded-sm bg-slate-900; }
   main h1.no-bar::before { display: none; }
   main h2 { @apply text-slate-800; }
 
@@ -25,7 +25,20 @@
     @apply rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400;
   }
   input:where(:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']):not([type='color'])):focus, select:focus, textarea:focus { @apply border-emerald-500 ring-4 ring-emerald-500/15; }
-  input[type='checkbox'], input[type='radio'], input[type='range'] { accent-color: #10b981; }
+  input[type='checkbox'], input[type='radio'], input[type='range'] { accent-color: #141414; }
+
+  /* Dropdowns: one look everywhere — custom chevron, comfortable height, clear hover/focus. */
+  select {
+    @apply cursor-pointer appearance-none bg-white pr-10 font-medium hover:border-slate-400;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23141414' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right .7rem center;
+    background-size: 1.05rem;
+    min-height: 2.6rem;
+  }
+  select:disabled { @apply cursor-not-allowed bg-slate-100 text-slate-400; }
+  select option { @apply font-normal text-slate-800; }
+  select option:checked { @apply bg-slate-100 font-semibold; }
   input[type='range'] { @apply cursor-pointer; }
 
   /* File pickers: an emerald "Choose file" pill instead of the grey browser button. */
@@ -50,14 +63,16 @@
 
 @layer components {
   .rdg-card { @apply rounded-2xl border border-slate-200 bg-white shadow-card; }
-  .rdg-btn { @apply inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-emerald-900/20 hover:bg-emerald-600; }
+  .rdg-btn { @apply inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-black/20 hover:bg-black; }
   .rdg-btn-dark { @apply inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800; }
-  .rdg-btn-ghost { @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-emerald-400 hover:text-emerald-700; }
+  .rdg-btn-ghost { @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-900 hover:text-slate-900; }
   .rdg-chip { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide; }
   .rdg-label { @apply mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500; }
   .rdg-skeleton { @apply relative overflow-hidden rounded-lg bg-slate-200/70; }
   .rdg-skeleton::after { content: ''; @apply absolute inset-0 -translate-x-full animate-rdg-shimmer bg-gradient-to-r from-transparent via-white/60 to-transparent; }
-  .rdg-pattern { background-image: radial-gradient(rgba(16,185,129,.12) 1px, transparent 1px); background-size: 22px 22px; }
+  .rdg-pattern { background-image: radial-gradient(rgba(0,0,0,.07) 1px, transparent 1px); background-size: 22px 22px; }
+  /* Logo-style title: condensed, bold, italic caps ("RDG" in the logo). */
+  .rdg-display { @apply font-display font-bold uppercase tracking-wide; }
 }
 
 /* Older pages list records as plain bordered rows: give them the card look too. */

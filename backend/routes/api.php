@@ -100,10 +100,12 @@ Route::middleware('auth:sanctum')->group(function () {
     | Seller — "Sell Your Car" + appraisal status tracker. MFA-gated.
     |----------------------------------------------------------------------
     */
-    Route::middleware(['role:seller', 'mfa'])->prefix('seller')->group(function () {
+    // Buyers can sell their car too, so both roles may use the Sell Your Car portal.
+    Route::middleware(['role:seller,buyer', 'mfa'])->prefix('seller')->group(function () {
         Route::get('/acquisition-leads', [AcquisitionLeadController::class, 'index']);
         Route::post('/acquisition-leads', [AcquisitionLeadController::class, 'store']);
         Route::get('/acquisition-leads/{lead}', [AcquisitionLeadController::class, 'show']);
+        Route::post('/acquisition-leads/{lead}/respond', [AcquisitionLeadController::class, 'respond']);
     });
 
     /*

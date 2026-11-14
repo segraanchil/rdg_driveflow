@@ -41,7 +41,7 @@ class OverviewController extends Controller
             'ready_to_sell' => $readyToSell,
             'upcoming_test_drives' => $testDrives,
             'recent_sales' => Sale::with(['vehicle', 'buyer:id,name', 'legalDocuments:id,sale_id,doc_type'])->latest('sale_date')->latest('id')->take(5)->get(),
-            'cars_without_photos' => Vehicle::where('status', Vehicle::STATUS_AVAILABLE)->whereDoesntHave('media')->get(['id', 'year', 'make', 'model']),
+            'cars_without_photos' => Vehicle::where('status', Vehicle::STATUS_AVAILABLE)->whereDoesntHave('media', fn ($q) => $q->where('is_sample', false))->get(['id', 'year', 'make', 'model']),
         ]);
     }
 }

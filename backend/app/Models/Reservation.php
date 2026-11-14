@@ -26,6 +26,8 @@ class Reservation extends Model
         'buyer_id',
         'payment_method',
         'fee_amount',
+        'payment_channel',
+        'payment_reference',
         'payment_proof_path',
         'status',
         'expires_at',

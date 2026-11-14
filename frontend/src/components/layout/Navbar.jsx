@@ -5,8 +5,9 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { initials } from '../../lib/format'
+import Logo from '../ui/Logo'
 
-/** Public/buyer/seller top bar: slate-900 with emerald highlights, account menu on the right. */
+/** Public/buyer/seller top bar: white with the black RDG logo (as the artwork is printed), black accents. */
 export default function Navbar() {
   const { user, logout } = useAuth()
   const [open, setOpen] = useState(false)
@@ -25,36 +26,33 @@ export default function Navbar() {
   const links = [
     { to: '/inventory', label: 'Browse Cars', icon: Car },
     { to: '/loan-calculator', label: 'Loan Calculator', icon: Calculator },
-    ...(user?.role !== 'buyer' ? [{ to: user?.role === 'seller' ? '/my-leads' : '/sell-your-car', label: user?.role === 'seller' ? 'My Submissions' : 'Sell Your Car', icon: user?.role === 'seller' ? ClipboardList : CarFront }] : []),
+    user?.role === 'seller' ? { to: '/my-leads', label: 'My Submissions', icon: ClipboardList } : { to: '/sell-your-car', label: 'Sell Your Car', icon: CarFront },
     ...(user?.role === 'buyer' ? [{ to: '/garage', label: 'My Garage', icon: Warehouse }] : []),
   ]
   const accountLinks = [
     ...(isStaff ? [{ to: user.role === 'ceo' ? '/ceo/dashboard' : '/admin/overview', label: 'Staff dashboard', icon: LayoutDashboard }] : []),
-    ...(user?.role === 'buyer' ? [{ to: '/garage', label: 'My Garage', icon: Warehouse }, { to: '/warranty-claim', label: 'File a warranty claim', icon: ShieldCheck }] : []),
+    ...(user?.role === 'buyer' ? [{ to: '/garage', label: 'My Garage', icon: Warehouse }, { to: '/my-leads', label: 'Cars I’m selling', icon: ClipboardList }, { to: '/warranty-claim', label: 'File a warranty claim', icon: ShieldCheck }] : []),
     ...(user?.role === 'seller' ? [{ to: '/sell-your-car', label: 'Submit a car', icon: CarFront }, { to: '/my-leads', label: 'My submissions', icon: ClipboardList }] : []),
   ]
 
   const linkClass = ({ isActive }) =>
-    `flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold ${isActive ? 'bg-white/10 text-white' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`
+    `flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold ${isActive ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'}`
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-slate-900/95 text-white backdrop-blur">
-      <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-        <Link to="/" className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-sm shadow-emerald-900/40"><Car size={19} /></span>
-          <span className="leading-tight">
-            <span className="block text-base font-extrabold tracking-tight">RDG DriveFlow</span>
-            <span className="block text-[10px] font-semibold uppercase tracking-[.18em] text-emerald-300">Car Deals &amp; Services</span>
-          </span>
+    <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 text-slate-900 backdrop-blur">
+      <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-2">
+        <Link to="/" className="flex items-center gap-3" aria-label="RDG Car Deals & Services home">
+          <Logo className="h-12" />
+          <span className="hidden border-l border-slate-200 pl-3 font-display text-lg font-bold uppercase italic leading-none tracking-wide text-slate-900 sm:block">Drive<span className="text-slate-400">Flow</span></span>
         </Link>
 
         <div className="hidden items-center gap-1 lg:flex">
           {links.map(({ to, label, icon: Icon }) => <NavLink key={to} to={to} className={linkClass}><Icon size={16} /> {label}</NavLink>)}
-          <span className="mx-2 h-6 w-px bg-white/10" />
+          <span className="mx-2 h-6 w-px bg-slate-200" />
           {user ? (
             <div ref={menuRef} className="relative">
-              <button onClick={() => setMenu((m) => !m)} aria-expanded={menu} className="flex items-center gap-2 rounded-lg py-1.5 pl-1.5 pr-2.5 hover:bg-white/5">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-xs font-bold">{initials(user.name)}</span>
+              <button onClick={() => setMenu((m) => !m)} aria-expanded={menu} className="flex items-center gap-2 rounded-lg py-1.5 pl-1.5 pr-2.5 hover:bg-slate-100">
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white">{initials(user.name)}</span>
                 <span className="max-w-[9rem] truncate text-sm font-semibold">{user.name.split(' ')[0]}</span>
                 <ChevronDown size={15} className="text-slate-400" />
               </button>
@@ -74,22 +72,22 @@ export default function Navbar() {
           ) : (
             <>
               <NavLink to="/login" className={linkClass}><LogIn size={16} /> Log In</NavLink>
-              <Link to="/register" className="flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-bold text-white shadow-sm shadow-emerald-900/30 hover:bg-emerald-600"><UserPlus size={16} /> Sign Up</Link>
+              <Link to="/register" className="flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-black"><UserPlus size={16} /> Sign Up</Link>
             </>
           )}
         </div>
 
-        <button onClick={() => setOpen((o) => !o)} aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} className="rounded-lg p-2 text-slate-300 hover:bg-white/10 hover:text-white lg:hidden">
+        <button onClick={() => setOpen((o) => !o)} aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} className="rounded-lg p-2 text-slate-700 hover:bg-slate-100 lg:hidden">
           {open ? <X size={22} /> : <Menu size={22} />}
         </button>
       </nav>
 
       {open && (
-        <div className="animate-rdg-fade-up border-t border-white/10 px-4 pb-4 pt-2 lg:hidden">
+        <div className="animate-rdg-fade-up border-t border-slate-200 px-4 pb-4 pt-2 lg:hidden">
           {user && (
-            <div className="mb-2 flex items-center gap-3 rounded-xl bg-white/5 p-3">
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500 text-sm font-bold">{initials(user.name)}</span>
-              <span className="min-w-0"><span className="block truncate text-sm font-bold">{user.name}</span><span className="block truncate text-xs text-slate-400">{user.email}</span></span>
+            <div className="mb-2 flex items-center gap-3 rounded-xl bg-slate-100 p-3">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-sm font-bold text-white">{initials(user.name)}</span>
+              <span className="min-w-0"><span className="block truncate text-sm font-bold">{user.name}</span><span className="block truncate text-xs text-slate-500">{user.email}</span></span>
             </div>
           )}
           <div className="space-y-1">
@@ -97,13 +95,13 @@ export default function Navbar() {
               <NavLink key={to} to={to} className={linkClass}><Icon size={16} /> {label}</NavLink>
             ))}
           </div>
-          <div className="mt-3 flex items-center gap-2 border-t border-white/10 pt-3">
+          <div className="mt-3 flex items-center gap-2 border-t border-slate-200 pt-3">
             {user ? (
-              <button onClick={logout} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-slate-300 hover:bg-white/5 hover:text-white"><LogOut size={16} /> Log out</button>
+              <button onClick={logout} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-900"><LogOut size={16} /> Log out</button>
             ) : (
               <>
                 <NavLink to="/login" className={linkClass}><LogIn size={16} /> Log In</NavLink>
-                <Link to="/register" className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-bold text-white"><UserPlus size={16} /> Sign Up</Link>
+                <Link to="/register" className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-bold text-white"><UserPlus size={16} /> Sign Up</Link>
               </>
             )}
           </div>

@@ -109,22 +109,22 @@ function PaymentsPanel({ values, setValues }) {
 
   return (
     <div className="space-y-5">
-      <SettingsForm values={values} setValues={setValues} note="Buyers see these details on the reservation page before they upload their receipt."
+      <SettingsForm values={values} setValues={setValues} note="Buyers choose GCash or bank transfer when reserving. GCash shows the QR below and the GCash number; bank transfer shows the bank, account name and account number. Payments are verified manually."
         fields={[
           ['reservation_fee', 'Reservation fee (₱)', 'number'],
           ['payment_bank_name', 'Bank name', 'text'],
           ['payment_account_name', 'Account name', 'text'],
           ['payment_account_number', 'Account number', 'text'],
-          ['payment_ewallet_name', 'E-wallet (e.g. GCash, Maya)', 'text'],
-          ['payment_ewallet_number', 'E-wallet number', 'text'],
+          ['payment_ewallet_name', 'E-wallet name (shown to buyers)', 'text'],
+          ['payment_ewallet_number', 'GCash number', 'text'],
         ]} />
       <div className="rdg-card flex flex-col gap-4 p-6 sm:flex-row sm:items-center">
         <div className="flex h-32 w-32 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-100 ring-1 ring-slate-200">
           {values.payment_qr_path ? <img src={backendUrl(`/storage/${values.payment_qr_path}`)} alt="Payment QR code" className="h-full w-full object-contain" /> : <QrCode size={40} className="text-slate-300" />}
         </div>
         <div className="flex-1">
-          <p className="font-bold text-slate-900">Payment QR code</p>
-          <p className="text-sm text-slate-500">Upload your InstaPay / GCash QR so buyers can scan and pay the reservation fee.</p>
+          <p className="font-bold text-slate-900">GCash QR code</p>
+          <p className="text-sm text-slate-500">Buyers who choose GCash on the reservation page see this QR. Download it from the GCash app (Receive → QR) and upload it here.</p>
           <div className="mt-3 flex gap-2">
             <label className="rdg-btn cursor-pointer"><Upload size={15} /> {values.payment_qr_path ? 'Replace' : 'Upload'} QR
               <input type="file" accept="image/*" className="sr-only" onChange={(e) => e.target.files[0] && uploadQr(e.target.files[0])} />

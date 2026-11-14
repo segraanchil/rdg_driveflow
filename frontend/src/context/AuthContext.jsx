@@ -31,7 +31,7 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(async (email, password) => {
     await ensureCsrfCookie()
-    const { data } = await apiClient.post('/auth/login', { email, password })
+    const { data } = await apiClient.post('/auth/login', { email, password }, { silent: true }) // the login page shows its own loader
     setUser(data.user)
     setMfaRequired(Boolean(data.mfa_required))
     setMfaVerified(!data.mfa_required)
@@ -40,14 +40,14 @@ export function AuthProvider({ children }) {
 
   const register = useCallback(async (payload) => {
     await ensureCsrfCookie()
-    const { data } = await apiClient.post('/auth/register', payload)
+    const { data } = await apiClient.post('/auth/register', payload, { silent: true })
     setUser(data.user)
     setMfaVerified(true)
     return data
   }, [])
 
   const verifyMfa = useCallback(async (code) => {
-    await apiClient.post('/auth/mfa/verify', { code })
+    await apiClient.post('/auth/mfa/verify', { code }, { silent: true })
     setMfaVerified(true)
   }, [])
 

@@ -6,7 +6,7 @@ const STATUS = {
   submitted: { label: 'Submitted', chip: 'bg-blue-50 text-blue-700' },
   under_appraisal: { label: 'Under appraisal', chip: 'bg-amber-50 text-amber-700' },
   offer_made: { label: 'Offer made', chip: 'bg-violet-50 text-violet-700' },
-  accepted: { label: 'Accepted', chip: 'bg-emerald-50 text-emerald-700' },
+  accepted: { label: 'Accepted', chip: 'bg-green-50 text-green-700' },
   declined: { label: 'Declined', chip: 'bg-slate-100 text-slate-500' },
 }
 const FILTERS = ['all', 'submitted', 'under_appraisal', 'offer_made', 'accepted', 'declined']
@@ -136,6 +136,21 @@ function LeadCard({ lead, onSaved, onPhoto }) {
             <p className="flex items-center gap-2 text-slate-600"><UserRound size={15} className="text-emerald-600" /> {lead.seller?.name ?? '—'}</p>
             {lead.seller?.email && <a href={`mailto:${lead.seller.email}`} className="flex items-center gap-2 truncate text-emerald-700 hover:underline"><Mail size={15} /> {lead.seller.email}</a>}
           </div>
+
+          <dl className="mt-3 grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
+            {[
+              ['Asking price', specs.asking_price ? peso(specs.asking_price) : '—'],
+              ['Condition', specs.condition],
+              ['Papers', specs.complete_papers === undefined ? null : specs.complete_papers ? 'Complete OR/CR' : 'Incomplete'],
+              ['Transmission', specs.transmission],
+              ['Fuel', specs.fuel_type],
+              ['Color', specs.color],
+              ['Location', specs.location],
+              ['Mobile', specs.contact_number && <a href={`tel:${specs.contact_number}`} className="font-semibold underline">{specs.contact_number}</a>],
+            ].filter(([, v]) => v).map(([k, v]) => (
+              <div key={k} className="rounded-lg bg-slate-50 px-2.5 py-2"><dt className="text-slate-400">{k}</dt><dd className="font-semibold text-slate-800">{v}</dd></div>
+            ))}
+          </dl>
 
           {specs.condition_notes && (
             <div className="mt-3 rounded-xl bg-slate-50 p-3 text-sm text-slate-600">

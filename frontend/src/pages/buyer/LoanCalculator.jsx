@@ -5,6 +5,7 @@ import apiClient from '../../api/client'
 import { estimateMonthlyAmortization } from '../../lib/loanCalculator'
 import { loanRateFor, useSettings } from '../../lib/useSettings'
 import { PROFILE_LABELS, peso, vehicleName } from '../../lib/format'
+import RequirementsList from '../../components/vehicles/RequirementsList'
 
 const TERMS = [12, 24, 36, 48, 60]
 const DOWN_PCTS = [20, 30, 40, 50]
@@ -59,6 +60,7 @@ export default function LoanCalculator() {
                 </button>
               ))}
             </div>
+            <a href="#requirements" className="mt-2 inline-block text-xs font-semibold text-slate-700 underline underline-offset-2 hover:text-slate-900">See the {PROFILE_LABELS[profile]} requirements below</a>
           </div>
 
           <label className="block">
@@ -121,6 +123,16 @@ export default function LoanCalculator() {
           <p className="flex gap-2 text-xs text-slate-500"><Info size={14} className="mt-0.5 shrink-0" /> This is an estimate. The partner bank sets the final rate and terms after reviewing your application.</p>
         </div>
       </div>
+
+      <section id="requirements" className="rdg-card mt-6 p-6">
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <span className="mr-1 text-sm font-semibold text-slate-600">Requirements for:</span>
+          {Object.entries(PROFILE_LABELS).map(([key, label]) => (
+            <button key={key} onClick={() => setProfile(key)} className={`rounded-full px-3.5 py-1.5 text-sm font-semibold ${profile === key ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>{label}</button>
+          ))}
+        </div>
+        <RequirementsList profile={profile} />
+      </section>
     </div>
   )
 }

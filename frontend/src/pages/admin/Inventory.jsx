@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
-  Plus, Pencil, Trash2, ExternalLink, CarFront, Rotate3d, Image as ImageIcon, ChevronLeft, ChevronRight, Upload, Info, X,
+  Plus, Pencil, Trash2, ExternalLink, CarFront, Rotate3d, Image as ImageIcon, Armchair, ChevronLeft, ChevronRight, Upload, Info, X,
 } from 'lucide-react'
 import apiClient, { backendUrl } from '../../api/client'
 import { Modal, useConfirm } from '../../components/ui/Modal'
@@ -12,7 +12,7 @@ import { toast } from '../../lib/toast'
 const BLANK = {
   make: '', model: '', year: '', mileage: '', transmission: '', fuel_type: '', body_type: '', color: '',
   acquisition_cost: '', repair_fees: '', margin_percent: 12, status: 'available',
-  plate_number: '', engine_number: '', chassis_number: '', description: '',
+  plate_number: '', engine_number: '', chassis_number: '', description: '', engine: '', seats: '', drivetrain: '', features: '',
 }
 const TRANSMISSIONS = ['Automatic', 'Manual', 'CVT']
 const FUELS = ['Gasoline', 'Diesel', 'Hybrid', 'Electric']
@@ -211,7 +211,7 @@ function VehicleForm({ vehicle, globalMargin, onClose, onSaved }) {
       if (locked && k === 'status') return
       body.append(k, v ?? '')
     })
-    body.append('media_type', mediaType === 'photo' ? 'photo' : '360_frame')
+    body.append('media_type', mediaType === 'photo' ? 'photo' : mediaType === 'interior' ? 'interior_360' : '360_frame')
     files.forEach((f) => body.append('photos[]', f))
     if (vehicle) body.append('_method', 'PATCH')
     try {
@@ -249,7 +249,8 @@ function VehicleForm({ vehicle, globalMargin, onClose, onSaved }) {
   }
 
   function toggleType(index) {
-    const next = media.map((m, i) => (i === index ? { ...m, type: m.type === 'photo' ? '360_frame' : 'photo' } : m))
+    const cycle = { photo: '360_frame', '360_frame': 'interior_360', interior_360: 'photo' }
+    const next = media.map((m, i) => (i === index ? { ...m, type: cycle[m.type] ?? 'photo' } : m))
     saveOrder(next)
   }
 
@@ -293,9 +294,17 @@ function VehicleForm({ vehicle, globalMargin, onClose, onSaved }) {
                 <datalist id="body-types">{BODIES.map((b) => <option key={b} value={b} />)}</datalist>
               </Field>
               <Field label="Color" error={errors.color}><input value={form.color ?? ''} onChange={set('color')} className="w-full" placeholder="Pearl White" /></Field>
+              <Field label="Engine" error={errors.engine}><input value={form.engine ?? ''} onChange={set('engine')} className="w-full" placeholder="1.5L / 2.8L Diesel" /></Field>
+              <Field label="Seats" error={errors.seats}><input type="number" min="2" max="20" value={form.seats ?? ''} onChange={set('seats')} className="w-full" placeholder="5" /></Field>
+              <Field label="Drivetrain" error={errors.drivetrain}>
+                <select value={form.drivetrain ?? ''} onChange={set('drivetrain')} className="w-full"><option value="">—</option>{['FWD', 'RWD', 'AWD', '4x2', '4x4'].map((d) => <option key={d}>{d}</option>)}</select>
+              </Field>
             </div>
             <Field label="Description (shown to buyers)" className="mt-3" error={errors.description}>
               <textarea rows={3} value={form.description ?? ''} onChange={set('description')} className="w-full" placeholder="Casa-maintained, first owner, new tires, complete papers…" />
+            </Field>
+            <Field label="Features (one per line)" className="mt-3" error={errors.features}>
+              <textarea rows={3} value={form.features ?? ''} onChange={set('features')} className="w-full" placeholder={'Touchscreen with Apple CarPlay\nReverse camera\nDual airbags'} />
             </Field>
           </Section>
 
@@ -313,9 +322,9 @@ function VehicleForm({ vehicle, globalMargin, onClose, onSaved }) {
                 {media.map((m, i) => (
                   <div key={m.id} className="group relative overflow-hidden rounded-lg bg-slate-100 ring-1 ring-slate-200">
                     <img src={backendUrl(`/storage/${m.file_path}`)} alt="" className="aspect-[4/3] w-full object-cover" loading="lazy" />
-                    <button type="button" onClick={() => toggleType(i)} title="Switch between photo and 360° frame"
+                    <button type="button" onClick={() => toggleType(i)} title="Click to change: photo → exterior 360° → interior 360°"
                       className={`absolute left-1 top-1 rounded px-1.5 py-0.5 text-[10px] font-bold ${m.type === 'photo' ? 'bg-white/90 text-slate-700' : 'bg-slate-900/80 text-white'}`}>
-                      {m.type === 'photo' ? 'Photo' : `360° #${media.slice(0, i + 1).filter((x) => x.type !== 'photo').length}`}
+                      {m.type === 'photo' ? 'Photo' : m.type === 'interior_360' ? 'Interior 360°' : `360° #${media.slice(0, i + 1).filter((x) => x.type === '360_frame').length}`}{m.is_sample ? ' · sample' : ''}
                     </button>
                     <div className="absolute inset-x-0 bottom-0 flex justify-between bg-gradient-to-t from-black/60 p-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100">
                       <span className="flex gap-0.5">
@@ -332,7 +341,7 @@ function VehicleForm({ vehicle, globalMargin, onClose, onSaved }) {
             <div className="rounded-xl border-2 border-dashed border-slate-200 p-4">
               <div className="mb-3 flex flex-wrap items-center gap-2">
                 <span className="text-sm font-semibold text-slate-700">Upload as</span>
-                {[['photo', 'Photos', ImageIcon], ['360', '360° frames', Rotate3d]].map(([key, label, Icon]) => (
+                {[['photo', 'Photos', ImageIcon], ['360', 'Exterior 360° frames', Rotate3d], ['interior', 'Interior 360° panorama', Armchair]].map(([key, label, Icon]) => (
                   <button key={key} type="button" onClick={() => setMediaType(key)}
                     className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold ${mediaType === key ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'}`}>
                     <Icon size={14} /> {label}
@@ -354,6 +363,12 @@ function VehicleForm({ vehicle, globalMargin, onClose, onSaved }) {
                     </div>
                   ))}
                 </div>
+              )}
+              {mediaType === 'interior' && (
+                <p className="mt-3 flex gap-2 rounded-lg bg-sky-50 p-3 text-xs text-sky-800">
+                  <Info size={14} className="mt-0.5 shrink-0" />
+                  <span><strong>Interior 360°:</strong> sit in the middle of the cabin and take a <em>panorama</em> photo with your phone’s Panorama mode, turning all the way around (or as far as possible). Upload one wide image; buyers drag left and right to look around.</span>
+                </p>
               )}
               {mediaType === '360' && (
                 <p className="mt-3 flex gap-2 rounded-lg bg-sky-50 p-3 text-xs text-sky-800">

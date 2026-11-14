@@ -134,7 +134,7 @@ class InventoryController extends Controller
         $data = $request->validate([
             'items' => ['required', 'array'],
             'items.*.id' => ['required', 'integer'],
-            'items.*.type' => ['nullable', Rule::in([VehicleMedia::TYPE_360_FRAME, VehicleMedia::TYPE_PHOTO])],
+            'items.*.type' => ['nullable', Rule::in(VehicleMedia::TYPES)],
         ]);
 
         foreach (array_values($data['items']) as $i => $item) {
@@ -165,11 +165,15 @@ class InventoryController extends Controller
             'fuel_type' => ['sometimes', 'nullable', Rule::in(self::FUEL_TYPES)],
             'body_type' => ['sometimes', 'nullable', 'string', 'max:30'],
             'color' => ['sometimes', 'nullable', 'string', 'max:40'],
+            'engine' => ['sometimes', 'nullable', 'string', 'max:30'],
+            'seats' => ['sometimes', 'nullable', 'integer', 'min:2', 'max:20'],
+            'drivetrain' => ['sometimes', 'nullable', Rule::in(['FWD', 'RWD', 'AWD', '4x2', '4x4'])],
+            'features' => ['sometimes', 'nullable', 'string', 'max:3000'],
             'description' => ['sometimes', 'nullable', 'string', 'max:3000'],
             'plate_number' => ['sometimes', 'nullable', 'string', 'max:20'],
             'engine_number' => ['sometimes', 'nullable', 'string', 'max:40'],
             'chassis_number' => ['sometimes', 'nullable', 'string', 'max:40'],
-            'media_type' => ['sometimes', Rule::in([VehicleMedia::TYPE_360_FRAME, VehicleMedia::TYPE_PHOTO])],
+            'media_type' => ['sometimes', Rule::in(VehicleMedia::TYPES)],
             'photos.*' => ['nullable', 'image', 'max:10240'],
         ]);
     }
@@ -186,6 +190,12 @@ class InventoryController extends Controller
     {
         if (empty($photos)) {
             return;
+        }
+
+        // Real photos replace the generated sample showroom for this car.
+        foreach ($vehicle->media()->where('is_sample', true)->get() as $sample) {
+            Storage::disk('public')->delete($sample->file_path);
+            $sample->delete();
         }
 
         $nextOrder = (int) $vehicle->media()->max('sort_order') + 1;

@@ -3,6 +3,9 @@ import { Link, useParams } from 'react-router-dom'
 import { Check, Banknote, StickyNote, ArrowLeft, XCircle } from 'lucide-react'
 import apiClient, { backendUrl } from '../../api/client'
 import PageLoader from '../../components/ui/PageLoader'
+import { useConfirm } from '../../components/ui/Modal'
+import { toast } from '../../lib/toast'
+import { peso } from '../../lib/format'
 
 const STEPS = [
   ['submitted', 'Submitted'],
@@ -15,6 +18,20 @@ const STEPS = [
 export default function AppraisalStatus() {
   const { id } = useParams()
   const [lead, setLead] = useState(null)
+  const [confirm, confirmUi] = useConfirm()
+
+  async function respond(decision) {
+    const ok = await confirm({
+      title: decision === 'accept' ? 'Accept this offer?' : 'Decline this offer?',
+      message: decision === 'accept' ? `You’re accepting ${peso(lead.offer_amount)}. Our staff will call you to schedule the inspection and hand-over.` : 'We’ll let our appraiser know. You can submit the car again later.',
+      confirmLabel: decision === 'accept' ? 'Accept offer' : 'Decline offer',
+      tone: decision === 'accept' ? undefined : 'danger',
+    })
+    if (!ok) return
+    const { data } = await apiClient.post(`/seller/acquisition-leads/${id}/respond`, { decision })
+    setLead(data)
+    toast.success(decision === 'accept' ? 'Offer accepted. We’ll contact you soon.' : 'Offer declined.')
+  }
 
   useEffect(() => {
     apiClient.get(`/seller/acquisition-leads/${id}`).then(({ data }) => setLead(data))
@@ -58,7 +75,14 @@ export default function AppraisalStatus() {
           <div className="mt-6 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 p-5 text-white">
             <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-50"><Banknote size={14} /> Our offer</p>
             <p className="text-3xl font-extrabold">₱{Number(lead.offer_amount).toLocaleString()}</p>
-            <p className="mt-1 text-sm text-emerald-50">Our team will contact you to discuss the next steps.</p>
+            {lead.status === 'offer_made' ? (
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button onClick={() => respond('accept')} className="inline-flex items-center gap-1.5 rounded-lg bg-white px-4 py-2 text-sm font-bold text-slate-900 hover:bg-slate-100"><Check size={16} /> Accept offer</button>
+                <button onClick={() => respond('decline')} className="inline-flex items-center gap-1.5 rounded-lg border border-white/40 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10">Decline</button>
+              </div>
+            ) : (
+              <p className="mt-1 text-sm text-slate-200">{lead.status === 'accepted' ? 'You accepted this offer. Our team will contact you for the inspection and hand-over.' : 'Our team will contact you about the next steps.'}</p>
+            )}
           </div>
         )}
         {lead.admin_notes && (
@@ -77,6 +101,7 @@ export default function AppraisalStatus() {
           </div>
         )}
       </div>
+      {confirmUi}
     </div>
   )
 }

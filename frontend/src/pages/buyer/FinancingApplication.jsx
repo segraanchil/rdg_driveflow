@@ -7,6 +7,7 @@ import { StatusBadge } from '../../components/ui/kit'
 import { estimateMonthlyAmortization } from '../../lib/loanCalculator'
 import { loanRateFor, useSettings } from '../../lib/useSettings'
 import { PROFILE_LABELS, apiError, docLabel, peso, vehicleName } from '../../lib/format'
+import RequirementsList, { useRequirements } from '../../components/vehicles/RequirementsList'
 import { toast } from '../../lib/toast'
 
 const TERMS = [12, 24, 36, 48, 60]
@@ -29,6 +30,7 @@ export default function FinancingApplication() {
   const [checklist, setChecklist] = useState([])
   const [uploading, setUploading] = useState(null)
   const [error, setError] = useState(null)
+  const reqs = useRequirements(application?.employment_profile ?? null)
 
   useEffect(() => {
     if (!vehicleId) return
@@ -123,15 +125,7 @@ export default function FinancingApplication() {
             </div>
           </div>
 
-          {profile && (
-            <div className="rounded-xl bg-sky-50 p-4 text-sm">
-              <p className="mb-2 flex items-center gap-1.5 font-bold text-sky-900"><FileText size={16} /> You’ll need to upload</p>
-              <ul className="grid gap-1.5 sm:grid-cols-2">
-                {checklist.map((doc) => <li key={doc} className="flex items-center gap-2 text-sky-900"><CheckCircle2 size={14} className="text-sky-600" /> {docLabel(doc)}</li>)}
-              </ul>
-              <p className="mt-2 text-xs text-sky-700">PDF, JPG or PNG, up to 10 MB each. You can upload them after submitting, even later from My Garage.</p>
-            </div>
-          )}
+          {profile ? <RequirementsList profile={profile} /> : <p className="flex items-center gap-2 rounded-xl bg-slate-50 p-3 text-sm text-slate-500"><FileText size={16} /> Pick your employment above to see exactly which documents to prepare.</p>}
 
           <div>
             <div className="flex items-end justify-between"><span className="rdg-label">Down payment</span><span className="text-sm font-bold">{peso(down)} <span className="font-normal text-slate-500">({Math.round(((down ?? 0) / price) * 100)}%)</span></span></div>
@@ -168,13 +162,19 @@ export default function FinancingApplication() {
             <ul className="space-y-2">
               {required.map((doc) => {
                 const done = uploaded.has(doc)
+                const files = (application.documents ?? []).filter((d) => d.doc_type === doc).length
                 const verified = (application.documents ?? []).some((d) => d.doc_type === doc && d.verified)
+                const req = (reqs ?? []).find((r) => r.key === doc)
                 return (
                   <li key={doc} className={`flex flex-wrap items-center gap-3 rounded-xl border p-3 ${done ? 'border-emerald-200 bg-emerald-50/50' : 'border-slate-200'}`}>
                     {done ? <CheckCircle2 size={20} className="text-emerald-600" /> : <Circle size={20} className="text-slate-300" />}
-                    <span className="flex-1 text-sm font-semibold text-slate-800">{docLabel(doc)}{verified && <span className="ml-2 text-xs font-bold text-emerald-700">Verified</span>}</span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-semibold text-slate-800">{req?.label ?? docLabel(doc)} {req && <span className="ml-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-600">{req.quantity}</span>}{verified && <span className="ml-2 text-xs font-bold text-green-700">Verified</span>}</span>
+                      {req && <span className="mt-0.5 block text-xs text-slate-500">{req.details[0]}</span>}
+                      {files > 0 && <span className="mt-0.5 block text-xs font-semibold text-slate-600">{files} file{files === 1 ? '' : 's'} uploaded</span>}
+                    </span>
                     <label className={`cursor-pointer rounded-lg px-3 py-1.5 text-xs font-bold ${done ? 'text-slate-500 hover:text-emerald-700' : 'bg-emerald-500 text-white hover:bg-emerald-600'}`}>
-                      {uploading === doc ? 'Uploading…' : done ? 'Replace' : <span className="flex items-center gap-1"><Upload size={13} /> Upload</span>}
+                      {uploading === doc ? 'Uploading…' : done ? '+ Add file' : <span className="flex items-center gap-1"><Upload size={13} /> Upload</span>}
                       <input type="file" accept=".pdf,image/jpeg,image/png" className="sr-only" disabled={Boolean(uploading)} onChange={(e) => e.target.files[0] && uploadDoc(doc, e.target.files[0])} />
                     </label>
                   </li>

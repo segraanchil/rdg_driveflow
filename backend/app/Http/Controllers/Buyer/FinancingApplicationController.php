@@ -20,7 +20,8 @@ class FinancingApplicationController extends Controller
         abort_unless(array_key_exists($employmentProfile, FinancingApplication::CHECKLISTS), 404);
 
         return response()->json([
-            'documents' => FinancingApplication::CHECKLISTS[$employmentProfile],
+            'documents' => array_keys(FinancingApplication::CHECKLISTS[$employmentProfile]),
+            'requirements' => FinancingApplication::requirements($employmentProfile),
             'annual_interest_rate' => Setting::loanRate($employmentProfile),
         ]);
     }

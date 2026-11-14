@@ -72,17 +72,15 @@ export default function App() {
           element={<ProtectedRoute roles={['buyer']} requireMfa><WarrantyClaim /></ProtectedRoute>}
         />
 
-        <Route
-          path="/sell-your-car"
-          element={<ProtectedRoute roles={['seller']} requireMfa><SellYourCar /></ProtectedRoute>}
-        />
+        {/* Open to everyone; the page asks guests to log in or sign up before submitting. */}
+        <Route path="/sell-your-car" element={<SellYourCar />} />
         <Route
           path="/appraisal-status/:id"
-          element={<ProtectedRoute roles={['seller']} requireMfa><AppraisalStatus /></ProtectedRoute>}
+          element={<ProtectedRoute roles={['seller', 'buyer']} requireMfa><AppraisalStatus /></ProtectedRoute>}
         />
         <Route
           path="/my-leads"
-          element={<ProtectedRoute roles={['seller']} requireMfa><MyLeads /></ProtectedRoute>}
+          element={<ProtectedRoute roles={['seller', 'buyer']} requireMfa><MyLeads /></ProtectedRoute>}
         />
       </Route>
 

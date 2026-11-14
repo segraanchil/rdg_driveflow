@@ -99,10 +99,10 @@ export default function ChatWidget() {
       {open ? (
         <div className="flex h-[32rem] max-h-[calc(100dvh-2rem)] w-[min(23rem,calc(100vw-2rem))] animate-rdg-fade-up flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lift">
           <div className="flex items-center gap-3 bg-slate-900 px-4 py-3 text-white">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500"><Bot size={17} /></span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-slate-900"><Bot size={17} /></span>
             <div className="flex-1 leading-tight">
               <p className="text-sm font-bold">RDG Assistant</p>
-              <p className="flex items-center gap-1 text-[11px] text-emerald-300"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Online 24/7</p>
+              <p className="flex items-center gap-1 text-[11px] text-slate-300"><span className="h-1.5 w-1.5 rounded-full bg-green-400" /> Online 24/7</p>
             </div>
             <button onClick={() => setOpen(false)} aria-label="Close chat" className="rounded p-1 text-slate-400 hover:bg-white/10 hover:text-white"><X size={18} /></button>
           </div>
@@ -114,7 +114,7 @@ export default function ChatWidget() {
             {typing && <p className="w-14 rounded-2xl rounded-bl-sm bg-white px-3 py-2 text-slate-400 shadow-sm"><span className="animate-pulse">•••</span></p>}
             {messages.length <= 1 && !typing && (
               <div className="flex flex-wrap gap-1.5 pt-1">
-                {SUGGESTIONS.map((s) => <button key={s} onClick={() => send(s)} className="rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-50">{s}</button>)}
+                {SUGGESTIONS.map((s) => <button key={s} onClick={() => send(s)} className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:border-slate-900">{s}</button>)}
               </div>
             )}
             {handoff && (

@@ -8,6 +8,7 @@ import apiClient from '../../api/client'
 import { useAuth } from '../../context/AuthContext'
 import { initials } from '../../lib/format'
 import NotificationBell from './NotificationBell'
+import Logo from '../ui/Logo'
 
 const ADMIN_SECTIONS = [
   {
@@ -91,12 +92,9 @@ export default function AdminLayout() {
           menuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="flex items-center gap-2.5 border-b border-white/10 px-5 py-5">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500 text-white"><Car size={18} /></span>
-          <span className="leading-tight">
-            <span className="block text-base font-bold text-white">RDG {isCeo ? 'Executive' : 'Admin'}</span>
-            <span className="block text-[10px] font-semibold uppercase tracking-[.18em] text-emerald-300">DriveFlow</span>
-          </span>
+        <div className="flex items-center gap-3 border-b border-white/10 px-5 py-4">
+          <Logo onDark className="h-14" />
+          <span className="font-display text-sm font-bold uppercase italic leading-tight tracking-wider text-slate-300">{isCeo ? 'Executive' : 'Admin'}<br /><span className="text-slate-500">DriveFlow</span></span>
           <button onClick={() => setMenuOpen(false)} aria-label="Close menu" className="ml-auto rounded p-1.5 text-slate-400 hover:bg-white/10 hover:text-white lg:hidden"><X size={18} /></button>
         </div>
 
@@ -114,7 +112,7 @@ export default function AdminLayout() {
                       to={link.to}
                       className={({ isActive }) =>
                         `flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                          isActive ? 'bg-emerald-500 text-white shadow-sm shadow-emerald-900/30' : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                          isActive ? 'bg-white font-semibold text-slate-900 shadow-sm' : 'text-slate-300 hover:bg-white/5 hover:text-white'
                         }`
                       }
                     >
@@ -137,7 +135,7 @@ export default function AdminLayout() {
           </Link>
         </div>
         <div className="flex items-center gap-3 border-t border-white/10 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-          <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500 text-sm font-bold text-white">{initials(user?.name)}</span>
+          <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-white text-sm font-bold text-slate-900">{initials(user?.name)}</span>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold text-white">{user?.name}</p>
             <p className="truncate text-xs text-slate-500">{isCeo ? 'CEO / Management' : 'Administrative Staff'}</p>
@@ -149,7 +147,8 @@ export default function AdminLayout() {
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="sticky top-0 z-30 flex items-center gap-3 border-b border-white/10 bg-slate-900 px-4 py-3 text-white lg:hidden">
           <button onClick={() => setMenuOpen(true)} aria-label="Open menu" className="rounded-lg p-1.5 hover:bg-white/10"><Menu size={22} /></button>
-          <span className="min-w-0 flex-1 truncate font-bold">{current?.label ?? `RDG ${isCeo ? 'Executive' : 'Admin'}`}</span>
+          <Logo onDark className="h-8" />
+          <span className="min-w-0 flex-1 truncate border-l border-white/15 pl-3 font-bold">{current?.label ?? (isCeo ? 'Executive' : 'Admin')}</span>
           <NotificationBell />
         </div>
         <div className="relative z-40 hidden items-center justify-between gap-3 border-b border-slate-200 bg-white/80 px-8 py-2.5 backdrop-blur lg:flex">

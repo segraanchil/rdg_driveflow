@@ -16,7 +16,7 @@ export function PageHeader({ title, subtitle, actions, back }) {
 }
 
 const TONES = {
-  green: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
+  green: 'bg-green-50 text-green-700 ring-green-600/20',
   amber: 'bg-amber-50 text-amber-700 ring-amber-600/20',
   red: 'bg-red-50 text-red-700 ring-red-600/20',
   blue: 'bg-sky-50 text-sky-700 ring-sky-600/20',
@@ -73,7 +73,7 @@ export function Tabs({ tabs, value, onChange, className = '' }) {
             className={`flex shrink-0 items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-semibold ${active ? 'bg-slate-900 text-white shadow-sm' : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:text-slate-900'}`}
           >
             {t.label}
-            {t.count > 0 && <span className={`rounded-full px-1.5 text-[11px] font-bold ${active ? 'bg-emerald-500 text-white' : 'bg-amber-100 text-amber-700'}`}>{t.count}</span>}
+            {t.count > 0 && <span className={`rounded-full px-1.5 text-[11px] font-bold ${active ? 'bg-white text-slate-900' : 'bg-amber-100 text-amber-700'}`}>{t.count}</span>}
           </button>
         )
       })}

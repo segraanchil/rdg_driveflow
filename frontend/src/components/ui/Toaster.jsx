@@ -3,9 +3,9 @@ import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react'
 import { dismiss, subscribeToasts } from '../../lib/toast'
 
 const STYLE = {
-  success: ['bg-slate-900 text-white', CheckCircle2, 'text-emerald-400'],
+  success: ['bg-slate-900 text-white', CheckCircle2, 'text-green-400'],
   error: ['bg-red-600 text-white', AlertCircle, 'text-white'],
-  info: ['bg-slate-900 text-white', Info, 'text-sky-300'],
+  info: ['bg-slate-900 text-white', Info, 'text-slate-300'],
 }
 
 /** Bottom-center action feedback ("Reservation verified", "Couldn't save…"). */

@@ -14,7 +14,7 @@ const ACTIVITY_ICON = {
 }
 
 const STOCK = [
-  ['available', 'Available', 'bg-emerald-500'],
+  ['available', 'Available', 'bg-green-500'],
   ['reserved', 'Reserved', 'bg-amber-500'],
   ['under_repair', 'In repair', 'bg-violet-500'],
 ]
@@ -100,7 +100,7 @@ export default function Dashboard() {
               {stats.top_makes.map((m) => (
                 <li key={m.make} className="text-sm">
                   <div className="flex justify-between"><span className="font-semibold text-slate-700">{m.make}</span><span className="tabular-nums text-slate-500">{m.total} sold</span></div>
-                  <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-sky-500" style={{ width: `${(m.total / stats.top_makes[0].total) * 100}%` }} /></div>
+                  <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-slate-500" style={{ width: `${(m.total / stats.top_makes[0].total) * 100}%` }} /></div>
                 </li>
               ))}
             </ul>

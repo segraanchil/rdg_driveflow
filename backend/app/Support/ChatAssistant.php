@@ -161,11 +161,11 @@ class ChatAssistant
     {
         $labels = ['employed' => 'Employed', 'ofw' => 'OFW', 'business_owner' => 'Business owner'];
         $lines = collect(FinancingApplication::CHECKLISTS)
-            ->map(fn ($docs, $key) => "• {$labels[$key]}: ".collect($docs)->map(fn ($d) => self::DOC_LABELS[$d] ?? str_replace('_', ' ', $d))->implode(', '))
+            ->map(fn ($docs, $key) => "• {$labels[$key]}: ".collect($docs)->map(fn ($d) => lcfirst($d[0])." ({$d[1]})")->implode(', '))
             ->implode("\n");
 
-        return $this->say("Financing requirements depend on your work:\n{$lines}\nFor a cash purchase, just bring a valid ID.",
-            [['label' => 'Loan calculator', 'to' => '/loan-calculator']]);
+        return $this->say("Financing requirements depend on your work:\n{$lines}\nThe loan calculator shows the full details for each. For a cash purchase, just bring a valid ID.",
+            [['label' => 'See requirements', 'to' => '/loan-calculator']]);
     }
 
     private function contact(array $s): array

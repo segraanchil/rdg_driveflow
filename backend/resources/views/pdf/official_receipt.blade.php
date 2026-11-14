@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <style>
-        body { font-family: DejaVu Sans, sans-serif; font-size: 12px; color: #14213d; }
-        .header { text-align: center; border-bottom: 3px solid #14213d; padding-bottom: 12px; margin-bottom: 20px; }
+        body { font-family: DejaVu Sans, sans-serif; font-size: 12px; color: #141414; }
+        .header { text-align: center; border-bottom: 3px solid #141414; padding-bottom: 12px; margin-bottom: 20px; }
         .header h1 { margin: 0; font-size: 18px; }
         .header p { margin: 2px 0; color: #555; font-size: 11px; }
         .or-no { text-align: right; font-size: 13px; font-weight: bold; margin-bottom: 20px; }
@@ -15,11 +15,12 @@
         .amount-box .figure { font-size: 22px; font-weight: bold; }
         .sign-block { width: 100%; margin-top: 60px; }
         .sign-block td { width: 50%; text-align: center; padding-top: 40px; }
-        .sign-line { border-top: 1px solid #14213d; margin: 0 20px; padding-top: 4px; font-size: 10px; }
+        .sign-line { border-top: 1px solid #141414; margin: 0 20px; padding-top: 4px; font-size: 10px; }
     </style>
 </head>
 <body>
     <div class="header">
+        <img src="{{ resource_path('images/logo-black.jpg') }}" alt="RDG Car Deals & Services" style="height: 70px; margin-bottom: 6px;"><br>
         <h1>RDG Car Deals &amp; Services</h1>
         <p>143 Commonwealth Avenue, Quezon City, Philippines</p>
     </div>

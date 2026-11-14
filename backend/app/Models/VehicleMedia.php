@@ -14,6 +14,11 @@ class VehicleMedia extends Model
 
     public const TYPE_PHOTO = 'photo';
 
+    /** One wide look-around panorama of the cabin (drag left/right). */
+    public const TYPE_INTERIOR_360 = 'interior_360';
+
+    public const TYPES = [self::TYPE_360_FRAME, self::TYPE_INTERIOR_360, self::TYPE_PHOTO];
+
     protected $table = 'vehicle_media';
 
     protected $fillable = [
@@ -21,7 +26,10 @@ class VehicleMedia extends Model
         'file_path',
         'type',
         'sort_order',
+        'is_sample',
     ];
+
+    protected $casts = ['is_sample' => 'boolean'];
 
     public function vehicle(): BelongsTo
     {

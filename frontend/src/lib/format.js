@@ -70,14 +70,17 @@ export function initials(name) {
 }
 
 const DOC_LABELS = {
-  payslip: 'Latest payslips',
-  coe: 'Certificate of employment',
-  valid_id: 'Valid ID',
+  payslip: 'Latest payslips (3 months)',
+  coe: 'Certificate of employment / contract',
+  valid_id: '2 valid government IDs',
+  remittance_proof: 'Proof of remittance (3 months)',
+  attorney_valid_id: 'Attorney-in-fact’s valid IDs',
+  business_permit: 'Mayor’s / Business Permit',
   proof_of_billing: 'Proof of billing',
-  consularized_authorization: 'Consularized authorization',
+  consularized_authorization: 'Special Power of Attorney (SPA)',
   dti_or_sec: 'DTI / SEC registration',
   itr: 'Income tax return (ITR)',
-  bank_statement: 'Bank statements',
+  bank_statement: 'Bank statements (6 months)',
   invoice: 'Invoice',
   deed_of_sale: 'Deed of Sale',
   official_receipt: 'Official Receipt',

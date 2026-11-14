@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import {
-  ClipboardCheck, Receipt, CalendarClock, Landmark, ShieldCheck, Users, ArrowRight, Car, ImageOff, Clock, CheckCircle2, Plus,
-} from 'lucide-react'
+import { ClipboardCheck, Receipt, CalendarClock, Landmark, ShieldCheck, Users, ArrowRight, ImageOff, Clock, CheckCircle2, Plus, PartyPopper } from 'lucide-react'
 import apiClient from '../../api/client'
 import PageLoader from '../../components/ui/PageLoader'
-import { PageHeader, StatTile, StatusBadge } from '../../components/ui/kit'
-import { formatDate, formatDateTime, peso, pesoCompact, timeLeft, vehicleName } from '../../lib/format'
 import { useAuth } from '../../context/AuthContext'
+import { formatDateTime, pesoCompact, timeLeft, vehicleName } from '../../lib/format'
 
-/** Admin landing page: today's to-dos first, then the lot and recent sales. */
+/**
+ * Admin landing page, kept calm on purpose: one to-do list (only things that need action),
+ * what's coming up next, and a single line of numbers. Everything else lives on its own page.
+ */
 export default function Overview() {
   const { user } = useAuth()
   const [data, setData] = useState(null)
@@ -18,145 +18,87 @@ export default function Overview() {
     apiClient.get('/admin/overview').then(({ data }) => setData(data))
   }, [])
 
-  if (!data) return <PageLoader />
+  if (!data) return <PageLoader rows={2} />
   const c = data.counts
   const inv = data.inventory ?? {}
-  const todo = c.pending_reservations + c.ready_to_sell + c.pending_test_drives + c.documents_to_verify + c.open_claims + c.new_leads
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
 
+  const todos = [
+    [c.pending_reservations, ClipboardCheck, 'reservation payment', 'to verify', '/admin/reservations', 'Verify'],
+    [c.ready_to_sell, Receipt, 'verified reservation', 'ready to record as sold', '/admin/sales', 'Record sale'],
+    [c.pending_test_drives, CalendarClock, 'test drive request', 'to confirm', '/admin/test-drives', 'Review'],
+    [c.documents_to_verify, Landmark, 'financing document', 'to check', '/admin/financing', 'Check'],
+    [c.open_claims, ShieldCheck, 'warranty claim', 'open', '/admin/warranty-claims', 'Open'],
+    [c.new_leads, Users, 'car', 'offered to us for appraisal', '/admin/acquisition-leads', 'Appraise'],
+    [data.cars_without_photos.length, ImageOff, 'car on sale', 'without real photos', '/admin/inventory', 'Add photos'],
+  ].filter(([n]) => n > 0)
+
+  const upcoming = [
+    ...data.pending_reservations.map((r) => ({ key: `r${r.id}`, at: r.expires_at, icon: Clock, title: `Hold ends · ${vehicleName(r.vehicle)}`, sub: `${r.buyer?.name} · ${timeLeft(r.expires_at)}`, to: '/admin/reservations', urgent: new Date(r.expires_at) - Date.now() < 6 * 3_600_000 })),
+    ...data.upcoming_test_drives.map((t) => ({ key: `t${t.id}`, at: t.preferred_at, icon: CalendarClock, title: `Test drive · ${vehicleName(t.vehicle)}`, sub: `${t.buyer?.name} · ${formatDateTime(t.preferred_at)}${t.status === 'pending' ? ' · not confirmed yet' : ''}`, to: '/admin/test-drives' })),
+  ].sort((a, b) => new Date(a.at) - new Date(b.at)).slice(0, 5)
+
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title={`${greeting}, ${user?.name?.split(' ')[0] ?? 'there'}`}
-        subtitle={todo === 0 ? 'Everything is up to date. Nice work!' : `You have ${todo} item${todo === 1 ? '' : 's'} waiting for you today.`}
-        actions={<Link to="/admin/inventory?new=1" className="rdg-btn"><Plus size={16} /> Add vehicle</Link>}
-      />
-
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-        <StatTile icon={ClipboardCheck} tone="amber" label="To verify" value={c.pending_reservations} hint="Reservation payments" to="/admin/reservations" />
-        <StatTile icon={Receipt} tone="emerald" label="Ready to sell" value={c.ready_to_sell} hint="Verified reservations" to="/admin/sales" />
-        <StatTile icon={CalendarClock} tone="violet" label="Test drives" value={c.pending_test_drives} hint="Awaiting confirmation" to="/admin/test-drives" />
-        <StatTile icon={Landmark} tone="blue" label="Documents" value={c.documents_to_verify} hint="Financing files to check" to="/admin/financing" />
-        <StatTile icon={ShieldCheck} tone="red" label="Claims" value={c.open_claims} hint="Open warranty tickets" to="/admin/warranty-claims" />
-        <StatTile icon={Users} tone="slate" label="New leads" value={c.new_leads} hint="Cars offered to us" to="/admin/acquisition-leads" />
+    <div className="mx-auto max-w-4xl space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1>{greeting}, {user?.name?.split(' ')[0] ?? 'there'}</h1>
+          <p className="mt-1 text-sm text-slate-500">{todos.length === 0 ? 'Nothing needs your attention right now.' : `${todos.length} thing${todos.length === 1 ? '' : 's'} to take care of today.`}</p>
+        </div>
+        <Link to="/admin/inventory?new=1" className="rdg-btn"><Plus size={16} /> Add vehicle</Link>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Panel title="Payments to verify" to="/admin/reservations" empty="No reservations waiting for verification.">
-          {data.pending_reservations.map((r) => (
-            <Row key={r.id} to="/admin/reservations" title={vehicleName(r.vehicle)} sub={`${r.buyer?.name} · ${r.payment_method === 'financing' ? 'Bank financing' : 'Straight cash'}`}>
-              <span className={`flex items-center gap-1 text-xs font-bold ${new Date(r.expires_at) - Date.now() < 6 * 3_600_000 ? 'text-red-600' : 'text-amber-600'}`}>
-                <Clock size={13} /> {timeLeft(r.expires_at)}
-              </span>
-            </Row>
-          ))}
-        </Panel>
-
-        <Panel title="Ready to record as sold" to="/admin/sales" empty="No verified reservations waiting for a sale.">
-          {data.ready_to_sell.map((r) => (
-            <Row key={r.id} to={`/admin/sales?reservation=${r.id}`} title={vehicleName(r.vehicle)} sub={`${r.buyer?.name} · ${peso(r.vehicle?.selling_price)}`}>
-              <span className="rdg-btn px-3 py-1.5 text-xs">Record sale</span>
-            </Row>
-          ))}
-        </Panel>
-
-        <Panel title="Upcoming test drives" to="/admin/test-drives" empty="No test drives scheduled.">
-          {data.upcoming_test_drives.map((t) => (
-            <Row key={t.id} to="/admin/test-drives" title={vehicleName(t.vehicle)} sub={`${t.buyer?.name} · ${formatDateTime(t.preferred_at)}`}>
-              <StatusBadge kind="test_drive" status={t.status} />
-            </Row>
-          ))}
-        </Panel>
-
-        <Panel title="Recent sales" to="/admin/sales" empty="No sales recorded yet.">
-          {data.recent_sales.map((s) => {
-            const docs = (s.legal_documents ?? []).length
-            return (
-              <Row key={s.id} to="/admin/sales" title={vehicleName(s.vehicle)} sub={`${s.buyer?.name} · ${formatDate(s.sale_date)}`}>
-                <span className="text-right">
-                  <span className="block text-sm font-bold text-slate-900">{peso(s.total_amount)}</span>
-                  <span className={`text-[11px] font-semibold ${docs >= 3 ? 'text-emerald-600' : 'text-amber-600'}`}>{docs >= 3 ? 'All documents ready' : `${docs}/3 documents`}</span>
-                </span>
-              </Row>
-            )
-          })}
-        </Panel>
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-        <div className="rdg-card p-5">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-bold">The lot</h2>
-            <Link to="/admin/inventory" className="flex items-center gap-1 text-sm font-bold text-emerald-700 hover:underline">Inventory <ArrowRight size={15} /></Link>
+      <section className="rdg-card overflow-hidden">
+        <h2 className="border-b border-slate-100 px-5 py-3.5 text-sm font-bold uppercase tracking-wider text-slate-500">To do</h2>
+        {todos.length === 0 ? (
+          <div className="flex items-center gap-3 px-5 py-8 text-slate-600">
+            <PartyPopper size={22} className="text-slate-900" /> You’re all caught up. New reservations, requests and leads will show up here.
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {[
-              ['available', 'Available', 'bg-emerald-500'],
-              ['reserved', 'Reserved', 'bg-amber-500'],
-              ['under_repair', 'In repair', 'bg-violet-500'],
-              ['sold', 'Sold', 'bg-slate-500'],
-            ].map(([key, label, dot]) => (
-              <Link key={key} to={`/admin/inventory?status=${key}`} className="rounded-xl bg-slate-50 p-3 hover:bg-emerald-50">
-                <p className="flex items-center gap-1.5 text-xs font-semibold text-slate-500"><span className={`h-2 w-2 rounded-full ${dot}`} /> {label}</p>
-                <p className="mt-1 text-2xl font-extrabold tabular-nums text-slate-900">{inv[key] ?? 0}</p>
-              </Link>
+        ) : (
+          <ul className="divide-y divide-slate-100">
+            {todos.map(([n, Icon, noun, what, to, action]) => (
+              <li key={to + noun}>
+                <Link to={to} className="group flex items-center gap-4 px-5 py-4 hover:bg-slate-50">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-900"><Icon size={19} /></span>
+                  <span className="min-w-0 flex-1 text-slate-700">
+                    <strong className="text-lg text-slate-900">{n}</strong> {noun}{n === 1 ? '' : 's'} {what}
+                  </span>
+                  <span className="flex shrink-0 items-center gap-1 text-sm font-semibold text-slate-900">{action} <ArrowRight size={15} className="transition group-hover:translate-x-0.5" /></span>
+                </Link>
+              </li>
             ))}
-          </div>
-          <p className="mt-4 text-sm text-slate-500">
-            This month: <strong className="text-slate-800">{c.sales_this_month} sold</strong> · <strong className="text-slate-800">{pesoCompact(c.revenue_this_month)}</strong> in sales
-          </p>
-        </div>
+          </ul>
+        )}
+      </section>
 
-        <div className="rdg-card p-5">
-          <h2 className="mb-3 font-bold">Needs photos</h2>
-          {data.cars_without_photos.length === 0 ? (
-            <p className="flex items-center gap-2 text-sm text-emerald-700"><CheckCircle2 size={16} /> Every car on sale has photos.</p>
-          ) : (
-            <ul className="space-y-2">
-              {data.cars_without_photos.map((v) => (
-                <li key={v.id}>
-                  <Link to={`/admin/inventory?edit=${v.id}`} className="flex items-center gap-2 rounded-lg bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800 hover:bg-amber-100">
-                    <ImageOff size={15} /> {vehicleName(v)}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-          <p className="mt-3 text-xs text-slate-500">Cars without photos look empty in the showroom. Add a cover photo and a 360° set.</p>
-        </div>
-      </div>
+      <section className="rdg-card overflow-hidden">
+        <h2 className="border-b border-slate-100 px-5 py-3.5 text-sm font-bold uppercase tracking-wider text-slate-500">Coming up</h2>
+        {upcoming.length === 0 ? (
+          <p className="flex items-center gap-2 px-5 py-6 text-sm text-slate-500"><CheckCircle2 size={16} /> No holds expiring or test drives scheduled.</p>
+        ) : (
+          <ul className="divide-y divide-slate-100">
+            {upcoming.map(({ key, icon: Icon, title, sub, to, urgent }) => (
+              <li key={key}>
+                <Link to={to} className="flex items-center gap-3 px-5 py-3 hover:bg-slate-50">
+                  <Icon size={17} className={urgent ? 'text-red-600' : 'text-slate-400'} />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-semibold text-slate-900">{title}</span>
+                    <span className={`block truncate text-xs ${urgent ? 'font-semibold text-red-600' : 'text-slate-500'}`}>{sub}</span>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <p className="flex flex-wrap gap-x-5 gap-y-1 rounded-xl bg-white px-5 py-3 text-sm text-slate-500 ring-1 ring-slate-200">
+        <span><strong className="text-slate-900">{inv.available ?? 0}</strong> available</span>
+        <span><strong className="text-slate-900">{inv.reserved ?? 0}</strong> reserved</span>
+        {inv.under_repair > 0 && <span><strong className="text-slate-900">{inv.under_repair}</strong> in repair</span>}
+        <span className="ml-auto">This month: <strong className="text-slate-900">{c.sales_this_month} sold</strong> · <strong className="text-slate-900">{pesoCompact(c.revenue_this_month)}</strong></span>
+      </p>
     </div>
-  )
-}
-
-function Panel({ title, to, empty, children }) {
-  const items = Array.isArray(children) ? children.filter(Boolean) : children ? [children] : []
-  return (
-    <div className="rdg-card overflow-hidden">
-      <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3.5">
-        <h2 className="font-bold">{title}</h2>
-        <Link to={to} className="flex items-center gap-1 text-xs font-bold text-emerald-700 hover:underline">View all <ArrowRight size={14} /></Link>
-      </div>
-      {items.length === 0 ? (
-        <p className="flex items-center gap-2 px-5 py-6 text-sm text-slate-400"><Car size={16} /> {empty}</p>
-      ) : (
-        <ul className="divide-y divide-slate-100">{items}</ul>
-      )}
-    </div>
-  )
-}
-
-function Row({ to, title, sub, children }) {
-  return (
-    <li>
-      <Link to={to} className="flex items-center gap-3 px-5 py-3 hover:bg-emerald-50/40">
-        <span className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-semibold text-slate-900">{title}</span>
-          <span className="block truncate text-xs text-slate-500">{sub}</span>
-        </span>
-        {children}
-      </Link>
-    </li>
   )
 }

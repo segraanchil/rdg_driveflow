@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
-  Heart, Gauge, Banknote, Landmark, CalendarCheck, ChevronRight, Cog, Fuel, Palette, Car, CalendarDays, Share2, ShieldCheck, Clock, Calculator, Info,
+  Heart, Gauge, Banknote, Landmark, CalendarCheck, ChevronRight, Cog, Fuel, Palette, Car, CalendarDays, Share2, ShieldCheck, Clock, Calculator, Info, Wrench, Users, Milestone, Check,
 } from 'lucide-react'
 import apiClient from '../../api/client'
 import { useAuth } from '../../context/AuthContext'
@@ -11,7 +11,7 @@ import VehicleCard from '../../components/vehicles/VehicleCard'
 import PageLoader from '../../components/ui/PageLoader'
 import { estimateMonthlyAmortization } from '../../lib/loanCalculator'
 import { useSettings } from '../../lib/useSettings'
-import { km, peso } from '../../lib/format'
+import { formatDateTime, km, peso } from '../../lib/format'
 import { toast } from '../../lib/toast'
 
 export default function VehicleDetail() {
@@ -75,7 +75,11 @@ export default function VehicleDetail() {
     [Fuel, 'Fuel', vehicle.fuel_type],
     [Car, 'Body', vehicle.body_type],
     [Palette, 'Color', vehicle.color],
-  ].filter(([, , v]) => v)
+    [Wrench, 'Engine', vehicle.engine],
+    [Users, 'Seats', vehicle.seats ? `${vehicle.seats} seats` : null],
+    [Milestone, 'Drivetrain', vehicle.drivetrain],
+  ]
+  const features = (vehicle.features ?? '').split('\n').map((f) => f.trim()).filter(Boolean)
 
   const actions = available && isBuyer && (
     <div className="grid gap-2.5">
@@ -101,19 +105,26 @@ export default function VehicleDetail() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.25fr_1fr] lg:grid-rows-[auto_auto_1fr]">
           <div className="order-1 rdg-card p-3 lg:order-none lg:col-start-1"><Viewer360 vehicle={vehicle} /></div>
 
-          {specs.length > 0 && (
-            <div className="order-3 rdg-card p-5 lg:order-none lg:col-start-1">
-              <h2 className="mb-4 font-bold">Specifications</h2>
-              <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {specs.map(([Icon, label, value]) => (
-                  <div key={label} className="rounded-xl bg-slate-50 p-3">
-                    <dt className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-slate-400"><Icon size={13} /> {label}</dt>
-                    <dd className="mt-1 font-bold text-slate-800">{value}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-          )}
+          <div className="order-3 rdg-card p-5 lg:order-none lg:col-start-1">
+            <h2 className="mb-4 font-display text-xl font-bold uppercase italic tracking-wide">Specifications</h2>
+            <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {specs.map(([Icon, label, value]) => (
+                <div key={label} className="rounded-xl bg-slate-50 p-3">
+                  <dt className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-slate-400"><Icon size={13} /> {label}</dt>
+                  <dd className={`mt-1 font-bold ${value ? 'text-slate-800' : 'text-slate-400'}`}>{value || 'Ask us'}</dd>
+                </div>
+              ))}
+            </dl>
+            {features.length > 0 && (
+              <>
+                <h3 className="mb-2 mt-5 text-xs font-bold uppercase tracking-wide text-slate-500">Features</h3>
+                <ul className="grid gap-x-4 gap-y-1.5 text-sm text-slate-700 sm:grid-cols-2">
+                  {features.map((f) => <li key={f} className="flex items-center gap-2"><Check size={15} className="shrink-0 text-green-600" /> {f}</li>)}
+                </ul>
+              </>
+            )}
+            <p className="mt-4 text-xs text-slate-400">Listing updated {formatDateTime(vehicle.last_updated)}. Specs are checked during inspection; ask us if you need a detail that isn’t listed.</p>
+          </div>
 
           {vehicle.description && (
             <div className="order-4 rdg-card p-5 lg:order-none lg:col-start-1">

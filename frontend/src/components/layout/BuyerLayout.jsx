@@ -1,9 +1,10 @@
 import { useEffect } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
-import { Car, MapPin, Clock, ShieldCheck, Phone, Mail, Landmark } from 'lucide-react'
+import { MapPin, Clock, ShieldCheck, Phone, Mail, Landmark } from 'lucide-react'
 import Navbar from './Navbar'
 import ChatWidget from '../chatbot/ChatWidget'
 import { useSettings } from '../../lib/useSettings'
+import Logo from '../ui/Logo'
 
 export default function BuyerLayout() {
   const { pathname } = useLocation()
@@ -26,10 +27,7 @@ export default function BuyerLayout() {
       <footer className="bg-slate-900 text-slate-400">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <Link to="/" className="flex items-center gap-2 text-white">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500"><Car size={17} /></span>
-              <span className="font-extrabold">RDG DriveFlow</span>
-            </Link>
+            <Link to="/" className="inline-block" aria-label="RDG Car Deals & Services home"><Logo onDark className="h-20" /></Link>
             <p className="mt-3 text-sm leading-relaxed">Quality secondhand vehicles with transparent pricing, inspected and ready to drive.</p>
           </div>
           <div className="space-y-2 text-sm">
@@ -42,16 +40,16 @@ export default function BuyerLayout() {
           </div>
           <div className="space-y-2 text-sm">
             <p className="text-xs font-bold uppercase tracking-wider text-slate-300">Visit us</p>
-            <p className="flex items-start gap-2"><MapPin size={15} className="mt-0.5 shrink-0 text-emerald-400" /> {s.business_address}</p>
-            <p className="flex items-center gap-2"><Clock size={15} className="text-emerald-400" /> {s.business_hours}</p>
-            {s.business_phone && <a href={`tel:${s.business_phone}`} className="flex items-center gap-2 hover:text-white"><Phone size={15} className="text-emerald-400" /> {s.business_phone}</a>}
-            {s.business_email && <a href={`mailto:${s.business_email}`} className="flex items-center gap-2 hover:text-white"><Mail size={15} className="text-emerald-400" /> {s.business_email}</a>}
+            <p className="flex items-start gap-2"><MapPin size={15} className="mt-0.5 shrink-0 text-slate-300" /> {s.business_address}</p>
+            <p className="flex items-center gap-2"><Clock size={15} className="text-slate-300" /> {s.business_hours}</p>
+            {s.business_phone && <a href={`tel:${s.business_phone}`} className="flex items-center gap-2 hover:text-white"><Phone size={15} className="text-slate-300" /> {s.business_phone}</a>}
+            {s.business_email && <a href={`mailto:${s.business_email}`} className="flex items-center gap-2 hover:text-white"><Mail size={15} className="text-slate-300" /> {s.business_email}</a>}
           </div>
           <div className="space-y-2 text-sm">
             <p className="text-xs font-bold uppercase tracking-wider text-slate-300">Shop with confidence</p>
-            <p className="flex items-center gap-2"><ShieldCheck size={15} className="text-emerald-400" /> 1-month money-back guarantee</p>
-            <p className="flex items-center gap-2"><Landmark size={15} className="text-emerald-400" /> Bank financing assistance</p>
-            <p className="flex items-center gap-2"><ShieldCheck size={15} className="text-emerald-400" /> Legal documents ready on sale</p>
+            <p className="flex items-center gap-2"><ShieldCheck size={15} className="text-slate-300" /> 1-month money-back guarantee</p>
+            <p className="flex items-center gap-2"><Landmark size={15} className="text-slate-300" /> Bank financing assistance</p>
+            <p className="flex items-center gap-2"><ShieldCheck size={15} className="text-slate-300" /> Legal documents ready on sale</p>
           </div>
         </div>
         <p className="border-t border-white/10 py-4 text-center text-xs">© {new Date().getFullYear()} RDG Car Deals &amp; Services</p>

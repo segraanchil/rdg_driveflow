@@ -34,7 +34,16 @@ class AcquisitionLeadReviewController extends Controller
             'offer_amount.required_if' => 'Enter the offer amount before marking an offer as made.',
         ]);
 
+        $offerSent = $data['status'] === AcquisitionLead::STATUS_OFFER_MADE;
         $lead->update($data);
+
+        if ($offerSent) {
+            $s = $lead->vehicle_specs ?? [];
+            \App\Support\BuyerNotice::send($lead->seller, 'We made an offer for your car', [
+                "Our appraiser reviewed your {$s['year']} {$s['make']} {$s['model']} and offers ₱".number_format((float) $lead->offer_amount).'.',
+                'Open your submission to accept or decline the offer.',
+            ], 'View the offer', "/appraisal-status/{$lead->id}");
+        }
 
         return response()->json($lead);
     }

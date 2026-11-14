@@ -41,7 +41,7 @@ export default function GlobalLoader() {
     <>
       <div
         aria-hidden="true"
-        className="pointer-events-none fixed left-0 top-0 z-[100] h-[3px] bg-gradient-to-r from-emerald-400 via-emerald-500 to-teal-400 shadow-[0_0_10px_rgba(16,185,129,.7)] transition-all duration-300"
+        className="pointer-events-none fixed left-0 top-0 z-[100] h-[3px] bg-slate-900 shadow-[0_0_8px_rgba(0,0,0,.35)] transition-all duration-300"
         style={{ width: `${bar}%`, opacity: bar > 0 && bar < 100 ? 1 : 0 }}
       />
       {showCard && (

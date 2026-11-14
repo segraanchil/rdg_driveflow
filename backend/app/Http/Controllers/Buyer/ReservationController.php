@@ -32,7 +32,10 @@ class ReservationController extends Controller
             'vehicle_id' => ['required', 'exists:vehicles,id'],
             'payment_proof' => ['required', 'file', 'image', 'max:10240'],
             'payment_method' => ['nullable', 'in:cash,financing'],
-        ]);
+            // Where the reservation fee was paid; staff verify it manually against that channel.
+            'payment_channel' => ['required', 'in:gcash,bank_transfer'],
+            'payment_reference' => ['nullable', 'string', 'max:60'],
+        ], ['payment_channel.required' => 'Choose how you paid: GCash or bank transfer.']);
 
         $reservation = DB::transaction(function () use ($data, $request) {
             // lockForUpdate closes the race between two buyers reserving the
@@ -53,6 +56,8 @@ class ReservationController extends Controller
                 'buyer_id' => $request->user()->id,
                 'payment_method' => $data['payment_method'] ?? 'cash',
                 'fee_amount' => Setting::get('reservation_fee'),
+                'payment_channel' => $data['payment_channel'],
+                'payment_reference' => $data['payment_reference'] ?? null,
                 'payment_proof_path' => $path,
                 'status' => Reservation::STATUS_PENDING,
                 'expires_at' => now()->addHours(48),

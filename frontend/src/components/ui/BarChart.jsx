@@ -42,7 +42,7 @@ export default function BarChart({ data, format = (v) => v, label, height = 180,
                     <span className="mb-1 whitespace-nowrap text-[11px] font-bold tabular-nums text-slate-700">{format(d.value)}</span>
                   )}
                   <span
-                    className={`w-full max-w-[28px] rounded-t-[4px] transition-colors ${on ? 'bg-emerald-600' : i === last ? 'bg-emerald-500' : 'bg-emerald-400/80'}`}
+                    className={`w-full max-w-[28px] rounded-t-[4px] transition-colors ${on ? 'bg-black' : i === last ? 'bg-slate-900' : 'bg-slate-400'}`}
                     style={{ height: Math.max(d.value > 0 ? 3 : 0, h) }}
                   />
                   <span className="absolute bottom-0 text-[11px] font-semibold text-slate-500">{d.label}</span>

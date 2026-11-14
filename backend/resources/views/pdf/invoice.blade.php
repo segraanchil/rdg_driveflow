@@ -3,22 +3,22 @@
 <head>
     <meta charset="utf-8">
     <style>
-        body { font-family: DejaVu Sans, sans-serif; font-size: 12px; color: #14213d; margin: 0; }
-        .header { border-bottom: 3px solid #14213d; padding-bottom: 12px; margin-bottom: 20px; }
+        body { font-family: DejaVu Sans, sans-serif; font-size: 12px; color: #141414; margin: 0; }
+        .header { border-bottom: 3px solid #141414; padding-bottom: 12px; margin-bottom: 20px; }
         .header h1 { margin: 0; font-size: 20px; }
         .header p { margin: 2px 0; color: #555; }
         .meta { width: 100%; margin-bottom: 20px; }
         .meta td { vertical-align: top; padding: 2px 0; }
         .meta .label { color: #777; font-size: 10px; text-transform: uppercase; }
         table.items { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        table.items th { text-align: left; background: #f0f2f5; padding: 8px; font-size: 10px; text-transform: uppercase; border-bottom: 2px solid #14213d; }
+        table.items th { text-align: left; background: #f0f2f5; padding: 8px; font-size: 10px; text-transform: uppercase; border-bottom: 2px solid #141414; }
         table.items td { padding: 8px; border-bottom: 1px solid #ddd; }
         table.summary { width: 55%; margin-left: 45%; border-collapse: collapse; margin-top: 14px; }
         table.summary td { padding: 6px 8px; }
         table.summary td.amount { text-align: right; }
         table.summary tr.less td { color: #b42318; }
-        table.summary tr.total td { border-top: 2px solid #14213d; font-size: 15px; font-weight: bold; padding-top: 10px; }
-        .note { margin-top: 18px; padding: 10px; background: #f6f8fa; border-left: 3px solid #10b981; font-size: 11px; color: #444; }
+        table.summary tr.total td { border-top: 2px solid #141414; font-size: 15px; font-weight: bold; padding-top: 10px; }
+        .note { margin-top: 18px; padding: 10px; background: #f6f8fa; border-left: 3px solid #141414; font-size: 11px; color: #444; }
         .footer { margin-top: 40px; font-size: 10px; color: #888; border-top: 1px solid #ddd; padding-top: 10px; }
     </style>
 </head>
@@ -32,13 +32,18 @@
         $dueOnRelease = $isFinancing ? max(0, $downPayment - $reservationFee) : max(0, $price - $reservationFee);
     @endphp
 
-    <div class="header">
-        <h1>RDG Car Deals &amp; Services</h1>
-        <p>{{ $business['business_address'] }}</p>
-        @if ($business['business_phone'] || $business['business_email'])
-            <p>{{ collect([$business['business_phone'], $business['business_email']])->filter()->implode(' · ') }}</p>
-        @endif
-    </div>
+    <table class="header" style="width: 100%;">
+        <tr>
+            <td style="width: 120px; vertical-align: middle;"><img src="{{ resource_path('images/logo-black.jpg') }}" alt="RDG Car Deals & Services" style="height: 66px;"></td>
+            <td style="vertical-align: middle;">
+                <h1>RDG Car Deals &amp; Services</h1>
+                <p>{{ $business['business_address'] }}</p>
+                @if ($business['business_phone'] || $business['business_email'])
+                    <p>{{ collect([$business['business_phone'], $business['business_email']])->filter()->implode(' · ') }}</p>
+                @endif
+            </td>
+        </tr>
+    </table>
 
     <h2 style="margin-bottom: 4px;">SALES INVOICE</h2>
 
@@ -102,7 +107,7 @@
         @if ($isFinancing)
             The balance above is the remaining down payment, payable before the vehicle is released. The financed amount is paid by the partner bank, subject to its approval and terms.
         @else
-            The balance above is payable in full before the vehicle is released. The reservation fee has already been deducted.
+            The balance above is payable in full before the vehicle is released.@if ($reservationFee > 0) The reservation fee has already been deducted.@endif
         @endif
     </div>
 
