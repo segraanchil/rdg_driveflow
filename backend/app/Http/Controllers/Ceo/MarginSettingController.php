@@ -3,26 +3,20 @@
 namespace App\Http\Controllers\Ceo;
 
 use App\Http\Controllers\Controller;
+use App\Models\Setting;
+use App\Models\Vehicle;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 
 /**
- * Global profit margin setting (10-18%), used as InventoryController's
- * default when adding a vehicle without an explicit per-vehicle override.
- *
- * TODO: the ERD has no settings table — this is cached for now. Promote to
- * a real `settings` table/migration if it needs to survive a cache flush
- * or be audited.
+ * Global profit margin setting (10-18%). Stored in the `settings` table (it used to live
+ * only in the cache). Saving it re-prices every car still for sale; reserved and sold cars
+ * keep the price the buyer agreed to. New cars use it as their default margin.
  */
 class MarginSettingController extends Controller
 {
-    private const CACHE_KEY = 'settings.global_margin_percent';
-
-    private const DEFAULT_MARGIN = 12.0;
-
     public static function current(): float
     {
-        return (float) Cache::get(self::CACHE_KEY, self::DEFAULT_MARGIN);
+        return (float) Setting::get('global_margin_percent');
     }
 
     public function show(Request $request)
@@ -36,11 +30,10 @@ class MarginSettingController extends Controller
             'margin_percent' => ['required', 'numeric', 'min:10', 'max:18'],
         ]);
 
-        Cache::forever(self::CACHE_KEY, $data['margin_percent']);
+        Setting::put(['global_margin_percent' => $data['margin_percent']]);
 
-        // Apply the new margin to every car still for sale; reserved and sold cars keep their agreed price.
         $repriced = 0;
-        \App\Models\Vehicle::where('status', \App\Models\Vehicle::STATUS_AVAILABLE)->get()->each(function ($v) use ($data, &$repriced) {
+        Vehicle::where('status', Vehicle::STATUS_AVAILABLE)->get()->each(function (Vehicle $v) use ($data, &$repriced) {
             $cost = (float) $v->acquisition_cost + (float) $v->repair_fees;
             $v->update([
                 'margin_percent' => $data['margin_percent'],
@@ -50,6 +43,6 @@ class MarginSettingController extends Controller
             $repriced++;
         });
 
-        return response()->json(['margin_percent' => $data['margin_percent'], 'repriced' => $repriced]);
+        return response()->json(['margin_percent' => (float) $data['margin_percent'], 'repriced' => $repriced]);
     }
 }

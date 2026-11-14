@@ -8,6 +8,7 @@ use App\Models\ExpansionFundLedger;
 use App\Models\LegalDocument;
 use App\Models\Reservation;
 use App\Models\Sale;
+use App\Models\Setting;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -15,10 +16,6 @@ use Illuminate\Support\Collection;
 /** Executive dashboard: sales volume, inventory KPIs, expansion fund, recent activity. CEO only. */
 class DashboardController extends Controller
 {
-    // Placeholder — no peso figure exists yet for the 2026 Service Center
-    // goal, only the target date. Confirm the real number with the CEO.
-    private const EXPANSION_FUND_GOAL = 5_000_000;
-
     public function index(Request $request)
     {
         $salesThisMonth = Sale::with('vehicle')
@@ -32,13 +29,17 @@ class DashboardController extends Controller
                 : 0
         );
 
-        $fundBalance = (float) (ExpansionFundLedger::latest('entry_date')->first()?->running_balance ?? 0);
+        $fundBalance = (float) (ExpansionFundLedger::orderByDesc('entry_date')->orderByDesc('id')->value('running_balance') ?? 0);
+        // Goal is a Business Setting (placeholder until the CEO sets the Service Center budget).
+        $goal = (float) Setting::get('expansion_fund_goal');
 
         return response()->json([
             'inventory' => [
                 'available' => Vehicle::where('status', Vehicle::STATUS_AVAILABLE)->count(),
                 'reserved' => Vehicle::where('status', Vehicle::STATUS_RESERVED)->count(),
                 'sold' => Vehicle::where('status', Vehicle::STATUS_SOLD)->count(),
+                'under_repair' => Vehicle::where('status', Vehicle::STATUS_UNDER_REPAIR)->count(),
+                'stock_value' => (float) Vehicle::whereIn('status', [Vehicle::STATUS_AVAILABLE, Vehicle::STATUS_RESERVED, Vehicle::STATUS_UNDER_REPAIR])->sum('selling_price'),
             ],
             'sales' => [
                 'count_this_month' => $salesThisMonth->count(),
@@ -47,13 +48,37 @@ class DashboardController extends Controller
             ],
             'expansion_fund' => [
                 'current_balance' => $fundBalance,
-                'goal' => self::EXPANSION_FUND_GOAL,
-                'percent_to_goal' => self::EXPANSION_FUND_GOAL > 0
-                    ? min(100, round($fundBalance / self::EXPANSION_FUND_GOAL * 100, 1))
-                    : 0,
+                'goal' => $goal,
+                'contribution_percent' => (float) Setting::get('expansion_fund_percent'),
+                'percent_to_goal' => $goal > 0 ? min(100, round($fundBalance / $goal * 100, 1)) : 0,
             ],
+            'monthly' => $this->monthlySeries(6),
+            'top_makes' => Sale::join('vehicles', 'vehicles.id', '=', 'sales.vehicle_id')
+                ->where('sale_date', '>=', now()->subMonths(5)->startOfMonth())
+                ->selectRaw('vehicles.make as make, count(*) as total')->groupBy('vehicles.make')->orderByDesc('total')->take(5)->get(),
             'recent_activity' => $this->recentActivity(),
         ]);
+    }
+
+    /** Cars sold, revenue and gross profit for each of the last $months months (oldest first). */
+    private function monthlySeries(int $months): array
+    {
+        $start = now()->subMonths($months - 1)->startOfMonth();
+        $sales = Sale::with('vehicle')->where('sale_date', '>=', $start)->get()
+            ->groupBy(fn (Sale $s) => $s->sale_date->format('Y-m'));
+
+        return collect(range(0, $months - 1))->map(function (int $i) use ($start, $sales) {
+            $month = $start->copy()->addMonths($i);
+            $rows = $sales->get($month->format('Y-m'), collect());
+
+            return [
+                'month' => $month->format('Y-m'),
+                'label' => $month->format('M'),
+                'count' => $rows->count(),
+                'revenue' => (float) $rows->sum('total_amount'),
+                'profit' => (float) $rows->sum(fn (Sale $s) => $s->vehicle ? $s->total_amount - $s->vehicle->acquisition_cost - $s->vehicle->repair_fees : 0),
+            ];
+        })->all();
     }
 
     private function recentActivity(): Collection

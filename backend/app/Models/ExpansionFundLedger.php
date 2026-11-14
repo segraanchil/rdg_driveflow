@@ -22,7 +22,7 @@ class ExpansionFundLedger extends Model
     protected $casts = [
         'amount' => 'decimal:2',
         'running_balance' => 'decimal:2',
-        'entry_date' => 'date',
+        'entry_date' => 'date:Y-m-d',
     ];
 
     public function sale(): BelongsTo

@@ -1,45 +1,13 @@
-import { useEffect, useState } from 'react'
-import apiClient, { backendUrl } from '../../api/client'
+import SaleDocumentsPage from '../../components/admin/SaleDocumentsPage'
 
-const DOC_TYPES = [
-  { value: 'deed_of_sale', label: 'Deed of Sale' },
-  { value: 'official_receipt', label: 'Official Receipt' },
-]
-
-/** Legal document generation (Deed of Sale, Official Receipt) as PDF. */
+/** Deed of Sale and Official Receipt PDFs (Stories 23–24), pre-filled from the sale record. */
 export default function LegalDocuments() {
-  const [sales, setSales] = useState([])
-
-  useEffect(() => {
-    apiClient.get('/admin/sales').then(({ data }) => setSales(data.data ?? []))
-  }, [])
-
-  async function generate(saleId, docType) {
-    const { data } = await apiClient.post(`/admin/sales/${saleId}/legal-documents`, { doc_type: docType })
-    window.open(backendUrl(`/storage/${data.file_path}`), '_blank')
-  }
-
   return (
-    <div>
-      <h1 className="mb-6">Legal Documents</h1>
-      <div className="space-y-3">
-        {sales.map((sale) => (
-          <div key={sale.id} className="rdg-card flex flex-wrap items-center justify-between gap-3 p-4 text-sm">
-            <span>{sale.vehicle?.year} {sale.vehicle?.make} {sale.vehicle?.model} — {sale.buyer?.name}</span>
-            <span className="flex gap-2">
-              {DOC_TYPES.map((type) => (
-                <button
-                  key={type.value}
-                  onClick={() => generate(sale.id, type.value)}
-                  className="rounded border border-brand px-2 py-1 text-brand"
-                >
-                  {type.label}
-                </button>
-              ))}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
+    <SaleDocumentsPage
+      title="Legal Documents"
+      subtitle="The Deed of Sale of Motor Vehicle and the Official Receipt, filled in from the sale and the car’s registration details."
+      types={['deed_of_sale', 'official_receipt']}
+      tip="Missing plate, motor or chassis numbers print as blank lines on the Deed. Fill them in on the car’s Inventory record, then regenerate."
+    />
   )
 }

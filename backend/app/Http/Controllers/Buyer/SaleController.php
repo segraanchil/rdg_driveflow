@@ -11,7 +11,7 @@ class SaleController extends Controller
     public function index(Request $request)
     {
         return response()->json(
-            $request->user()->sales()->with('vehicle')->latest('sale_date')->get()
+            $request->user()->sales()->with(['vehicle.media', 'legalDocuments', 'reservation:id,fee_amount'])->latest('sale_date')->get()
         );
     }
 }

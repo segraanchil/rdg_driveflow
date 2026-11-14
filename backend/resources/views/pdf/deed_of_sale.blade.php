@@ -43,16 +43,16 @@
             <td class="label">SERIES</td><td class="value">{{ strtoupper($sale->vehicle->model) }}</td>
         </tr>
         <tr>
-            <td class="label">TYPE OF BODY</td><td class="value blank">&nbsp;</td>
+            <td class="label">TYPE OF BODY</td><td class="value">{!! $sale->vehicle->body_type ? e(strtoupper($sale->vehicle->body_type)) : '&nbsp;' !!}</td>
             <td class="label">YEAR MODEL</td><td class="value">{{ $sale->vehicle->year }}</td>
         </tr>
         <tr>
             <td class="label">OR NO.</td><td class="value blank">&nbsp;</td>
-            <td class="label">MOTOR NO.</td><td class="value blank">&nbsp;</td>
+            <td class="label">MOTOR NO.</td><td class="value">{!! $sale->vehicle->engine_number ? e(strtoupper($sale->vehicle->engine_number)) : '&nbsp;' !!}</td>
         </tr>
         <tr>
-            <td class="label">SERIAL/CHASSIS NO.</td><td class="value blank">&nbsp;</td>
-            <td class="label">PLATE NO.</td><td class="value blank">&nbsp;</td>
+            <td class="label">SERIAL/CHASSIS NO.</td><td class="value">{!! $sale->vehicle->chassis_number ? e(strtoupper($sale->vehicle->chassis_number)) : '&nbsp;' !!}</td>
+            <td class="label">PLATE NO.</td><td class="value">{!! $sale->vehicle->plate_number ? e(strtoupper($sale->vehicle->plate_number)) : '&nbsp;' !!}</td>
         </tr>
         <tr>
             <td class="label">FILE NO.</td><td class="value blank">&nbsp;</td>

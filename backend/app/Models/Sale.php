@@ -18,6 +18,7 @@ class Sale extends Model
     protected $fillable = [
         'vehicle_id',
         'buyer_id',
+        'reservation_id',
         'payment_type',
         'total_amount',
         'sale_date',
@@ -25,7 +26,7 @@ class Sale extends Model
 
     protected $casts = [
         'total_amount' => 'decimal:2',
-        'sale_date' => 'date',
+        'sale_date' => 'date:Y-m-d', // a calendar date, serialized without a time/zone
     ];
 
     public function vehicle(): BelongsTo
@@ -36,6 +37,11 @@ class Sale extends Model
     public function buyer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'buyer_id');
+    }
+
+    public function reservation(): BelongsTo
+    {
+        return $this->belongsTo(Reservation::class);
     }
 
     public function legalDocuments(): HasMany

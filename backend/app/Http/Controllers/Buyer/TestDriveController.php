@@ -18,7 +18,7 @@ class TestDriveController extends Controller
     public function index(Request $request)
     {
         return response()->json(
-            $request->user()->testDrives()->with('vehicle')->latest('preferred_at')->get()
+            $request->user()->testDrives()->with('vehicle.media')->latest('preferred_at')->get()
         );
     }
 

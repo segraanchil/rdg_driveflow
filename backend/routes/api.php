@@ -29,6 +29,8 @@ use App\Http\Controllers\Ceo\ExpansionFundController;
 use App\Http\Controllers\Ceo\MarginSettingController;
 use App\Http\Controllers\Ceo\StaffController;
 use App\Http\Controllers\Seller\AcquisitionLeadController;
+use App\Http\Controllers\SettingController;
+use App\Http\Controllers\Admin\OverviewController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -39,11 +41,13 @@ use Illuminate\Support\Facades\Route;
 | reachable by anonymous visitors per the spec.
 */
 Route::get('/vehicles', [VehicleController::class, 'index']);
+Route::get('/vehicles/facets', [VehicleController::class, 'facets']);
+Route::get('/settings/public', [SettingController::class, 'publicIndex']);
 Route::get('/vehicles/{vehicle}', [VehicleController::class, 'show']);
 Route::post('/loan-calculator', [LoanCalculatorController::class, 'calculate']);
 Route::get('/financing/checklist/{employmentProfile}', [FinancingApplicationController::class, 'checklist']);
-Route::post('/chat/message', [ChatController::class, 'sendMessage']);
-Route::post('/chat/escalate', [ChatController::class, 'escalate']);
+Route::post('/chat/message', [ChatController::class, 'sendMessage'])->middleware('throttle:30,1');
+Route::post('/chat/escalate', [ChatController::class, 'escalate'])->middleware('throttle:5,1');
 
 /*
 |--------------------------------------------------------------------------
@@ -114,6 +118,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('inventory', InventoryController::class)
             ->parameters(['inventory' => 'vehicle'])
             ->only(['index', 'store', 'update', 'destroy']);
+        Route::delete('/inventory/{vehicle}/media/{media}', [InventoryController::class, 'destroyMedia']);
+        Route::put('/inventory/{vehicle}/media/order', [InventoryController::class, 'reorderMedia']);
+
+        Route::get('/overview', [OverviewController::class, 'index']);
 
         Route::get('/reservations', [ReservationQueueController::class, 'index']);
         Route::post('/reservations/{reservation}/verify', [ReservationQueueController::class, 'verify']);
@@ -122,8 +130,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/test-drives', [AdminTestDriveController::class, 'index']);
         Route::patch('/test-drives/{testDrive}/confirm', [AdminTestDriveController::class, 'confirm']);
         Route::patch('/test-drives/{testDrive}/decline', [AdminTestDriveController::class, 'decline']);
+        Route::patch('/test-drives/{testDrive}/complete', [AdminTestDriveController::class, 'complete']);
 
         Route::get('/financing-applications', [FinancingReviewController::class, 'index']);
+        Route::patch('/financing-applications/{application}', [FinancingReviewController::class, 'update']);
         Route::post('/financing-documents/{document}/verify', [FinancingReviewController::class, 'verifyDocument']);
         Route::get('/financing-documents/{document}/download', [FinancingReviewController::class, 'downloadDocument']);
 
@@ -147,6 +157,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/expansion-fund', [ExpansionFundController::class, 'index']);
         Route::get('/margin-setting', [MarginSettingController::class, 'show']);
         Route::put('/margin-setting', [MarginSettingController::class, 'update']);
+        Route::get('/settings', [SettingController::class, 'index']);
+        Route::put('/settings', [SettingController::class, 'update']);
+        Route::post('/settings/payment-qr', [SettingController::class, 'uploadQr']);
+        Route::delete('/settings/payment-qr', [SettingController::class, 'removeQr']);
 
         Route::get('/staff', [StaffController::class, 'index']);
         Route::post('/staff', [StaffController::class, 'store']);

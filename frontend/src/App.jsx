@@ -23,6 +23,7 @@ const Login = lazy(() => import('./pages/auth/Login'))
 const Register = lazy(() => import('./pages/auth/Register'))
 const Mfa = lazy(() => import('./pages/auth/Mfa'))
 const EmailVerified = lazy(() => import('./pages/auth/EmailVerified'))
+const AdminOverview = lazy(() => import('./pages/admin/Overview'))
 const AdminInventory = lazy(() => import('./pages/admin/Inventory'))
 const AdminReservations = lazy(() => import('./pages/admin/Reservations'))
 const Sales = lazy(() => import('./pages/admin/Sales'))
@@ -36,6 +37,7 @@ const AcquisitionLeads = lazy(() => import('./pages/admin/AcquisitionLeads'))
 const CeoDashboard = lazy(() => import('./pages/ceo/Dashboard'))
 const ExpansionFund = lazy(() => import('./pages/ceo/ExpansionFund'))
 const MarginSettings = lazy(() => import('./pages/ceo/MarginSettings'))
+const BusinessSettings = lazy(() => import('./pages/ceo/BusinessSettings'))
 const StaffManagement = lazy(() => import('./pages/ceo/StaffManagement'))
 
 export default function App() {
@@ -98,6 +100,8 @@ export default function App() {
           </ProtectedRoute>
         }
       >
+        <Route path="/admin" element={<Navigate to="/admin/overview" replace />} />
+        <Route path="/admin/overview" element={<AdminOverview />} />
         <Route path="/admin/inventory" element={<AdminInventory />} />
         <Route path="/admin/reservations" element={<AdminReservations />} />
         <Route path="/admin/test-drives" element={<AdminTestDrives />} />
@@ -118,7 +122,9 @@ export default function App() {
       >
         <Route path="/ceo/dashboard" element={<CeoDashboard />} />
         <Route path="/ceo/expansion-fund" element={<ExpansionFund />} />
+        <Route path="/ceo" element={<Navigate to="/ceo/dashboard" replace />} />
         <Route path="/ceo/margin-settings" element={<MarginSettings />} />
+        <Route path="/ceo/settings" element={<BusinessSettings />} />
         <Route path="/ceo/staff" element={<StaffManagement />} />
       </Route>
 

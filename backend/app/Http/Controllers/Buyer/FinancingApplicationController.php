@@ -2,29 +2,27 @@
 
 namespace App\Http\Controllers\Buyer;
 
-use App\Support\AdminAlert;
-use App\Support\ImageShrinker;
 use App\Http\Controllers\Controller;
 use App\Models\FinancingApplication;
 use App\Models\FinancingDocument;
+use App\Models\Setting;
+use App\Models\Vehicle;
+use App\Support\AdminAlert;
+use App\Support\ImageShrinker;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 /** Bank financing path: application + per-employment-profile document checklist. Auth required. */
 class FinancingApplicationController extends Controller
 {
-    // TODO: confirm exact required doc_type list per profile with the bank partner.
-    private const DOCUMENT_CHECKLISTS = [
-        'employed' => ['payslip', 'coe', 'valid_id', 'proof_of_billing'],
-        'ofw' => ['coe', 'valid_id', 'proof_of_billing', 'consularized_authorization'],
-        'business_owner' => ['dti_or_sec', 'itr', 'valid_id', 'bank_statement'],
-    ];
-
     public function checklist(string $employmentProfile)
     {
-        abort_unless(array_key_exists($employmentProfile, self::DOCUMENT_CHECKLISTS), 404);
+        abort_unless(array_key_exists($employmentProfile, FinancingApplication::CHECKLISTS), 404);
 
-        return response()->json(['documents' => self::DOCUMENT_CHECKLISTS[$employmentProfile]]);
+        return response()->json([
+            'documents' => FinancingApplication::CHECKLISTS[$employmentProfile],
+            'annual_interest_rate' => Setting::loanRate($employmentProfile),
+        ]);
     }
 
     public function index(Request $request)
@@ -38,18 +36,31 @@ class FinancingApplicationController extends Controller
     {
         $data = $request->validate([
             'vehicle_id' => ['required', 'exists:vehicles,id'],
-            'employment_profile' => ['required', Rule::in(array_keys(self::DOCUMENT_CHECKLISTS))],
+            'employment_profile' => ['required', Rule::in(array_keys(FinancingApplication::CHECKLISTS))],
             'term_months' => ['required', 'integer', 'min:12', 'max:60'],
             'down_payment' => ['required', 'numeric', 'min:0'],
         ]);
 
+        $vehicle = Vehicle::findOrFail($data['vehicle_id']);
+        abort_if($vehicle->status === Vehicle::STATUS_SOLD, 422, 'This car has already been sold.');
+
+        $estimate = LoanCalculatorController::amortize(
+            (float) $vehicle->selling_price,
+            (float) $data['down_payment'],
+            (int) $data['term_months'],
+            Setting::loanRate($data['employment_profile']),
+        );
+
         $application = FinancingApplication::create([
             ...$data,
             'buyer_id' => $request->user()->id,
+            'monthly_amortization' => $estimate['monthly_amortization'],
             'status' => 'pending',
         ]);
 
-        return response()->json($application, 201);
+        AdminAlert::notify('financing', 'New financing application', "{$request->user()->name} applied for financing on the {$vehicle->year} {$vehicle->make} {$vehicle->model}.", '/admin/financing');
+
+        return response()->json($application->load('documents'), 201);
     }
 
     public function uploadDocument(Request $request, FinancingApplication $application)
@@ -57,8 +68,8 @@ class FinancingApplicationController extends Controller
         abort_unless($application->buyer_id === $request->user()->id, 403);
 
         $data = $request->validate([
-            'doc_type' => ['required', 'string'],
-            'file' => ['required', 'file', 'max:10240'],
+            'doc_type' => ['required', 'string', Rule::in($application->required_documents)],
+            'file' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'],
         ]);
 
         $path = ImageShrinker::shrinkStored($request->file('file')->store('uploads/financing_documents', 'public'));
@@ -70,7 +81,7 @@ class FinancingApplicationController extends Controller
             'verified' => false,
         ]);
 
-        AdminAlert::notify('financing', 'Financing document uploaded', "{$request->user()->name} uploaded " . str_replace('_', ' ', $data['doc_type']) . " for application #{$application->id}.", '/admin/financing');
+        AdminAlert::notify('financing', 'Financing document uploaded', "{$request->user()->name} uploaded ".str_replace('_', ' ', $data['doc_type'])." for application #{$application->id}.", '/admin/financing');
 
         return response()->json($document, 201);
     }

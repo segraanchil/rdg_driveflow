@@ -17,6 +17,17 @@ class FinancingApplication extends Model
 
     public const PROFILE_BUSINESS_OWNER = 'business_owner';
 
+    public const STATUSES = ['pending', 'documents_review', 'approved', 'rejected'];
+
+    // TODO: confirm the exact required documents per profile with the partner bank.
+    public const CHECKLISTS = [
+        'employed' => ['payslip', 'coe', 'valid_id', 'proof_of_billing'],
+        'ofw' => ['coe', 'valid_id', 'proof_of_billing', 'consularized_authorization'],
+        'business_owner' => ['dti_or_sec', 'itr', 'valid_id', 'bank_statement'],
+    ];
+
+    protected $appends = ['required_documents'];
+
     protected $fillable = [
         'buyer_id',
         'vehicle_id',
@@ -25,6 +36,7 @@ class FinancingApplication extends Model
         'down_payment',
         'monthly_amortization',
         'status',
+        'admin_notes',
     ];
 
     protected $casts = [
@@ -40,6 +52,11 @@ class FinancingApplication extends Model
     public function vehicle(): BelongsTo
     {
         return $this->belongsTo(Vehicle::class);
+    }
+
+    public function getRequiredDocumentsAttribute(): array
+    {
+        return self::CHECKLISTS[$this->employment_profile] ?? [];
     }
 
     public function documents(): HasMany

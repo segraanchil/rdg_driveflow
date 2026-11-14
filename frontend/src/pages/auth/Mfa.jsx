@@ -5,7 +5,7 @@ import apiClient from '../../api/client'
 import AuthShell from '../../components/layout/AuthShell'
 
 const ROLE_FALLBACK = {
-  admin: '/admin/inventory',
+  admin: '/admin/overview',
   ceo: '/ceo/dashboard',
   buyer: '/',
   seller: '/',

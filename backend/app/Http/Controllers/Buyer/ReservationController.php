@@ -6,6 +6,7 @@ use App\Support\AdminAlert;
 use App\Support\ImageShrinker;
 use App\Http\Controllers\Controller;
 use App\Models\Reservation;
+use App\Models\Setting;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -51,6 +52,7 @@ class ReservationController extends Controller
                 'vehicle_id' => $vehicle->id,
                 'buyer_id' => $request->user()->id,
                 'payment_method' => $data['payment_method'] ?? 'cash',
+                'fee_amount' => Setting::get('reservation_fee'),
                 'payment_proof_path' => $path,
                 'status' => Reservation::STATUS_PENDING,
                 'expires_at' => now()->addHours(48),

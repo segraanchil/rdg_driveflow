@@ -26,6 +26,7 @@ class WarrantyClaim extends Model
         'issue_description',
         'evidence_path',
         'status',
+        'admin_notes',
     ];
 
     protected $casts = [

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Reservation extends Model
 {
@@ -24,6 +25,7 @@ class Reservation extends Model
         'vehicle_id',
         'buyer_id',
         'payment_method',
+        'fee_amount',
         'payment_proof_path',
         'status',
         'expires_at',
@@ -31,7 +33,22 @@ class Reservation extends Model
 
     protected $casts = [
         'expires_at' => 'datetime',
+        'fee_amount' => 'decimal:2',
     ];
+
+    /** Verified, not yet finalized into a sale, and the car isn't sold some other way (e.g. an older walk-in sale). */
+    public function scopeReadyToSell($query)
+    {
+        return $query->where('status', self::STATUS_VERIFIED)
+            ->whereDoesntHave('sale')
+            ->whereHas('vehicle', fn ($v) => $v->where('status', '!=', Vehicle::STATUS_SOLD));
+    }
+
+    /** The sale that finalized this reservation (Record Sale), if any. */
+    public function sale(): HasOne
+    {
+        return $this->hasOne(Sale::class);
+    }
 
     public function vehicle(): BelongsTo
     {

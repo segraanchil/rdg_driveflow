@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
-/** Deed of Sale / Official Receipt PDF generation. Admin/CEO only. */
+/** Deed of Sale / Official Receipt PDF generation. Regenerating replaces the previous file. */
 class LegalDocumentController extends Controller
 {
     public function store(Request $request, Sale $sale)
@@ -22,19 +22,16 @@ class LegalDocumentController extends Controller
             ])],
         ]);
 
-        // TODO: build resources/views/pdf/official_receipt.blade.php with real legal copy.
         $pdf = Pdf::loadView("pdf.{$data['doc_type']}", ['sale' => $sale->load(['vehicle', 'buyer'])])
             ->setPaper('legal', 'portrait');
 
         $path = "uploads/legal_documents/{$data['doc_type']}-sale-{$sale->id}.pdf";
         Storage::disk('public')->put($path, $pdf->output());
 
-        $document = LegalDocument::create([
-            'sale_id' => $sale->id,
-            'doc_type' => $data['doc_type'],
-            'file_path' => $path,
-            'generated_at' => now(),
-        ]);
+        $document = LegalDocument::updateOrCreate(
+            ['sale_id' => $sale->id, 'doc_type' => $data['doc_type']],
+            ['file_path' => $path, 'generated_at' => now()],
+        );
 
         return response()->json($document, 201);
     }

@@ -24,6 +24,14 @@ class Vehicle extends Model
         'model',
         'year',
         'mileage',
+        'transmission',
+        'fuel_type',
+        'body_type',
+        'color',
+        'description',
+        'plate_number',
+        'engine_number',
+        'chassis_number',
         'acquisition_cost',
         'repair_fees',
         'margin_percent',
@@ -31,6 +39,11 @@ class Vehicle extends Model
         'status',
         'last_updated',
     ];
+
+    /** Cost/margin and LTO registration details are staff-only; admin endpoints call makeVisible(STAFF_FIELDS). */
+    public const STAFF_FIELDS = ['acquisition_cost', 'repair_fees', 'margin_percent', 'plate_number', 'engine_number', 'chassis_number'];
+
+    protected $hidden = self::STAFF_FIELDS;
 
     protected $casts = [
         'acquisition_cost' => 'decimal:2',

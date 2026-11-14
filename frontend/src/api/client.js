@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { trackRequest } from '../lib/loading'
+import { toast } from '../lib/toast'
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api'
 const API_ROOT = API_URL.replace(/\/api\/?$/, '')
@@ -71,5 +72,15 @@ apiClient.interceptors.request.use((config) => {
 })
 apiClient.interceptors.response.use(
   (response) => { response.config.__done?.(); return response },
-  (error) => { error.config?.__done?.(); return Promise.reject(error) },
+  (error) => {
+    error.config?.__done?.()
+    // Failed saves get a toast so nothing fails silently. Validation errors (422) are shown next to
+    // the form by the page itself; pass { quietErrors: true } when a page handles every error itself.
+    const method = (error.config?.method || 'get').toLowerCase()
+    const status = error.response?.status
+    if (!error.config?.silent && !error.config?.quietErrors && method !== 'get' && status !== 422 && status !== 401) {
+      toast.error(error.response?.data?.message || (error.response ? 'That didn’t work. Please try again.' : 'Can’t reach the server. Check your connection.'))
+    }
+    return Promise.reject(error)
+  },
 )
