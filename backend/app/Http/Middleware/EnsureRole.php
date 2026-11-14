@@ -21,7 +21,10 @@ class EnsureRole
         $user = $request->user();
 
         if (! $user || ! in_array($user->role, $roles, true)) {
-            abort(403, 'You do not have access to this resource.');
+            $needed = implode(' or ', array_map('ucfirst', $roles));
+            abort(403, $user
+                ? "This needs a {$needed} account. You're signed in as ".ucfirst($user->role).' ('.$user->email.'). Log out and sign in with a '.$needed.' account.'
+                : 'Please log in first.');
         }
 
         return $next($request);

@@ -29,6 +29,24 @@ export function AuthProvider({ children }) {
     refreshUser()
   }, [refreshUser])
 
+  // All tabs share one login session. If someone signs in or out in another tab,
+  // re-check when this tab is shown again so it never acts as a stale account.
+  useEffect(() => {
+    async function recheck() {
+      if (document.visibilityState !== 'visible') return
+      try {
+        const { data } = await apiClient.get('/auth/me', { silent: true, quietErrors: true })
+        setUser((prev) => (prev?.id === data.user?.id && prev?.role === data.user?.role ? prev : data.user))
+        setMfaRequired(true)
+        setMfaVerified(data.mfa_verified)
+      } catch {
+        setUser(null)
+      }
+    }
+    document.addEventListener('visibilitychange', recheck)
+    return () => document.removeEventListener('visibilitychange', recheck)
+  }, [])
+
   const login = useCallback(async (email, password) => {
     await ensureCsrfCookie()
     const { data } = await apiClient.post('/auth/login', { email, password }, { silent: true }) // the login page shows its own loader
