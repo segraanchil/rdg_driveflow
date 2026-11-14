@@ -84,6 +84,9 @@ export function AuthProvider({ children }) {
     isAuthenticated: Boolean(user) && (!mfaRequired || mfaVerified),
     login,
     register,
+    refreshUser,
+    /** After the account page saves a change (name, email) or deletes the account (null). */
+    setUser,
     verifyMfa,
     logout,
   }

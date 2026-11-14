@@ -105,11 +105,16 @@ export function StatTile({ icon: Icon, label, value, hint, tone = 'emerald', to 
   return to ? <Link to={to} className={`${cls} hover:-translate-y-0.5 hover:shadow-lift`}>{body}</Link> : <div className={cls}>{body}</div>
 }
 
-/** Labeled form field. */
-export function Field({ label, hint, error, children, className = '' }) {
+/** "Fields marked * are required." line for the top of a form. */
+export function RequiredNote({ className = '' }) {
+  return <p className={`text-xs text-slate-500 ${className}`}>Fields marked <span className="font-bold text-red-500">*</span> are required.</p>
+}
+
+/** Labeled form field. The red * appears by itself when the field inside has `required` (or pass `required`). */
+export function Field({ label, hint, error, children, className = '', required }) {
   return (
     <label className={`block ${className}`}>
-      <span className="rdg-label">{label}</span>
+      <span className={`rdg-label ${required ? 'is-required' : ''}`}>{label}</span>
       {children}
       {hint && !error && <span className="mt-1 block text-xs text-slate-400">{hint}</span>}
       {error && <span className="mt-1 block text-xs font-semibold text-red-600">{error}</span>}

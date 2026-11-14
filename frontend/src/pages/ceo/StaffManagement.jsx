@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react'
 import { UserPlus, Pencil, Ban, CheckCircle2 } from 'lucide-react'
 import apiClient from '../../api/client'
+import { Modal } from '../../components/ui/Modal'
+import { Field, RequiredNote } from '../../components/ui/kit'
+import PasswordInput from '../../components/ui/PasswordInput'
+import PasswordRules, { passwordOk } from '../../components/ui/PasswordRules'
+import { apiError } from '../../lib/format'
 
 /** Story 28 — CEO adds, edits, and deactivates Administrative Staff accounts. */
 export default function StaffManagement() {
@@ -30,6 +35,7 @@ export default function StaffManagement() {
   async function submit(e) {
     e.preventDefault()
     setError(null)
+    if (!editing?.id && !passwordOk(form.password)) return setError('The password needs at least 8 characters with an uppercase letter, a lowercase letter and a number.')
     try {
       if (editing?.id) {
         await apiClient.patch(`/ceo/staff/${editing.id}`, { name: form.name, email: form.email })
@@ -39,7 +45,7 @@ export default function StaffManagement() {
       setEditing(null)
       load()
     } catch (err) {
-      setError(err.response?.data?.message ?? 'Could not save this account.')
+      setError(apiError(err, 'Could not save this account.'))
     }
   }
 
@@ -113,54 +119,24 @@ export default function StaffManagement() {
         </table>
       </div>
 
-      {editing && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/30">
-          <form onSubmit={submit} className="w-full max-w-sm rounded-xl bg-white p-6 shadow-lg">
-            <h2 className="mb-4 text-lg font-bold text-slate-800">{editing.id ? 'Edit Admin' : 'Add Admin'}</h2>
-            <label className="mb-3 block text-sm">
-              Name
-              <input
-                required
-                value={form.name}
-                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                className="mt-1 block w-full rounded border border-slate-300 px-3 py-2"
-              />
-            </label>
-            <label className="mb-3 block text-sm">
-              Email
-              <input
-                type="email"
-                required
-                value={form.email}
-                onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                className="mt-1 block w-full rounded border border-slate-300 px-3 py-2"
-              />
-            </label>
-            {!editing.id && (
-              <label className="mb-3 block text-sm">
-                Temporary password
-                <input
-                  type="password"
-                  required
-                  minLength={8}
-                  value={form.password}
-                  onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-                  className="mt-1 block w-full rounded border border-slate-300 px-3 py-2"
-                />
-              </label>
-            )}
-            {error && <p className="mb-3 text-sm text-red-600">{error}</p>}
-            <div className="flex justify-end gap-2">
-              <button type="button" onClick={() => setEditing(null)} className="rounded px-4 py-2 text-sm text-slate-500">
-                Cancel
-              </button>
-              <button type="submit" className="rounded bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600">
-                Save
-              </button>
+      <Modal open={Boolean(editing)} onClose={() => setEditing(null)} title={editing?.id ? 'Edit admin' : 'Add admin'} size="sm">
+        <form onSubmit={submit} className="space-y-4">
+          <RequiredNote />
+          <Field label="Full name"><input required value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} className="w-full" /></Field>
+          <Field label="Email" hint="Their login codes are sent here."><input type="email" required value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} className="w-full" /></Field>
+          {!editing?.id && (
+            <div>
+              <Field label="Temporary password" hint="Share it privately. They can change it under My account."><PasswordInput required autoComplete="new-password" value={form.password} onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))} /></Field>
+              <PasswordRules password={form.password} />
             </div>
-          </form>
-        </div>
-      )}
+          )}
+          {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+          <div className="flex justify-end gap-2">
+            <button type="button" onClick={() => setEditing(null)} className="rdg-btn-ghost">Cancel</button>
+            <button type="submit" className="rdg-btn">{editing?.id ? 'Save changes' : 'Add admin'}</button>
+          </div>
+        </form>
+      </Modal>
     </div>
   )
 }

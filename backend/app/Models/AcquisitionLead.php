@@ -20,11 +20,32 @@ class AcquisitionLead extends Model
 
     public const STATUS_DECLINED = 'declined';
 
+    /** Accepted or declined: nothing more to do, so the lead can no longer be edited. */
+    public const CLOSED = [self::STATUS_ACCEPTED, self::STATUS_DECLINED];
+
+    /**
+     * Photo slots on the Sell Your Car form: key => [label, required, max files].
+     * The frontend shows one upload box per slot (frontend/src/pages/seller/SellYourCar.jsx).
+     */
+    public const PHOTO_SLOTS = [
+        'front' => ['Front', true, 1],
+        'back' => ['Back', true, 1],
+        'left' => ['Left side', true, 1],
+        'right' => ['Right side', true, 1],
+        'odometer' => ['Dashboard / odometer', true, 1],
+        'interior' => ['Interior / seats', false, 1],
+        'engine' => ['Engine bay', false, 1],
+        'trunk' => ['Trunk', false, 1],
+        'damage' => ['Dents or scratches', false, 4],
+    ];
+
     protected $fillable = [
         'seller_id',
         'vehicle_specs',
         'photos_path',
+        'photo_labels',
         'status',
+        'closed_by',
         'offer_amount',
         'admin_notes',
     ];
@@ -32,8 +53,14 @@ class AcquisitionLead extends Model
     protected $casts = [
         'vehicle_specs' => 'array',
         'photos_path' => 'array',
+        'photo_labels' => 'array',
         'offer_amount' => 'decimal:2',
     ];
+
+    public function isClosed(): bool
+    {
+        return in_array($this->status, self::CLOSED, true);
+    }
 
     public function seller(): BelongsTo
     {

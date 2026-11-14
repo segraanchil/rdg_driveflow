@@ -92,7 +92,7 @@ export default function TestDrive() {
 
       <form onSubmit={submit} className="rdg-card space-y-5 p-6">
         <div>
-          <span className="rdg-label">Day</span>
+          <span className="rdg-label is-required">Day</span>
           <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
             {days.map((d) => {
               const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -108,7 +108,7 @@ export default function TestDrive() {
           </div>
         </div>
         <div>
-          <span className="rdg-label">Time</span>
+          <span className="rdg-label is-required">Time</span>
           <div className="grid grid-cols-4 gap-2">
             {SLOTS.map((t) => (
               <button type="button" key={t} onClick={() => setSlot(t)} disabled={!day}

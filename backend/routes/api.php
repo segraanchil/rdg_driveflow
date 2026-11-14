@@ -12,6 +12,8 @@ use App\Http\Controllers\Admin\WarrantyClaimReviewController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\MfaController;
+use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Buyer\ChatController;
 use App\Http\Controllers\Buyer\FinancingApplicationController;
@@ -56,6 +58,8 @@ Route::post('/chat/escalate', [ChatController::class, 'escalate'])->middleware('
 */
 Route::post('/auth/register', [RegisterController::class, 'register']);
 Route::post('/auth/login', [LoginController::class, 'login']);
+Route::post('/auth/forgot-password', [PasswordResetController::class, 'sendLink'])->middleware('throttle:5,1');
+Route::post('/auth/reset-password', [PasswordResetController::class, 'reset'])->middleware('throttle:10,1');
 Route::get('/auth/verify-email/{id}/{hash}', [EmailVerificationController::class, 'verify'])
     ->middleware('signed')
     ->name('verification.verify');
@@ -65,6 +69,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/auth/me', [LoginController::class, 'me']);
     Route::post('/auth/mfa/verify', [MfaController::class, 'verify']);
     Route::post('/auth/mfa/resend', [MfaController::class, 'resend']);
+
+    // My account (every role can change the password; profile/email/delete are buyer + seller only,
+    // checked in the controller).
+    Route::middleware('mfa')->prefix('account')->group(function () {
+        Route::put('/profile', [AccountController::class, 'updateProfile']);
+        Route::put('/password', [AccountController::class, 'updatePassword'])->middleware('throttle:10,1');
+        Route::put('/email', [AccountController::class, 'updateEmail'])->middleware('throttle:10,1');
+        Route::delete('/', [AccountController::class, 'destroy'])->middleware('throttle:5,1');
+    });
 
     /*
     |----------------------------------------------------------------------

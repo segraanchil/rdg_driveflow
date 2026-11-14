@@ -5,6 +5,7 @@ import apiClient from '../../api/client'
 import VehicleCard from '../../components/vehicles/VehicleCard'
 import { Modal } from '../../components/ui/Modal'
 import { peso } from '../../lib/format'
+import Select from '../../components/ui/Select'
 
 const FILTER_KEYS = ['q', 'make', 'min_price', 'max_price', 'min_year', 'transmission', 'fuel_type', 'body_type']
 const SORTS = [
@@ -80,8 +81,8 @@ export default function Inventory() {
 
   const filterPanel = (
     <div className="space-y-4">
-      <Select label="Brand" value={filters.make} onChange={(v) => update({ make: v })} options={[['', 'All brands'], ...(facets?.makes ?? []).map((m) => [m, m])]} />
-      <Select label="Budget" value={filters.max_price} onChange={(v) => update({ max_price: v })} options={BUDGETS} />
+      <FilterSelect label="Brand" value={filters.make} onChange={(v) => update({ make: v })} options={[['', 'All brands'], ...(facets?.makes ?? []).map((m) => [m, m])]} />
+      <FilterSelect label="Budget" value={filters.max_price} onChange={(v) => update({ max_price: v })} options={BUDGETS} />
       <div>
         <span className="rdg-label">Price range (₱)</span>
         <div className="grid grid-cols-2 gap-2">
@@ -89,7 +90,7 @@ export default function Inventory() {
           <input type="number" min="0" placeholder="Max" value={filters.max_price} onChange={(e) => update({ max_price: e.target.value })} className="w-full text-sm" />
         </div>
       </div>
-      <Select label="Model year" value={filters.min_year} onChange={(v) => update({ min_year: v })}
+      <FilterSelect label="Model year" value={filters.min_year} onChange={(v) => update({ min_year: v })}
         options={[['', 'Any year'], ...yearOptions(facets?.years)]} />
       {(facets?.transmissions ?? []).length > 0 && <Pills label="Transmission" value={filters.transmission} onChange={(v) => update({ transmission: v })} options={facets.transmissions} />}
       {(facets?.fuel_types ?? []).length > 0 && <Pills label="Fuel" value={filters.fuel_type} onChange={(v) => update({ fuel_type: v })} options={facets.fuel_types} />}
@@ -111,9 +112,9 @@ export default function Inventory() {
           <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search brand, model or year…" aria-label="Search cars" className="w-full py-2.5 pl-10 text-sm" />
         </label>
         <button onClick={() => setDrawer(true)} className="rdg-btn-ghost lg:hidden"><SlidersHorizontal size={16} /> Filters{activeCount > 0 && <span className="rounded-full bg-emerald-500 px-1.5 text-[11px] text-white">{activeCount}</span>}</button>
-        <select value={filters.sort || 'newest'} onChange={(e) => update({ sort: e.target.value === 'newest' ? '' : e.target.value })} aria-label="Sort" className="text-sm">
+        <Select value={filters.sort || 'newest'} onChange={(e) => update({ sort: e.target.value === 'newest' ? '' : e.target.value })} aria-label="Sort" className="text-sm">
           {SORTS.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
-        </select>
+        </Select>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
@@ -168,13 +169,13 @@ function yearOptions(years) {
   return out
 }
 
-function Select({ label, value, onChange, options }) {
+function FilterSelect({ label, value, onChange, options }) {
   return (
     <label className="block">
       <span className="rdg-label">{label}</span>
-      <select value={value} onChange={(e) => onChange(e.target.value)} className="w-full text-sm">
+      <Select value={value} onChange={(e) => onChange(e.target.value)} className="w-full text-sm">
         {options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-      </select>
+      </Select>
     </label>
   )
 }

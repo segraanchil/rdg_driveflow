@@ -52,7 +52,7 @@ export default function AppraisalStatus() {
       <div className="rdg-card p-6">
         {declined ? (
           <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-4 text-slate-600">
-            <XCircle className="shrink-0 text-slate-400" /> The dealership decided not to acquire this vehicle. Thank you for your submission.
+            <XCircle className="shrink-0 text-slate-400" /> {lead.closed_by === 'seller' ? 'You declined our offer. You’re welcome to submit the car again any time.' : 'The dealership decided not to acquire this vehicle. Thank you for your submission.'}
           </div>
         ) : (
           <ol className="grid grid-cols-4 gap-2">
@@ -96,7 +96,12 @@ export default function AppraisalStatus() {
           <div className="mt-6">
             <p className="rdg-label">Your photos</p>
             <div className="grid grid-cols-4 gap-2">
-              {lead.photos_path.map((p) => <img key={p} src={backendUrl(`/storage/${p}`)} alt="" loading="lazy" className="aspect-square w-full rounded-lg object-cover" />)}
+              {lead.photos_path.map((p, i) => (
+                <figure key={p} className="min-w-0">
+                  <img src={backendUrl(`/storage/${p}`)} alt={lead.photo_labels?.[i] ?? ''} loading="lazy" className="aspect-square w-full rounded-lg object-cover" />
+                  {lead.photo_labels?.[i] && <figcaption className="mt-0.5 truncate text-[11px] text-slate-500">{lead.photo_labels[i]}</figcaption>}
+                </figure>
+              ))}
             </div>
           </div>
         )}

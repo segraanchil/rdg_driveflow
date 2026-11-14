@@ -23,6 +23,9 @@ const Login = lazy(() => import('./pages/auth/Login'))
 const Register = lazy(() => import('./pages/auth/Register'))
 const Mfa = lazy(() => import('./pages/auth/Mfa'))
 const EmailVerified = lazy(() => import('./pages/auth/EmailVerified'))
+const ForgotPassword = lazy(() => import('./pages/auth/ForgotPassword'))
+const ResetPassword = lazy(() => import('./pages/auth/ResetPassword'))
+const Account = lazy(() => import('./pages/Account'))
 const AdminOverview = lazy(() => import('./pages/admin/Overview'))
 const AdminInventory = lazy(() => import('./pages/admin/Inventory'))
 const AdminReservations = lazy(() => import('./pages/admin/Reservations'))
@@ -82,6 +85,10 @@ export default function App() {
           path="/my-leads"
           element={<ProtectedRoute roles={['seller', 'buyer']} requireMfa><MyLeads /></ProtectedRoute>}
         />
+        <Route
+          path="/account"
+          element={<ProtectedRoute roles={['seller', 'buyer']} requireMfa><Account /></ProtectedRoute>}
+        />
       </Route>
 
       {/* Auth — shared by all four roles, outside any layout (no nav/sidebar until authenticated) */}
@@ -89,6 +96,8 @@ export default function App() {
       <Route path="/register" element={<Register />} />
       <Route path="/mfa" element={<Mfa />} />
       <Route path="/email-verified" element={<EmailVerified />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* Admin — MFA-gated */}
       <Route
@@ -108,6 +117,7 @@ export default function App() {
         <Route path="/admin/invoices" element={<Invoices />} />
         <Route path="/admin/legal-documents" element={<LegalDocuments />} />
         <Route path="/admin/warranty-claims" element={<AdminWarrantyClaims />} />
+        <Route path="/admin/account" element={<Account />} />
       </Route>
 
       {/* CEO — MFA-gated */}
@@ -124,6 +134,7 @@ export default function App() {
         <Route path="/ceo/margin-settings" element={<MarginSettings />} />
         <Route path="/ceo/settings" element={<BusinessSettings />} />
         <Route path="/ceo/staff" element={<StaffManagement />} />
+        <Route path="/ceo/account" element={<Account />} />
       </Route>
 
       {/* Shared — Acquisition lead review reachable by both Admin and CEO */}

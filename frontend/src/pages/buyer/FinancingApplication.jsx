@@ -116,7 +116,7 @@ export default function FinancingApplication() {
       {!application ? (
         <form onSubmit={submit} className="rdg-card space-y-6 p-6">
           <div>
-            <span className="rdg-label">Your employment</span>
+            <span className="rdg-label is-required">Your employment</span>
             <div className="grid grid-cols-3 gap-2">
               {Object.entries(PROFILE_LABELS).map(([key, label]) => (
                 <button type="button" key={key} onClick={() => setProfile(key)}
@@ -128,12 +128,12 @@ export default function FinancingApplication() {
           {profile ? <RequirementsList profile={profile} /> : <p className="flex items-center gap-2 rounded-xl bg-slate-50 p-3 text-sm text-slate-500"><FileText size={16} /> Pick your employment above to see exactly which documents to prepare.</p>}
 
           <div>
-            <div className="flex items-end justify-between"><span className="rdg-label">Down payment</span><span className="text-sm font-bold">{peso(down)} <span className="font-normal text-slate-500">({Math.round(((down ?? 0) / price) * 100)}%)</span></span></div>
+            <div className="flex items-end justify-between"><span className="rdg-label is-required">Down payment</span><span className="text-sm font-bold">{peso(down)} <span className="font-normal text-slate-500">({Math.round(((down ?? 0) / price) * 100)}%)</span></span></div>
             <input type="range" min={0} max={price} step={5000} value={down ?? 0} onChange={(e) => setDown(Number(e.target.value))} className="w-full" aria-label="Down payment" />
           </div>
 
           <div>
-            <span className="rdg-label">Term</span>
+            <span className="rdg-label is-required">Term</span>
             <div className="grid grid-cols-5 gap-2">
               {TERMS.map((t) => <button type="button" key={t} onClick={() => setTerm(t)} className={`rounded-lg border py-2 text-sm font-bold ${term === t ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-300 text-slate-600'}`}>{t} mo</button>)}
             </div>

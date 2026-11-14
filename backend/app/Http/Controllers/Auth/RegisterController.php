@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Mail\VerifyEmailMail;
 use App\Models\User;
+use App\Support\PasswordRules;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -24,10 +25,10 @@ class RegisterController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password' => PasswordRules::rules(),
             'role' => ['required', Rule::in([User::ROLE_BUYER, User::ROLE_SELLER])],
-        ]);
+        ], PasswordRules::messages() + ['email.unique' => 'An account with this email already exists. Log in instead, or use “Forgot password”.']);
 
         $user = User::create([
             'name' => $data['name'],

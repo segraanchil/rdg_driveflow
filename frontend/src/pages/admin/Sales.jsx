@@ -7,6 +7,8 @@ import { Chip, EmptyState, Field, ListSkeleton, PageHeader, SearchInput } from '
 import DocumentButtons from '../../components/admin/DocumentButtons'
 import { apiError, formatDate, peso, vehicleName } from '../../lib/format'
 import { toast } from '../../lib/toast'
+import Select from '../../components/ui/Select'
+import PesoInput from '../../components/ui/PesoInput'
 
 /**
  * "Record Sale": turns a verified reservation (or a walk-in deal) into the official sale that
@@ -188,35 +190,36 @@ function RecordSaleModal({ draft, options, onClose, onSaved }) {
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
             <Field label="Vehicle">
-              <select required value={form.vehicle_id} className="w-full"
+              <Select required value={form.vehicle_id} className="w-full"
                 onChange={(e) => {
                   const v = options.vehicles.find((x) => String(x.id) === e.target.value)
                   setForm((f) => ({ ...f, vehicle_id: e.target.value, total_amount: v ? Number(v.selling_price) : f.total_amount }))
                 }}>
                 <option value="" disabled>Choose an available car</option>
                 {options.vehicles.map((v) => <option key={v.id} value={v.id}>{vehicleName(v)} · {peso(v.selling_price)}</option>)}
-              </select>
+              </Select>
             </Field>
             <Field label="Buyer" hint="The buyer needs an account so they can see their documents.">
-              <select required value={form.buyer_id} onChange={(e) => setForm((f) => ({ ...f, buyer_id: e.target.value }))} className="w-full">
+              <Select required value={form.buyer_id} onChange={(e) => setForm((f) => ({ ...f, buyer_id: e.target.value }))} className="w-full">
                 <option value="" disabled>Choose a buyer</option>
                 {options.buyers.map((b) => <option key={b.id} value={b.id}>{b.name} · {b.email}</option>)}
-              </select>
+              </Select>
             </Field>
           </div>
         )}
 
         <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Final payment type">
+          <div>
+            <span className="rdg-label is-required">Final payment type</span>
             <div className="grid grid-cols-2 gap-2">
               {[['cash', 'Straight cash'], ['financing', 'Bank financing']].map(([key, label]) => (
                 <button key={key} type="button" onClick={() => setForm((f) => ({ ...f, payment_type: key }))}
                   className={`rounded-lg border px-3 py-2 text-sm font-semibold ${form.payment_type === key ? 'border-emerald-500 bg-emerald-50 text-emerald-800' : 'border-slate-300 text-slate-600'}`}>{label}</button>
               ))}
             </div>
-          </Field>
-          <Field label="Total amount (₱)" hint={vehicle ? `Listed price ${peso(vehicle.selling_price)}` : undefined}>
-            <input required type="number" min="1" step="0.01" value={form.total_amount} onChange={(e) => setForm((f) => ({ ...f, total_amount: e.target.value }))} className="w-full" />
+          </div>
+          <Field label="Total amount" hint={vehicle ? `Listed price ${peso(vehicle.selling_price)}` : undefined}>
+            <PesoInput required value={form.total_amount} onChange={(v) => setForm((f) => ({ ...f, total_amount: v }))} />
           </Field>
         </div>
 

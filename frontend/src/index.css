@@ -41,6 +41,9 @@
   select option:checked { @apply bg-slate-100 font-semibold; }
   input[type='range'] { @apply cursor-pointer; }
 
+  /* Edge/IE draw their own eye button inside password fields; ours (PasswordInput) replaces it. */
+  input::-ms-reveal, input::-ms-clear { display: none; }
+
   /* File pickers: an emerald "Choose file" pill instead of the grey browser button. */
   input:where([type='file']) { @apply max-w-full cursor-pointer rounded-lg border border-dashed border-slate-300 bg-white p-1.5 text-xs text-slate-500 transition hover:border-emerald-400; }
   input[type='file']::file-selector-button {
@@ -68,6 +71,11 @@
   .rdg-btn-ghost { @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-900 hover:text-slate-900; }
   .rdg-chip { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide; }
   .rdg-label { @apply mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500; }
+  /* Required fields get a red asterisk automatically: any label whose field has `required`,
+     or a label marked .is-required (for button groups and other non-input choices). */
+  .rdg-label.is-required::after,
+  label:has(:is(input, select, textarea):required) > .rdg-label::after { content: ' *'; @apply font-bold text-red-500; }
+  .rdg-label.not-required::after { content: none !important; }
   .rdg-skeleton { @apply relative overflow-hidden rounded-lg bg-slate-200/70; }
   .rdg-skeleton::after { content: ''; @apply absolute inset-0 -translate-x-full animate-rdg-shimmer bg-gradient-to-r from-transparent via-white/60 to-transparent; }
   .rdg-pattern { background-image: radial-gradient(rgba(0,0,0,.07) 1px, transparent 1px); background-size: 22px 22px; }

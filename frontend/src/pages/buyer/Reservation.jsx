@@ -107,7 +107,7 @@ export default function Reservation() {
 
         <form onSubmit={submit} className="space-y-5">
           <div className="rdg-card p-5">
-            <p className="mb-3 font-bold text-slate-900">1. How will you pay {peso(fee)}?</p>
+            <p className="mb-3 font-bold text-slate-900">1. How will you pay {peso(fee)}? <span className="text-red-500" aria-label="required">*</span></p>
             <div className="grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label="Payment channel">
               {channels.map(({ key, label, hint, icon: Icon }) => {
                 const on = channel === key
@@ -165,7 +165,7 @@ export default function Reservation() {
           </div>
 
           <div className="rdg-card p-5">
-            <p className="mb-3 font-bold text-slate-900">2. Upload your receipt</p>
+            <p className="mb-3 font-bold text-slate-900">2. Upload your receipt <span className="text-red-500" aria-label="required">*</span></p>
             {preview ? (
               <div className="relative">
                 <img src={preview} alt="Your receipt" className="max-h-72 w-full rounded-xl bg-slate-100 object-contain" />

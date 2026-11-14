@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import {
   Car, ClipboardCheck, CalendarClock, Landmark, Receipt, FileText, FileSignature, ShieldCheck, Users,
-  LayoutDashboard, TrendingUp, Settings, UserCog, LogOut, Menu, X, Gauge, ExternalLink,
+  LayoutDashboard, TrendingUp, Settings, UserCog, LogOut, Menu, X, Gauge, ExternalLink, KeyRound,
 } from 'lucide-react'
 import apiClient from '../../api/client'
 import { useAuth } from '../../context/AuthContext'
@@ -82,7 +82,7 @@ export default function AdminLayout() {
   const [menuOpen, setMenuOpen] = useState(false)
   useEffect(() => { setMenuOpen(false) }, [pathname])
 
-  const current = sections.flatMap((s) => s.links).find((l) => pathname.startsWith(l.to))
+  const current = sections.flatMap((s) => s.links).find((l) => pathname.startsWith(l.to)) ?? (pathname.endsWith('/account') ? { label: 'My Account' } : null)
 
   return (
     <div className="flex min-h-screen bg-slate-50">
@@ -134,12 +134,15 @@ export default function AdminLayout() {
             <ExternalLink size={16} /> View public site
           </Link>
         </div>
-        <div className="flex items-center gap-3 border-t border-white/10 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-          <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-white text-sm font-bold text-slate-900">{initials(user?.name)}</span>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-white">{user?.name}</p>
-            <p className="truncate text-xs text-slate-500">{isCeo ? 'CEO / Management' : 'Administrative Staff'}</p>
-          </div>
+        <div className="flex items-center gap-2 border-t border-white/10 px-3 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+          <NavLink to={isCeo ? '/ceo/account' : '/admin/account'} title="My account · change password"
+            className={({ isActive }) => `flex min-w-0 flex-1 items-center gap-3 rounded-lg px-1.5 py-1.5 ${isActive ? 'bg-white/10' : 'hover:bg-white/5'}`}>
+            <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-white text-sm font-bold text-slate-900">{initials(user?.name)}</span>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-sm font-semibold text-white">{user?.name}</span>
+              <span className="flex items-center gap-1 truncate text-xs text-slate-400"><KeyRound size={11} /> My account</span>
+            </span>
+          </NavLink>
           <button onClick={logout} title="Log out" aria-label="Log out" className="flex-shrink-0 rounded p-1.5 text-slate-400 hover:bg-white/5 hover:text-white"><LogOut size={16} /></button>
         </div>
       </aside>

@@ -5,6 +5,7 @@ import { Modal } from '../../components/ui/Modal'
 import { EmptyState, Field, ListSkeleton, PageHeader, StatusBadge, Tabs } from '../../components/ui/kit'
 import { formatDate, timeAgo, vehicleName } from '../../lib/format'
 import { toast } from '../../lib/toast'
+import Select from '../../components/ui/Select'
 
 const STATUSES = [
   ['submitted', 'Submitted'],
@@ -109,10 +110,10 @@ function ClaimModal({ claim, onClose, onSaved }) {
             <a href={`mailto:${claim.sale?.buyer?.email}`} className="flex items-center gap-1 text-xs text-slate-400 hover:text-emerald-700"><Mail size={12} /> {claim.sale?.buyer?.email}</a>
             <p className="mt-2 text-xs text-slate-500">Sold {formatDate(claim.sale?.sale_date)} · filed on day {Math.max(0, daysSinceSale)} of 30</p>
           </div>
-          <Field label="Status">
-            <select value={status} onChange={(e) => setStatus(e.target.value)} className="w-full">
+          <Field label="Status" required>
+            <Select value={status} onChange={(e) => setStatus(e.target.value)} className="w-full">
               {STATUSES.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
-            </select>
+            </Select>
           </Field>
           <Field label="Internal notes" hint="Inspection findings, category (mechanical, electrical…), actions taken.">
             <textarea rows={5} value={notes} onChange={(e) => setNotes(e.target.value)} className="w-full" />

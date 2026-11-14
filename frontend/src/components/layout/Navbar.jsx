@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import {
-  Car, Calculator, CarFront, Warehouse, ClipboardList, LogIn, LogOut, Menu, X, UserPlus, ChevronDown, LayoutDashboard, ShieldCheck,
+  Car, Calculator, CarFront, Warehouse, ClipboardList, LogIn, LogOut, Menu, X, UserPlus, ChevronDown, LayoutDashboard, ShieldCheck, UserCog,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { initials } from '../../lib/format'
@@ -33,6 +33,8 @@ export default function Navbar() {
     ...(isStaff ? [{ to: user.role === 'ceo' ? '/ceo/dashboard' : '/admin/overview', label: 'Staff dashboard', icon: LayoutDashboard }] : []),
     ...(user?.role === 'buyer' ? [{ to: '/garage', label: 'My Garage', icon: Warehouse }, { to: '/my-leads', label: 'Cars I’m selling', icon: ClipboardList }, { to: '/warranty-claim', label: 'File a warranty claim', icon: ShieldCheck }] : []),
     ...(user?.role === 'seller' ? [{ to: '/sell-your-car', label: 'Submit a car', icon: CarFront }, { to: '/my-leads', label: 'My submissions', icon: ClipboardList }] : []),
+    ...(user && !isStaff ? [{ to: '/account', label: 'Account settings', icon: UserCog }] : []),
+    ...(isStaff ? [{ to: user.role === 'ceo' ? '/ceo/account' : '/admin/account', label: 'Change password', icon: UserCog }] : []),
   ]
 
   const linkClass = ({ isActive }) =>

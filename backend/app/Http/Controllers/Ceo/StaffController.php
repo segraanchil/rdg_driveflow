@@ -27,7 +27,7 @@ class StaffController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8'],
+            'password' => ['required', 'string', 'max:72', \Illuminate\Validation\Rules\Password::min(8)->mixedCase()->numbers()],
         ]);
 
         $admin = User::create([

@@ -75,7 +75,7 @@ export default function WarrantyClaim() {
       ) : (
         <form onSubmit={submit} className="rdg-card space-y-5 p-6">
           <div>
-            <span className="rdg-label">Which car?</span>
+            <span className="rdg-label is-required">Which car?</span>
             <div className="space-y-2">
               {sales.map((s) => {
                 const open = deadlineOf(s) > new Date()
@@ -95,13 +95,13 @@ export default function WarrantyClaim() {
           </div>
 
           <label className="block">
-            <span className="rdg-label">What’s the problem?</span>
+            <span className="rdg-label is-required">What’s the problem?</span>
             <textarea value={issue} onChange={(e) => setIssue(e.target.value)} required rows={5} maxLength={3000} className="w-full"
               placeholder="Describe what happens, when it started and how often, e.g. “Engine check light turns on after 20 minutes of driving.”" />
           </label>
 
           <div>
-            <span className="rdg-label">Photos or videos</span>
+            <span className="rdg-label">Photos or videos (optional)</span>
             <label className="flex cursor-pointer flex-col items-center gap-1 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 py-6 text-center text-sm text-slate-500 hover:border-emerald-400 hover:bg-emerald-50">
               <Upload size={20} className="text-emerald-600" />
               <span className="font-semibold text-slate-700">Add files</span>

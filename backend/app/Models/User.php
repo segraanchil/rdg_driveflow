@@ -25,6 +25,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'phone',
         'password_hash',
         'role',
         'mfa_secret',
@@ -41,6 +42,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'mfa_code_expires_at' => 'datetime',
         'is_active' => 'boolean',
+        'deleted_at' => 'datetime',
     ];
 
     /**

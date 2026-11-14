@@ -8,6 +8,8 @@ import { Modal, useConfirm } from '../../components/ui/Modal'
 import { EmptyState, Field, ListSkeleton, PageHeader, SearchInput, StatusBadge, Tabs } from '../../components/ui/kit'
 import { apiError, formatDate, km, peso } from '../../lib/format'
 import { toast } from '../../lib/toast'
+import Select from '../../components/ui/Select'
+import PesoInput from '../../components/ui/PesoInput'
 
 const BLANK = {
   make: '', model: '', year: '', mileage: '', transmission: '', fuel_type: '', body_type: '', color: '',
@@ -284,10 +286,10 @@ function VehicleForm({ vehicle, globalMargin, onClose, onSaved }) {
               <Field label="Year" error={errors.year}><input required type="number" min="1980" max={new Date().getFullYear() + 1} value={form.year} onChange={set('year')} className="w-full" /></Field>
               <Field label="Mileage (km)" error={errors.mileage}><input required type="number" min="0" value={form.mileage} onChange={set('mileage')} className="w-full" /></Field>
               <Field label="Transmission" error={errors.transmission}>
-                <select value={form.transmission ?? ''} onChange={set('transmission')} className="w-full"><option value="">—</option>{TRANSMISSIONS.map((t) => <option key={t}>{t}</option>)}</select>
+                <Select value={form.transmission ?? ''} onChange={set('transmission')} className="w-full"><option value="">—</option>{TRANSMISSIONS.map((t) => <option key={t}>{t}</option>)}</Select>
               </Field>
               <Field label="Fuel" error={errors.fuel_type}>
-                <select value={form.fuel_type ?? ''} onChange={set('fuel_type')} className="w-full"><option value="">—</option>{FUELS.map((t) => <option key={t}>{t}</option>)}</select>
+                <Select value={form.fuel_type ?? ''} onChange={set('fuel_type')} className="w-full"><option value="">—</option>{FUELS.map((t) => <option key={t}>{t}</option>)}</Select>
               </Field>
               <Field label="Body type" error={errors.body_type}>
                 <input list="body-types" value={form.body_type ?? ''} onChange={set('body_type')} className="w-full" placeholder="Sedan" />
@@ -297,7 +299,7 @@ function VehicleForm({ vehicle, globalMargin, onClose, onSaved }) {
               <Field label="Engine" error={errors.engine}><input value={form.engine ?? ''} onChange={set('engine')} className="w-full" placeholder="1.5L / 2.8L Diesel" /></Field>
               <Field label="Seats" error={errors.seats}><input type="number" min="2" max="20" value={form.seats ?? ''} onChange={set('seats')} className="w-full" placeholder="5" /></Field>
               <Field label="Drivetrain" error={errors.drivetrain}>
-                <select value={form.drivetrain ?? ''} onChange={set('drivetrain')} className="w-full"><option value="">—</option>{['FWD', 'RWD', 'AWD', '4x2', '4x4'].map((d) => <option key={d}>{d}</option>)}</select>
+                <Select value={form.drivetrain ?? ''} onChange={set('drivetrain')} className="w-full"><option value="">—</option>{['FWD', 'RWD', 'AWD', '4x2', '4x4'].map((d) => <option key={d}>{d}</option>)}</Select>
               </Field>
             </div>
             <Field label="Description (shown to buyers)" className="mt-3" error={errors.description}>
@@ -384,8 +386,8 @@ function VehicleForm({ vehicle, globalMargin, onClose, onSaved }) {
         <div className="space-y-6">
           <Section title="Pricing">
             <div className="space-y-3">
-              <Field label="Acquisition cost (₱)" error={errors.acquisition_cost}><input required type="number" min="0" step="0.01" value={form.acquisition_cost} onChange={set('acquisition_cost')} className="w-full" /></Field>
-              <Field label="Repair & reconditioning (₱)" error={errors.repair_fees}><input type="number" min="0" step="0.01" value={form.repair_fees} onChange={set('repair_fees')} className="w-full" /></Field>
+              <Field label="Acquisition cost" error={errors.acquisition_cost}><PesoInput required value={form.acquisition_cost} onChange={(v) => setForm((f) => ({ ...f, acquisition_cost: v }))} placeholder="400,000" /></Field>
+              <Field label="Repair & reconditioning" error={errors.repair_fees}><PesoInput value={form.repair_fees} onChange={(v) => setForm((f) => ({ ...f, repair_fees: v }))} placeholder="0" /></Field>
               <div>
                 <div className="flex items-end justify-between">
                   <span className="rdg-label">Margin</span>

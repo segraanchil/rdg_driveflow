@@ -12,7 +12,7 @@ export default function Login() {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState(location.state?.email ?? '')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
   const [busy, setBusy] = useState(false)
@@ -45,10 +45,16 @@ export default function Login() {
             <input type="email" autoComplete="email" required autoFocus value={email} onChange={(e) => setEmail(e.target.value)} className="w-full pl-9" placeholder="you@example.com" />
           </span>
         </label>
-        <label className="block">
-          <span className="rdg-label">Password</span>
-          <PasswordInput autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
-        </label>
+        <div>
+          <label className="block">
+            <span className="rdg-label">Password</span>
+            <PasswordInput autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+          </label>
+          <div className="mt-1.5 text-right">
+            <Link to="/forgot-password" state={{ email }} className="text-sm font-semibold text-slate-700 underline-offset-2 hover:text-slate-900 hover:underline">Forgot password?</Link>
+          </div>
+        </div>
+        {location.state?.notice && !error && <p role="status" className="rounded-lg bg-green-50 px-3 py-2 text-sm text-green-800">{location.state.notice}</p>}
         {error && <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
         <button type="submit" disabled={busy} className="rdg-btn w-full py-3">Continue <ArrowRight size={17} /></button>
         <p className="text-center text-xs text-slate-500">We’ll email you a 6-digit code to finish signing in.</p>

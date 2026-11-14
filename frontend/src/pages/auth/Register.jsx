@@ -5,6 +5,8 @@ import { useAuth } from '../../context/AuthContext'
 import AuthShell from '../../components/layout/AuthShell'
 import AuthTransition from '../../components/ui/AuthTransition'
 import PasswordInput from '../../components/ui/PasswordInput'
+import PasswordRules, { passwordOk } from '../../components/ui/PasswordRules'
+import { RequiredNote } from '../../components/ui/kit'
 
 const ROLES = [
   { key: 'buyer', title: 'I’m buying', text: 'Reserve, finance and track cars', icon: Car },
@@ -17,15 +19,16 @@ export default function Register() {
   const navigate = useNavigate()
   const [params] = useSearchParams()
 
-  const [form, setForm] = useState({ name: '', email: '', password: '', role: params.get('role') === 'seller' ? 'seller' : 'buyer' })
+  const [form, setForm] = useState({ name: '', email: '', password: '', password_confirmation: '', role: params.get('role') === 'seller' ? 'seller' : 'buyer' })
   const [error, setError] = useState(null)
   const [busy, setBusy] = useState(false)
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }))
-  const longEnough = form.password.length >= 8
 
   async function submit(e) {
     e.preventDefault()
     setError(null)
+    if (!passwordOk(form.password)) return setError('Your password needs at least 8 characters with an uppercase letter, a lowercase letter and a number.')
+    if (form.password !== form.password_confirmation) return setError('The two passwords don’t match.')
     setBusy(true)
     try {
       await register({ ...form, email: form.email.trim() })
@@ -45,6 +48,7 @@ export default function Register() {
           <p className="mt-1 text-sm text-slate-500">Free, and takes less than a minute.</p>
         </div>
 
+        <span className="rdg-label is-required -mb-2">I am</span>
         <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="I am">
           {ROLES.map(({ key, title, text, icon: Icon }) => {
             const on = form.role === key
@@ -74,13 +78,20 @@ export default function Register() {
             <input type="email" required autoComplete="email" value={form.email} onChange={set('email')} className="w-full pl-9" placeholder="you@example.com" />
           </span>
         </label>
+        <div>
+          <label className="block">
+            <span className="rdg-label">Password</span>
+            <PasswordInput required minLength={8} autoComplete="new-password" value={form.password} onChange={set('password')} placeholder="Create a password" />
+          </label>
+          <PasswordRules password={form.password} confirm={form.password_confirmation} />
+        </div>
         <label className="block">
-          <span className="rdg-label">Password</span>
-          <PasswordInput required minLength={8} autoComplete="new-password" value={form.password} onChange={set('password')} placeholder="At least 8 characters" />
-          <span className={`mt-1 flex items-center gap-1 text-xs ${longEnough ? 'text-green-700' : 'text-slate-400'}`}><Check size={12} /> At least 8 characters</span>
+          <span className="rdg-label">Confirm password</span>
+          <PasswordInput required autoComplete="new-password" value={form.password_confirmation} onChange={set('password_confirmation')} placeholder="Type it again" />
         </label>
         {error && <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
         <button type="submit" disabled={busy} className="rdg-btn w-full py-3">Create account</button>
+        <RequiredNote className="text-center" />
         <p className="border-t border-slate-100 pt-4 text-center text-sm text-slate-500">
           Already have an account? <Link to="/login" className="font-semibold text-slate-900 hover:underline">Log in</Link>
         </p>
