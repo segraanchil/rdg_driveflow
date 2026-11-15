@@ -3,29 +3,22 @@ import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { MessageCircle, X, Send, UserRound, Bot, ArrowRight, Headset } from 'lucide-react'
 import apiClient from '../../api/client'
 import { useAuth } from '../../context/AuthContext'
+import { chatKey, readJson, supportKey, writeJson } from '../../lib/chatStorage'
 
-const STORE_KEY = 'rdg.chat'
-const SUPPORT_KEY = 'rdg.support' // { id, token } of the visitor's live chat with staff (kept across visits)
 const SUGGESTIONS = ['What cars do you have?', 'Cars under ₱600K', 'Financing requirements', 'How do I reserve?', 'Where are you located?']
 const WELCOME = { sender: 'bot', text: 'Hi! I’m the RDG assistant. Ask me about our cars, prices, financing, reservations or test drives, any time of day.' }
 
-function restore() {
-  try {
-    const saved = JSON.parse(sessionStorage.getItem(STORE_KEY))
-    if (saved?.sessionId) return saved
-  } catch { /* storage unavailable */ }
-  return { sessionId: crypto.randomUUID(), messages: [WELCOME] }
+/** The assistant chat of one owner ("u<id>" or "guest"); a fresh one when there is none. owner null = not known yet. */
+function restore(owner) {
+  const saved = owner ? readJson(chatKey(owner)) : null
+  if (saved?.sessionId) return { ...saved, owner }
+  return { owner, sessionId: crypto.randomUUID(), messages: [WELCOME] }
 }
 function mergeById(list, incoming) {
   const seen = new Set(list.map((m) => m.id))
   return [...list, ...incoming.filter((m) => !seen.has(m.id))]
 }
-function readSupport() {
-  try { return JSON.parse(localStorage.getItem(SUPPORT_KEY)) } catch { return null }
-}
-function saveSupport(v) {
-  try { v ? localStorage.setItem(SUPPORT_KEY, JSON.stringify(v)) : localStorage.removeItem(SUPPORT_KEY) } catch { /* ignore */ }
-}
+const readSupport = (owner) => (owner ? readJson(supportKey(owner)) : null)
 
 /**
  * Chat widget with two modes:
@@ -37,15 +30,17 @@ function saveSupport(v) {
 export default function ChatWidget() {
   const { pathname } = useLocation()
   const [params, setParams] = useSearchParams()
-  const { user } = useAuth()
+  const { user, loading } = useAuth()
+  // Whose chat this is. Until sign-in state is known, nothing is loaded or saved.
+  const owner = loading ? null : user ? `u${user.id}` : 'guest'
   const [open, setOpen] = useState(false)
   const [mode, setMode] = useState('bot') // bot | staff
-  const [state, setState] = useState(restore)
+  const [state, setState] = useState(() => restore(null))
   const [text, setText] = useState('')
   const [typing, setTyping] = useState(false)
   const [handoff, setHandoff] = useState(false)
   const [contact, setContact] = useState({ name: '', contact: '' })
-  const [support, setSupport] = useState(readSupport) // { id, token }
+  const [support, setSupport] = useState(null) // { id, token } of this owner's live chat with staff
   const [live, setLive] = useState({ messages: [], status: 'open' })
   const [unread, setUnread] = useState(false)
   const [error, setError] = useState(null)
@@ -53,7 +48,23 @@ export default function ChatWidget() {
   const lastId = useRef(0)
   const { sessionId, messages } = state
 
-  useEffect(() => { try { sessionStorage.setItem(STORE_KEY, JSON.stringify(state)) } catch { /* ignore */ } }, [state])
+  const saveSupport = useCallback((v) => { if (owner) writeJson(supportKey(owner), v) }, [owner])
+
+  // Someone signed in or out: show that person's own chat (or a fresh one), never the previous one.
+  useEffect(() => {
+    if (!owner || state.owner === owner) return
+    setState(restore(owner))
+    setSupport(readSupport(owner))
+    setLive({ messages: [], status: 'open' })
+    lastId.current = 0
+    setUnread(false)
+    setHandoff(false)
+    setMode('bot')
+    setText('')
+    setError(null)
+  }, [owner]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => { if (state.owner) writeJson(chatKey(state.owner), { sessionId: state.sessionId, messages: state.messages }) }, [state])
 
   // Opened from a notification ("New reply from RDG staff") → /?chat=open
   useEffect(() => {
@@ -72,7 +83,7 @@ export default function ChatWidget() {
     apiClient.get('/support/mine', { silent: true, quietErrors: true }).then(({ data }) => {
       if (data?.conversation) { const v = { id: data.conversation.id, token: data.token }; saveSupport(v); setSupport(v) }
     }).catch(() => {})
-  }, [user, support])
+  }, [user, support, saveSupport])
 
   const poll = useCallback(async () => {
     if (!support) return
@@ -88,7 +99,7 @@ export default function ChatWidget() {
     } catch (err) {
       if (err.response?.status === 403 || err.response?.status === 404) { saveSupport(null); setSupport(null) }
     }
-  }, [support, open, mode])
+  }, [support, open, mode, saveSupport])
 
   useEffect(() => {
     if (!support) return

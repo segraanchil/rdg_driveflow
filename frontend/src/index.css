@@ -41,6 +41,11 @@
   select option:checked { @apply bg-slate-100 font-semibold; }
   input[type='range'] { @apply cursor-pointer; }
 
+  /* Hidden file pickers (a styled <label> wraps an sr-only <input type=file>): keep the input inside
+     its label. Without a positioned parent it sits at the top of the dialog/page, and when the file
+     chooser closes the browser focuses it and scrolls everything up to it. */
+  label:has(> input.sr-only), label:has(input[type='file'].sr-only) { position: relative; }
+
   /* Edge/IE draw their own eye button inside password fields; ours (PasswordInput) replaces it. */
   input::-ms-reveal, input::-ms-clear { display: none; }
 
@@ -81,6 +86,9 @@
   .rdg-pattern { background-image: radial-gradient(rgba(0,0,0,.07) 1px, transparent 1px); background-size: 22px 22px; }
   /* Logo-style title: condensed, bold, italic caps ("RDG" in the logo). */
   .rdg-display { @apply font-display font-bold uppercase tracking-wide; }
+  /* Scrolls normally (wheel, touch, keyboard) but draws no scrollbar. */
+  .rdg-scrollbar-none { scrollbar-width: none; -ms-overflow-style: none; }
+  .rdg-scrollbar-none::-webkit-scrollbar { display: none; }
 }
 
 /* Older pages list records as plain bordered rows: give them the card look too. */

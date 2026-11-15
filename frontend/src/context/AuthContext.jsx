@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import apiClient, { ensureCsrfCookie } from '../api/client'
+import { clearChatStorage } from '../lib/chatStorage'
 
 const AuthContext = createContext(null)
 
@@ -36,11 +37,15 @@ export function AuthProvider({ children }) {
       if (document.visibilityState !== 'visible') return
       try {
         const { data } = await apiClient.get('/auth/me', { silent: true, quietErrors: true })
-        setUser((prev) => (prev?.id === data.user?.id && prev?.role === data.user?.role ? prev : data.user))
+        setUser((prev) => {
+          if (prev?.id === data.user?.id && prev?.role === data.user?.role) return prev
+          if (prev) clearChatStorage() // a different account took over this browser
+          return data.user
+        })
         setMfaRequired(true)
         setMfaVerified(data.mfa_verified)
       } catch {
-        setUser(null)
+        setUser((prev) => { if (prev) clearChatStorage(); return null }) // signed out in another tab
       }
     }
     document.addEventListener('visibilitychange', recheck)
@@ -71,6 +76,7 @@ export function AuthProvider({ children }) {
 
   const logout = useCallback(async () => {
     await apiClient.post('/auth/logout')
+    clearChatStorage() // the next person on this device starts with an empty chat
     setUser(null)
     setMfaRequired(false)
     setMfaVerified(false)

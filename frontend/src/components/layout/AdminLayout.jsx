@@ -103,7 +103,7 @@ export default function AdminLayout() {
           <button onClick={() => setMenuOpen(false)} aria-label="Close menu" className="ml-auto rounded p-1.5 text-slate-400 hover:bg-white/10 hover:text-white lg:hidden"><X size={18} /></button>
         </div>
 
-        <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-5">
+        <nav className="rdg-scrollbar-none flex-1 space-y-6 overflow-y-auto overscroll-contain px-3 py-5">
           {sections.map((section) => (
             <div key={section.label}>
               <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">{section.label}</p>

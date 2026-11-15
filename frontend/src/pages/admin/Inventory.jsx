@@ -358,7 +358,7 @@ function VehicleForm({ vehicle, globalMargin, onClose, onSaved }) {
                   </button>
                 ))}
               </div>
-              <label className="flex cursor-pointer flex-col items-center gap-1 rounded-lg bg-slate-50 py-5 text-center text-sm text-slate-500 hover:bg-emerald-50">
+              <label className="relative flex cursor-pointer flex-col items-center gap-1 rounded-lg bg-slate-50 py-5 text-center text-sm text-slate-500 hover:bg-emerald-50">
                 <Upload size={20} className="text-emerald-600" />
                 <span className="font-semibold text-slate-700">Choose images</span>
                 <span className="text-xs">JPG/PNG, up to 10 MB each. Large photos are resized automatically.</span>

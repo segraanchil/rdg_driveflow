@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Bell, ClipboardCheck, Landmark, ShieldCheck, CalendarClock, Users, MessageCircle, CheckCheck, Info } from 'lucide-react'
 import apiClient from '../../api/client'
+import { useAuth } from '../../context/AuthContext'
 
 const ICONS = {
   reservation: [ClipboardCheck, 'bg-amber-100 text-amber-600'],
@@ -12,6 +13,13 @@ const ICONS = {
   chat: [MessageCircle, 'bg-pink-100 text-pink-600'],
   general: [Info, 'bg-slate-100 text-slate-600'],
 }
+
+const STAFF_PAGES = {
+  chat: '/admin/support', lead: '/admin/acquisition-leads', reservation: '/admin/reservations',
+  financing: '/admin/financing', warranty: '/admin/warranty-claims', test_drive: '/admin/test-drives',
+}
+const USER_PAGES = { lead: '/my-leads', chat: '/?chat=open', test_drive: '/garage', financing: '/garage', warranty: '/garage', reservation: '/garage' }
+const CEO_ALLOWED = ['/ceo', '/admin/acquisition-leads', '/admin/support']
 
 function timeAgo(iso) {
   const mins = Math.round((Date.now() - new Date(iso).getTime()) / 60000)
@@ -33,6 +41,7 @@ export default function NotificationBell({ tone = 'dark', endpoint = '/shared/no
   const prevUnread = useRef(null)
   const box = useRef(null)
   const navigate = useNavigate()
+  const { user } = useAuth()
 
   const load = useCallback(() => {
     if (document.hidden) return
@@ -56,10 +65,21 @@ export default function NotificationBell({ tone = 'dark', endpoint = '/shared/no
     return () => document.removeEventListener('mousedown', close)
   }, [])
 
+  // Every notification opens something: its own link, or the page for its kind when it has none
+  // (older alerts were saved without a link). The CEO only gets pages the CEO can open.
+  function targetFor(n) {
+    const staff = endpoint.startsWith('/shared')
+    let to = n.link || (staff ? STAFF_PAGES[n.type] : USER_PAGES[n.type] ?? '/garage')
+    if (user?.role === 'ceo' && to && !CEO_ALLOWED.some((p) => to.startsWith(p))) to = '/ceo/dashboard'
+    if (user?.role === 'seller' && to === '/garage') to = '/my-leads'
+    return to
+  }
+
   async function openItem(n) {
     setOpen(false)
     if (!n.read_at) apiClient.post(`${endpoint}/${n.id}/read`, {}, { silent: true }).then(load)
-    if (n.link) navigate(n.link)
+    const to = targetFor(n)
+    if (to) navigate(to)
   }
   async function readAll() {
     await apiClient.post(`${endpoint}/read-all`, {}, { silent: true })

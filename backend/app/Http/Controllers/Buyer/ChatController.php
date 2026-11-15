@@ -39,7 +39,7 @@ class ChatController extends Controller
                 'chat',
                 'High-intent buyer in chat',
                 '“'.Str::limit($data['text'], 90).'”'.(! empty($data['page']) ? ' (on '.$data['page'].')' : '').' Session '.substr($data['session_id'], 0, 8).'.',
-                null,
+                '/admin/support',
             );
         }
 
@@ -69,7 +69,7 @@ class ChatController extends Controller
             'chat',
             'A visitor wants to talk to a person',
             ($who !== '' ? "{$who}. " : '').(! empty($data['last_message']) ? '“'.Str::limit($data['last_message'], 80).'” ' : '').'Session '.substr($data['session_id'], 0, 8).'.',
-            null,
+            '/admin/support',
         );
 
         return response()->json(['message' => 'escalated']);
