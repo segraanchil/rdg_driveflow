@@ -59,6 +59,9 @@ class AcquisitionLeadReviewController extends Controller
             $data['closed_by'] = 'staff';
         }
         $lead->update($data);
+        if ($data['status'] === AcquisitionLead::STATUS_ACCEPTED) {
+            \App\Support\LeadToInventory::create($lead);
+        }
 
         if ($offerSent) {
             $s = $lead->vehicle_specs ?? [];

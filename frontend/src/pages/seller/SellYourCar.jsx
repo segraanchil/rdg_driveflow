@@ -6,7 +6,7 @@ import { useAuth } from '../../context/AuthContext'
 import { apiError } from '../../lib/format'
 import { Field, RequiredNote } from '../../components/ui/kit'
 import Select from '../../components/ui/Select'
-import PesoInput from '../../components/ui/PesoInput'
+import PesoInput, { KmInput } from '../../components/ui/PesoInput'
 
 const STEPS = [
   [ClipboardList, 'Tell us about your car', 'Details and a few photos. About 3 minutes.'],
@@ -27,8 +27,11 @@ const SLOTS = [
 ]
 const REQUIRED_SLOTS = SLOTS.filter((s) => s[2])
 const CONDITIONS = ['Excellent', 'Good', 'Fair', 'Needs repair']
+const THIS_YEAR = new Date().getFullYear()
+// LTO registration is renewed yearly: newest first, back far enough to cover lapsed registrations.
+const REG_YEARS = Array.from({ length: 14 }, (_, i) => THIS_YEAR + 3 - i)
 const DRAFT_KEY = 'rdg.sell-draft'
-const BLANK = { make: '', model: '', year: '', mileage: '', transmission: '', fuel_type: '', color: '', condition: 'Good', asking_price: '', complete_papers: true, location: '', contact_number: '', condition_notes: '' }
+const BLANK = { make: '', model: '', year: '', mileage: '', transmission: '', fuel_type: '', registered_until: '', color: '', condition: 'Good', asking_price: '', complete_papers: true, location: '', contact_number: '', condition_notes: '' }
 
 /** "Sell Your Car" (Stories 13–14): open to everyone; guests sign in before submitting and keep their draft. */
 export default function SellYourCar() {
@@ -109,14 +112,20 @@ export default function SellYourCar() {
             <Field label="Brand"><input required value={form.make} onChange={set('make')} placeholder="Toyota" className="w-full" /></Field>
             <Field label="Model"><input required value={form.model} onChange={set('model')} placeholder="Vios 1.3 E" className="w-full" /></Field>
             <Field label="Year"><input required type="number" inputMode="numeric" min="1980" max={new Date().getFullYear() + 1} value={form.year} onChange={set('year')} placeholder="2019" className="w-full" /></Field>
-            <Field label="Mileage (km)"><input required type="number" inputMode="numeric" min="0" value={form.mileage} onChange={set('mileage')} placeholder="45000" className="w-full" /></Field>
+            <Field label="Mileage"><KmInput required value={form.mileage} onChange={(v) => setForm((f) => ({ ...f, mileage: v }))} placeholder="45,000" hint="short" max={1000000} /></Field>
             <Field label="Transmission">
               <Select required value={form.transmission} onChange={set('transmission')} className="w-full"><option value="">Choose</option><option>Automatic</option><option>Manual</option><option>CVT</option></Select>
             </Field>
             <Field label="Fuel">
               <Select required value={form.fuel_type} onChange={set('fuel_type')} className="w-full"><option value="">Choose</option><option>Gasoline</option><option>Diesel</option><option>Hybrid</option><option>Electric</option></Select>
             </Field>
-            <Field label="Color" className="col-span-2 sm:col-span-2"><input value={form.color} onChange={set('color')} placeholder="Silver" className="w-full" /></Field>
+            <Field label="Registered until" hint="Year on the latest OR">
+              <Select required value={String(form.registered_until ?? '')} onChange={set('registered_until')} className="w-full">
+                <option value="">Choose year</option>
+                {REG_YEARS.map((y) => <option key={y} value={y}>{y}{y < THIS_YEAR ? ' (expired)' : ''}</option>)}
+              </Select>
+            </Field>
+            <Field label="Color"><input value={form.color} onChange={set('color')} placeholder="Silver" className="w-full" /></Field>
           </div>
 
           <div className="mt-4">

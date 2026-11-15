@@ -36,6 +36,7 @@ const LegalDocuments = lazy(() => import('./pages/admin/LegalDocuments'))
 const AdminWarrantyClaims = lazy(() => import('./pages/admin/WarrantyClaims'))
 const AdminTestDrives = lazy(() => import('./pages/admin/TestDrives'))
 const AcquisitionLeads = lazy(() => import('./pages/admin/AcquisitionLeads'))
+const SupportInbox = lazy(() => import('./pages/admin/SupportInbox'))
 
 const CeoDashboard = lazy(() => import('./pages/ceo/Dashboard'))
 const ExpansionFund = lazy(() => import('./pages/ceo/ExpansionFund'))
@@ -146,6 +147,7 @@ export default function App() {
         }
       >
         <Route path="/admin/acquisition-leads" element={<AcquisitionLeads />} />
+        <Route path="/admin/support" element={<SupportInbox />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

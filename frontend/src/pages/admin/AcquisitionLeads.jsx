@@ -2,10 +2,12 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import {
   Gauge, CalendarDays, UserRound, Mail, ImageOff, X, ChevronLeft, ChevronRight, StickyNote, CarFront, Check,
-  Search, Send, ThumbsUp, Ban, Lock, Hourglass, Phone, Expand,
+  Search, Send, ThumbsUp, Ban, Lock, Hourglass, Phone, Expand, ArrowRight,
 } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import apiClient, { backendUrl } from '../../api/client'
 import { useConfirm } from '../../components/ui/Modal'
+import { ProgressSteps } from '../../components/ui/kit'
 import PesoInput, { pesoInWords } from '../../components/ui/PesoInput'
 import { toast } from '../../lib/toast'
 
@@ -47,7 +49,7 @@ export default function AcquisitionLeads() {
         {[
           [Search, '1. Start appraisal', 'You’re checking the photos or inspecting the car.'],
           [Send, '2. Send offer', 'Emails your price. The seller accepts or declines online.'],
-          [ThumbsUp, '3. Accepted', 'Automatic when the seller accepts. Use “Mark accepted” only if they said yes by phone.'],
+          [ThumbsUp, '3. Accepted', 'Automatic when the seller accepts (or “said yes by phone”). The car is added to Inventory as “For inspection”.'],
           [Lock, 'Closed', 'Accepted or declined leads are locked.'],
         ].map(([Icon, t, d]) => (
           <li key={t} className="flex gap-2"><Icon size={15} className="mt-0.5 shrink-0 text-slate-900" /><span><strong className="block text-slate-900">{t}</strong>{d}</span></li>
@@ -87,24 +89,7 @@ export default function AcquisitionLeads() {
 
 function Stepper({ status }) {
   if (status === 'declined') return null
-  const current = STEPS.findIndex(([k]) => k === status)
-  return (
-    <ol className="mt-4 grid grid-cols-4 gap-1" aria-label="Progress">
-      {STEPS.map(([key, label], i) => {
-        const done = i < current || status === 'accepted'
-        const now = i === current && status !== 'accepted'
-        return (
-          <li key={key} className="relative text-center">
-            {i > 0 && <span className={`absolute right-1/2 top-3 h-0.5 w-full ${i <= current ? 'bg-slate-900' : 'bg-slate-200'}`} />}
-            <span className={`relative mx-auto flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold ${done ? 'bg-slate-900 text-white' : now ? 'bg-white text-slate-900 ring-2 ring-slate-900' : 'bg-slate-200 text-slate-500'}`}>
-              {done ? <Check size={13} strokeWidth={3} /> : i + 1}
-            </span>
-            <span className={`mt-1 block text-[11px] font-semibold ${done || now ? 'text-slate-800' : 'text-slate-400'}`}>{label}</span>
-          </li>
-        )
-      })}
-    </ol>
-  )
+  return <ProgressSteps className="mt-4" size="sm" steps={STEPS} current={STEPS.findIndex(([k]) => k === status)} complete={status === 'accepted'} />
 }
 
 function LeadCard({ lead, onSaved, onPhoto }) {
@@ -222,6 +207,7 @@ function LeadCard({ lead, onSaved, onPhoto }) {
               ['Asking price', specs.asking_price ? peso(specs.asking_price) : '—'],
               ['Condition', specs.condition],
               ['Papers', specs.complete_papers === undefined ? null : specs.complete_papers ? 'Complete OR/CR' : 'Incomplete'],
+              ['Registered until', specs.registered_until ? `${specs.registered_until}${Number(specs.registered_until) < new Date().getFullYear() ? ' (expired)' : ''}` : null],
               ['Transmission', specs.transmission],
               ['Fuel', specs.fuel_type],
               ['Color', specs.color],
@@ -252,6 +238,11 @@ function LeadCard({ lead, onSaved, onPhoto }) {
                       : { seller: `The seller declined the ${peso(lead.offer_amount)} offer`, staff: 'Declined by staff' }[lead.closed_by] ?? 'Declined'}
                   </p>
                   <p className="text-slate-500">{lead.status === 'accepted' ? 'Call the seller to schedule the inspection and hand-over.' : 'This lead is closed.'} <span className="inline-flex items-center gap-1 text-slate-400"><Lock size={12} /> Can’t be edited anymore.</span></p>
+                  {lead.status === 'accepted' && (
+                    <Link to="/admin/inventory?status=for_inspection" className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-bold text-white hover:bg-black">
+                      <CarFront size={13} /> In Inventory as “For inspection” <ArrowRight size={13} />
+                    </Link>
+                  )}
                   {lead.admin_notes && <p className="mt-2 rounded-lg bg-slate-50 p-2 text-xs text-slate-600"><StickyNote size={12} className="mr-1 inline" />{lead.admin_notes}</p>}
                 </div>
               </div>

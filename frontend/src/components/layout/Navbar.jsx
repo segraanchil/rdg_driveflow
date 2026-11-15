@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, NavLink, useLocation } from 'react-router-dom'
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import {
-  Car, Calculator, CarFront, Warehouse, ClipboardList, LogIn, LogOut, Menu, X, UserPlus, ChevronDown, LayoutDashboard, ShieldCheck, UserCog,
+  Car, Calculator, CarFront, Warehouse, ClipboardList, LogIn, LogOut, Menu, X, UserPlus, ChevronDown, LayoutDashboard, ShieldCheck, UserCog, ArrowLeft,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { initials } from '../../lib/format'
 import Logo from '../ui/Logo'
+import NotificationBell from './NotificationBell'
 
 /** Public/buyer/seller top bar: white with the black RDG logo (as the artwork is printed), black accents. */
 export default function Navbar() {
@@ -23,6 +24,10 @@ export default function Navbar() {
   }, [])
 
   const isStaff = user?.role === 'admin' || user?.role === 'ceo'
+  const navigate = useNavigate()
+  const isHome = location.pathname === '/'
+  // React Router keeps a history index; go back inside the app when possible, otherwise to the home page.
+  const goBack = () => ((window.history.state?.idx ?? 0) > 0 ? navigate(-1) : navigate('/'))
   const links = [
     { to: '/inventory', label: 'Browse Cars', icon: Car },
     { to: '/loan-calculator', label: 'Loan Calculator', icon: Calculator },
@@ -43,14 +48,20 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 text-slate-900 backdrop-blur">
       <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-2">
+        <div className="flex min-w-0 items-center gap-1">
+        {!isHome && (
+          <button onClick={goBack} aria-label="Go back" className="-ml-2 flex h-10 w-10 shrink-0 animate-rdg-slide-left items-center justify-center rounded-lg text-slate-700 hover:bg-slate-100 lg:hidden"><ArrowLeft size={21} /></button>
+        )}
         <Link to="/" className="flex items-center gap-3" aria-label="RDG Car Deals & Services home">
           <Logo className="h-12" />
           <span className="hidden border-l border-slate-200 pl-3 font-display text-lg font-bold uppercase italic leading-none tracking-wide text-slate-900 sm:block">Drive<span className="text-slate-400">Flow</span></span>
         </Link>
+        </div>
 
         <div className="hidden items-center gap-1 lg:flex">
           {links.map(({ to, label, icon: Icon }) => <NavLink key={to} to={to} className={linkClass}><Icon size={16} /> {label}</NavLink>)}
           <span className="mx-2 h-6 w-px bg-slate-200" />
+          {user && !isStaff && <NotificationBell tone="light" endpoint="/notifications" />}
           {user ? (
             <div ref={menuRef} className="relative">
               <button onClick={() => setMenu((m) => !m)} aria-expanded={menu} className="flex items-center gap-2 rounded-lg py-1.5 pl-1.5 pr-2.5 hover:bg-slate-100">
@@ -79,9 +90,12 @@ export default function Navbar() {
           )}
         </div>
 
-        <button onClick={() => setOpen((o) => !o)} aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} className="rounded-lg p-2 text-slate-700 hover:bg-slate-100 lg:hidden">
+        <div className="flex items-center gap-1 lg:hidden">
+        {user && !isStaff && <NotificationBell tone="light" endpoint="/notifications" />}
+        <button onClick={() => setOpen((o) => !o)} aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} className="rounded-lg p-2 text-slate-700 hover:bg-slate-100">
           {open ? <X size={22} /> : <Menu size={22} />}
         </button>
+        </div>
       </nav>
 
       {open && (

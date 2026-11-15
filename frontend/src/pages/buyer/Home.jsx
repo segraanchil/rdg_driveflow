@@ -7,6 +7,7 @@ import apiClient from '../../api/client'
 import VehicleCard from '../../components/vehicles/VehicleCard'
 import Viewer360 from '../../components/vehicles/Viewer360'
 import Logo from '../../components/ui/Logo'
+import Reveal from '../../components/ui/Reveal'
 import { estimateMonthlyAmortization } from '../../lib/loanCalculator'
 import { useSettings } from '../../lib/useSettings'
 import { peso } from '../../lib/format'
@@ -73,20 +74,20 @@ export default function Home() {
       {/* Hero: search on the left, a car you can actually spin on the right */}
       <section className="relative overflow-hidden bg-slate-900 text-white">
         <div className="absolute inset-0 opacity-[.06] [background-image:repeating-linear-gradient(135deg,#fff_0_1px,transparent_1px_16px)]" />
-        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 py-12 lg:grid-cols-[1fr_1.1fr] lg:py-16">
+        <div className="relative mx-auto grid max-w-6xl items-center gap-6 px-4 py-8 sm:gap-10 sm:py-12 lg:grid-cols-[1fr_1.1fr] lg:py-16">
           <div className="animate-rdg-fade-up">
             <span className="rdg-chip bg-white/10 text-slate-200"><Sparkles size={12} /> Quezon City&apos;s trusted secondhand dealer</span>
-            <h1 className="no-bar mt-4 block font-display text-5xl font-bold uppercase italic leading-[.95] tracking-wide text-white md:text-7xl">
+            <h1 className="no-bar mt-4 block font-display text-[2.6rem] font-bold uppercase italic leading-[.95] tracking-wide text-white sm:text-5xl md:text-7xl">
               Drive home your next car with <span className="underline decoration-white/40 decoration-4 underline-offset-8">confidence</span>.
             </h1>
-            <p className="mt-4 max-w-md text-slate-300">Inspected secondhand cars with transparent prices. Spin every car in 360°, look inside the cabin, and reserve online.</p>
+            <p className="mt-4 max-w-md text-sm text-slate-300 sm:text-base">Inspected secondhand cars with transparent prices. Spin every car in 360°, look inside the cabin, and reserve online.</p>
 
-            <form onSubmit={search} className="mt-7 flex max-w-md gap-2 rounded-2xl bg-white p-1.5 shadow-lift">
+            <form onSubmit={search} className="mt-6 flex max-w-md gap-2 rounded-2xl bg-white p-1.5 shadow-lift sm:mt-7">
               <label className="relative flex-1">
                 <Search size={18} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Try “Vios” or “Innova”" aria-label="Search cars" className="w-full border-0 pl-10 text-sm shadow-none focus:ring-0" />
               </label>
-              <button className="rdg-btn px-5">Search</button>
+              <button className="rdg-btn shrink-0 px-4 sm:px-5">Search</button>
             </form>
             <div className="mt-3 flex flex-wrap gap-2">
               {(facets?.makes ?? []).slice(0, 5).map((m) => (
@@ -99,13 +100,13 @@ export default function Home() {
           </div>
 
           <div className="animate-rdg-fade-up">
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-3 shadow-lift backdrop-blur">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-2 shadow-lift backdrop-blur sm:rounded-3xl sm:p-3">
               {hero === undefined ? (
                 <div className="rdg-skeleton aspect-[16/10] rounded-xl bg-white/10" />
               ) : hero ? (
                 <>
                   <Viewer360 vehicle={hero} compact autoSpin />
-                  <div className="mt-3 flex items-center justify-between gap-3 px-1">
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-3 px-1">
                     <div className="min-w-0">
                       <p className="flex items-center gap-1.5 text-xs uppercase tracking-wider text-slate-400"><Rotate3d size={13} /> Drag the car to rotate it</p>
                       <p className="truncate font-bold">{hero.year} {hero.make} {hero.model} · <span className="text-slate-300">{peso(hero.selling_price)}</span></p>
@@ -114,7 +115,7 @@ export default function Home() {
                   </div>
                 </>
               ) : (
-                <div className="flex aspect-[16/10] items-center justify-center rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 p-10"><Logo onDark className="h-auto w-full max-w-sm" /></div>
+                <div className="flex aspect-[16/10] items-center justify-center rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 p-6 sm:p-10"><Logo onDark className="h-auto w-full max-w-sm" /></div>
               )}
             </div>
           </div>
@@ -123,73 +124,73 @@ export default function Home() {
 
       {/* Why RDG */}
       <section className="border-b border-slate-200 bg-white">
-        <div className="mx-auto grid max-w-6xl gap-4 px-4 py-8 sm:grid-cols-2 lg:grid-cols-4">
-          {PERKS.map(([Icon, title, text]) => (
-            <div key={title} className="flex gap-3">
+        <div className="mx-auto grid max-w-6xl gap-4 px-4 py-6 sm:grid-cols-2 sm:py-8 lg:grid-cols-4">
+          {PERKS.map(([Icon, title, text], i) => (
+            <Reveal key={title} delay={i * 80} className="flex gap-3">
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white"><Icon size={19} /></span>
               <span><span className="block font-bold text-slate-900">{title}</span><span className="text-sm text-slate-500">{text}</span></span>
-            </div>
+            </Reveal>
           ))}
         </div>
       </section>
 
       {/* Latest arrivals */}
       <section className="rdg-pattern">
-        <div className="mx-auto max-w-6xl px-4 py-14">
+        <div className="mx-auto max-w-6xl px-4 py-10 sm:py-14">
           <SectionTitle kicker="Fresh on the lot" title="Latest arrivals" link={<Link to="/inventory" className="flex items-center gap-1 text-sm font-bold text-slate-900 hover:underline">View all cars <ArrowRight size={16} /></Link>} />
           {featured === null ? (
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{[0, 1, 2].map((i) => <div key={i} className="rdg-skeleton h-80 rounded-2xl" />)}</div>
           ) : featured.length === 0 ? (
             <div className="rdg-card p-10 text-center text-slate-500">New arrivals are being prepared. Check back soon!</div>
           ) : (
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{featured.map((v) => <VehicleCard key={v.id} vehicle={v} />)}</div>
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{featured.map((v, i) => <Reveal key={v.id} delay={(i % 3) * 90}><VehicleCard vehicle={v} /></Reveal>)}</div>
           )}
         </div>
       </section>
 
       {/* Shop by budget / type */}
       <section className="border-y border-slate-200 bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-14">
+        <div className="mx-auto max-w-6xl px-4 py-10 sm:py-14">
           <SectionTitle kicker="Shop your way" title="What’s your budget?" />
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {BUDGETS.map(([label, max, hint]) => (
-              <Link key={label} to={max ? `/inventory?max_price=${max}` : '/inventory?min_price=1000000'} className="group rounded-2xl border border-slate-200 p-5 transition hover:-translate-y-0.5 hover:border-slate-900 hover:shadow-lift">
-                <p className="font-display text-2xl font-bold uppercase italic tracking-wide text-slate-900">{label}</p>
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {BUDGETS.map(([label, max, hint], i) => (
+              <Reveal key={label} delay={i * 80}><Link to={max ? `/inventory?max_price=${max}` : '/inventory?min_price=1000000'} className="group block h-full rounded-2xl border border-slate-200 p-4 transition duration-300 hover:-translate-y-1 hover:border-slate-900 hover:shadow-lift sm:p-5">
+                <p className="font-display text-xl font-bold uppercase italic tracking-wide text-slate-900 sm:text-2xl">{label}</p>
                 <p className="mt-1 text-sm text-slate-500">{hint}</p>
                 <span className="mt-4 inline-flex items-center gap-1 text-sm font-bold text-slate-900">Browse <ArrowRight size={15} className="transition group-hover:translate-x-1" /></span>
-              </Link>
+              </Link></Reveal>
             ))}
           </div>
           <div className="mt-6 flex flex-wrap items-center gap-2">
             <span className="mr-1 text-sm font-semibold text-slate-500">Or by body type:</span>
-            {TYPES.map((t) => <Link key={t} to={`/inventory?body_type=${t}`} className="rounded-full bg-slate-100 px-4 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-900 hover:text-white">{t}</Link>)}
+            {TYPES.map((t) => <Link key={t} to={`/inventory?body_type=${t}`} className="rounded-full bg-slate-100 px-3.5 py-1.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-900 hover:text-white sm:px-4">{t}</Link>)}
           </div>
         </div>
       </section>
 
       {/* How it works + financing teaser */}
       <section className="rdg-pattern">
-        <div className="mx-auto grid max-w-6xl gap-8 px-4 py-14 lg:grid-cols-[1.4fr_1fr]">
+        <div className="mx-auto grid max-w-6xl gap-6 px-4 py-10 sm:gap-8 sm:py-14 lg:grid-cols-[1.4fr_1fr]">
           <div>
             <SectionTitle kicker="How it works" title="From browsing to driving" />
             <ol className="grid gap-3 sm:grid-cols-2">
               {STEPS.map(({ icon: Icon, title, text }, i) => (
-                <li key={title} className="rdg-card relative p-5">
+                <Reveal as="li" delay={i * 90} key={title} className="rdg-card relative p-4 transition duration-300 hover:-translate-y-1 hover:shadow-lift sm:p-5">
                   <span className="absolute right-4 top-3 font-display text-4xl font-bold italic text-slate-200">{i + 1}</span>
                   <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white"><Icon size={19} /></span>
                   <h3 className="mt-3 font-bold text-slate-900">{title}</h3>
                   <p className="mt-1 text-sm text-slate-500">{text}</p>
-                </li>
+                </Reveal>
               ))}
             </ol>
           </div>
-          <div className="self-start rounded-3xl bg-slate-900 p-6 text-white shadow-lift">
+          <div className="self-start rounded-2xl bg-slate-900 p-5 text-white shadow-lift sm:rounded-3xl sm:p-6">
             <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400"><Calculator size={14} /> Quick estimate</p>
             <p className="mt-2 text-sm text-slate-300">If the car costs</p>
-            <p className="font-display text-4xl font-bold italic">{peso(budget)}</p>
+            <p className="font-display text-3xl font-bold italic tabular-nums sm:text-4xl">{peso(budget)}</p>
             <input type="range" min={300000} max={2500000} step={25000} value={budget} onChange={(e) => setBudget(Number(e.target.value))} aria-label="Car price" className="mt-3 w-full [accent-color:#fff]" />
             <p className="mt-4 text-sm text-slate-300">you could pay about</p>
-            <p className="font-display text-4xl font-bold italic">{peso(monthly)}<span className="text-lg text-slate-400"> /month</span></p>
+            <p className="font-display text-3xl font-bold italic tabular-nums sm:text-4xl">{peso(monthly)}<span className="text-lg text-slate-400"> /month</span></p>
             <p className="mt-1 text-xs text-slate-400">20% down, 60 months, {settings.loan_rate_employed}% a year (employed). Estimate only.</p>
             <div className="mt-5 grid gap-2">
               <Link to={`/inventory?max_price=${budget}`} className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-bold text-slate-900 hover:bg-slate-100">See cars in this budget</Link>
@@ -201,16 +202,16 @@ export default function Home() {
 
       {/* FAQ */}
       <section className="border-t border-slate-200 bg-white">
-        <div className="mx-auto max-w-3xl px-4 py-14">
+        <div className="mx-auto max-w-3xl px-4 py-10 sm:py-14">
           <SectionTitle kicker="Good to know" title="Questions buyers ask" />
           <div className="divide-y divide-slate-200 rounded-2xl border border-slate-200">
             {FAQ.map(([q, a]) => (
-              <details key={q} className="group p-5 [&_summary::-webkit-details-marker]:hidden">
+              <details key={q} className="group p-4 sm:p-5 [&_summary::-webkit-details-marker]:hidden">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold text-slate-900">
                   {q}
                   <ChevronDown size={18} className="shrink-0 text-slate-400 transition group-open:rotate-180" />
                 </summary>
-                <p className="mt-3 text-sm leading-relaxed text-slate-600">{a}</p>
+                <p className="mt-3 animate-rdg-fade-in text-sm leading-relaxed text-slate-600">{a}</p>
               </details>
             ))}
           </div>
@@ -218,16 +219,16 @@ export default function Home() {
       </section>
 
       {/* Sell CTA */}
-      <section className="mx-auto max-w-6xl px-4 py-14">
-        <div className="flex flex-col items-start justify-between gap-6 rounded-3xl bg-gradient-to-r from-slate-900 to-slate-700 p-8 text-white shadow-lift md:flex-row md:items-center">
+      <section className="mx-auto max-w-6xl px-4 py-10 sm:py-14">
+        <div className="flex flex-col items-start justify-between gap-5 rounded-2xl bg-gradient-to-r from-slate-900 to-slate-700 p-6 text-white shadow-lift sm:rounded-3xl sm:p-8 md:flex-row md:items-center">
           <div className="flex items-center gap-4">
             <span className="hidden h-14 w-14 items-center justify-center rounded-2xl bg-white/10 sm:flex"><CarFront size={28} /></span>
             <div>
-              <h2 className="font-display text-3xl font-bold uppercase italic tracking-wide text-white">Selling your car?</h2>
+              <h2 className="font-display text-2xl font-bold uppercase italic tracking-wide text-white sm:text-3xl">Selling your car?</h2>
               <p className="mt-1 text-slate-300">Send a few photos and get a dealership offer. No haggling with strangers.</p>
             </div>
           </div>
-          <Link to="/sell-your-car" className="inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 font-bold text-slate-900 hover:bg-slate-100">Get an offer <ArrowRight size={18} /></Link>
+          <Link to="/sell-your-car" className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-white px-6 py-3 font-bold text-slate-900 hover:bg-slate-100 sm:w-auto">Get an offer <ArrowRight size={18} /></Link>
         </div>
       </section>
     </div>
@@ -236,10 +237,10 @@ export default function Home() {
 
 function SectionTitle({ kicker, title, link }) {
   return (
-    <div className="mb-6 flex items-end justify-between gap-4">
+    <div className="mb-5 flex flex-wrap items-end justify-between gap-x-4 gap-y-2 sm:mb-6">
       <div>
         <p className="text-xs font-bold uppercase tracking-wider text-slate-500">{kicker}</p>
-        <h2 className="font-display text-3xl font-bold uppercase italic tracking-wide text-slate-900">{title}</h2>
+        <h2 className="font-display text-2xl font-bold uppercase italic tracking-wide text-slate-900 sm:text-3xl">{title}</h2>
       </div>
       {link}
     </div>

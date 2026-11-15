@@ -19,7 +19,16 @@ class Vehicle extends Model
 
     public const STATUS_UNDER_REPAIR = 'under_repair';
 
+    /** Bought through Sell Your Car; hidden from the public until inspected in person and given 360° photos. */
+    public const STATUS_FOR_INSPECTION = 'for_inspection';
+
+    /** Real (non-sample) exterior 360° frames needed before a car bought from a seller can be published. */
+    public const MIN_FRAMES_TO_PUBLISH = 8;
+
     protected $fillable = [
+        'acquisition_lead_id',
+        'inspected_at',
+        'inspected_by',
         'make',
         'model',
         'year',
@@ -55,7 +64,13 @@ class Vehicle extends Model
         'margin_percent' => 'decimal:2',
         'selling_price' => 'decimal:2',
         'last_updated' => 'datetime',
+        'inspected_at' => 'datetime',
     ];
+
+    public function acquisitionLead(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(AcquisitionLead::class);
+    }
 
     public function reservations(): HasMany
     {

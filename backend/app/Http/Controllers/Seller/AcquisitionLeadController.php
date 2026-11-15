@@ -31,6 +31,7 @@ class AcquisitionLeadController extends Controller
             'condition' => ['required', Rule::in(['Excellent', 'Good', 'Fair', 'Needs repair'])],
             'asking_price' => ['required', 'numeric', 'min:10000', 'max:100000000'],
             'complete_papers' => ['nullable', 'boolean'],
+            'registered_until' => ['required', 'integer', 'min:1990', 'max:'.(now()->year + 5)],
             'location' => ['nullable', 'string', 'max:120'],
             'contact_number' => ['required', 'string', 'max:30'],
             'condition_notes' => ['nullable', 'string', 'max:3000'],
@@ -42,6 +43,7 @@ class AcquisitionLeadController extends Controller
             'asking_price.min' => 'The asking price looks too low. Enter the full amount in pesos, e.g. 450,000.',
             'transmission.required' => 'Choose the transmission.',
             'fuel_type.required' => 'Choose the fuel type.',
+            'registered_until.required' => 'Choose the year the car’s LTO registration is valid until (see the OR).',
         ];
         foreach (AcquisitionLead::PHOTO_SLOTS as $key => [$label, $required, $max]) {
             if ($max > 1) {
@@ -104,6 +106,9 @@ class AcquisitionLeadController extends Controller
 
         $accepted = $data['decision'] === 'accept';
         $lead->update(['status' => $accepted ? AcquisitionLead::STATUS_ACCEPTED : AcquisitionLead::STATUS_DECLINED, 'closed_by' => 'seller']);
+        if ($accepted) {
+            \App\Support\LeadToInventory::create($lead);
+        }
 
         $s = $lead->vehicle_specs ?? [];
         AdminAlert::notify(

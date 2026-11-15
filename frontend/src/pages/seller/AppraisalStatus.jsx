@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { Check, Banknote, StickyNote, ArrowLeft, XCircle } from 'lucide-react'
 import apiClient, { backendUrl } from '../../api/client'
 import PageLoader from '../../components/ui/PageLoader'
+import { ProgressSteps } from '../../components/ui/kit'
 import { useConfirm } from '../../components/ui/Modal'
 import { toast } from '../../lib/toast'
 import { peso } from '../../lib/format'
@@ -55,20 +56,7 @@ export default function AppraisalStatus() {
             <XCircle className="shrink-0 text-slate-400" /> {lead.closed_by === 'seller' ? 'You declined our offer. You’re welcome to submit the car again any time.' : 'The dealership decided not to acquire this vehicle. Thank you for your submission.'}
           </div>
         ) : (
-          <ol className="grid grid-cols-4 gap-2">
-            {STEPS.map(([key, label], i) => {
-              const done = i <= current
-              return (
-                <li key={key} className="relative text-center">
-                  {i > 0 && <span className={`absolute right-1/2 top-4 h-0.5 w-full ${done ? 'bg-emerald-500' : 'bg-slate-200'}`} />}
-                  <span className={`relative mx-auto flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold ${done ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-500'}`}>
-                    {done ? <Check size={16} /> : i + 1}
-                  </span>
-                  <span className={`mt-2 block text-xs font-semibold ${done ? 'text-slate-800' : 'text-slate-400'}`}>{label}</span>
-                </li>
-              )
-            })}
-          </ol>
+          <ProgressSteps steps={STEPS} current={current} complete={lead.status === 'accepted'} />
         )}
 
         {lead.offer_amount && (

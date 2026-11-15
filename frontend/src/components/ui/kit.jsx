@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Inbox } from 'lucide-react'
+import { Inbox, Check } from 'lucide-react'
 
 /** Page title + subtitle + right-side actions, used by every page. */
 export function PageHeader({ title, subtitle, actions, back }) {
@@ -26,7 +26,7 @@ const TONES = {
 
 // [label, tone] per status, per record type. Same status words mean different things per type.
 const STATUS = {
-  vehicle: { available: ['Available', 'green'], reserved: ['Reserved', 'amber'], sold: ['Sold', 'slate'], under_repair: ['In repair', 'violet'] },
+  vehicle: { available: ['Available', 'green'], reserved: ['Reserved', 'amber'], sold: ['Sold', 'slate'], under_repair: ['In repair', 'violet'], for_inspection: ['For inspection', 'blue'] },
   reservation: { pending: ['Awaiting verification', 'amber'], verified: ['Verified', 'green'], rejected: ['Rejected', 'red'], expired: ['Expired', 'slate'], completed: ['Sold', 'blue'] },
   test_drive: { pending: ['Awaiting confirmation', 'amber'], confirmed: ['Confirmed', 'green'], declined: ['Declined', 'red'], completed: ['Done', 'blue'], cancelled: ['Cancelled', 'slate'] },
   financing: { pending: ['Submitted', 'amber'], documents_review: ['With the bank', 'blue'], approved: ['Approved', 'green'], rejected: ['Not approved', 'red'] },
@@ -103,6 +103,38 @@ export function StatTile({ icon: Icon, label, value, hint, tone = 'emerald', to 
   )
   const cls = 'rdg-card block p-4 transition'
   return to ? <Link to={to} className={`${cls} hover:-translate-y-0.5 hover:shadow-lift`}>{body}</Link> : <div className={cls}>{body}</div>
+}
+
+/**
+ * Horizontal progress bar: numbered circles joined by lines, labels underneath.
+ * The columns have no gap, so each line runs exactly from the previous circle's centre to this one's.
+ *   steps: [[key, label]], current: index of the step in progress, complete: every step done.
+ */
+export function ProgressSteps({ steps, current, complete = false, size = 'md', className = '' }) {
+  const box = size === 'sm' ? 'h-6 w-6 text-[11px]' : 'h-8 w-8 text-xs'
+  const lineTop = size === 'sm' ? 'top-[11px]' : 'top-[15px]'
+  return (
+    <ol className={`grid ${className}`} style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }} aria-label="Progress">
+      {steps.map(([key, label], i) => {
+        const done = complete || i < current
+        const now = !complete && i === current
+        return (
+          <li key={key} className="relative flex flex-col items-center text-center" aria-current={now ? 'step' : undefined}>
+            {i > 0 && (
+              <span className={`absolute right-1/2 ${lineTop} h-0.5 w-full overflow-hidden bg-slate-200`}>
+                <span className={`block h-full bg-slate-900 transition-all duration-700 ease-out ${done || now ? 'w-full' : 'w-0'}`} style={{ transitionDelay: `${i * 120}ms` }} />
+              </span>
+            )}
+            <span className={`relative z-10 flex ${box} items-center justify-center rounded-full font-bold transition-colors duration-500 ${done ? 'bg-slate-900 text-white' : now ? 'bg-white text-slate-900 ring-2 ring-slate-900' : 'bg-slate-200 text-slate-500'}`}>
+              {done ? <Check size={size === 'sm' ? 13 : 16} strokeWidth={3} className="animate-rdg-pop" /> : i + 1}
+              {now && <span className="absolute inset-0 animate-ping rounded-full ring-2 ring-slate-900/30 motion-reduce:hidden" />}
+            </span>
+            <span className={`mt-1.5 px-1 text-[11px] font-semibold leading-tight sm:text-xs ${done || now ? 'text-slate-800' : 'text-slate-400'}`}>{label}</span>
+          </li>
+        )
+      })}
+    </ol>
+  )
 }
 
 /** "Fields marked * are required." line for the top of a form. */

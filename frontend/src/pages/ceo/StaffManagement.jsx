@@ -57,20 +57,38 @@ export default function StaffManagement() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800">Manage Admin Accounts</h1>
-          <p className="text-sm text-slate-500">Add, edit, or deactivate Administrative Staff access.</p>
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
+          <h1>Manage Admin Accounts</h1>
+          <p className="mt-1 text-sm text-slate-500">Add, edit, or deactivate Administrative Staff access.</p>
         </div>
-        <button
-          onClick={openCreate}
-          className="flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600"
-        >
-          <UserPlus size={16} /> Add Admin
+        <button onClick={openCreate} className="rdg-btn w-full shrink-0 whitespace-nowrap sm:w-auto">
+          <UserPlus size={16} /> Add admin
         </button>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+      {/* Phones: one card per admin instead of a sideways-scrolling table. */}
+      <ul className="space-y-3 sm:hidden">
+        {staff.map((admin, i) => (
+          <li key={admin.id} style={{ animationDelay: `${i * 40}ms` }} className="rdg-card flex animate-rdg-fade-up items-center gap-3 p-4">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-900 text-sm font-bold text-white">{admin.name.slice(0, 1).toUpperCase()}</span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-semibold text-slate-900">{admin.name}</p>
+              <p className="truncate text-xs text-slate-500">{admin.email}</p>
+              <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[11px] font-bold ${admin.is_active ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>{admin.is_active ? 'Active' : 'Deactivated'}</span>
+            </div>
+            <div className="flex shrink-0 gap-1">
+              <button onClick={() => openEdit(admin)} aria-label={`Edit ${admin.name}`} className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"><Pencil size={16} /></button>
+              <button onClick={() => toggleActive(admin)} aria-label={admin.is_active ? 'Deactivate' : 'Activate'} className={`flex h-9 w-9 items-center justify-center rounded-lg hover:bg-slate-100 ${admin.is_active ? 'text-red-500' : 'text-green-600'}`}>
+                {admin.is_active ? <Ban size={16} /> : <CheckCircle2 size={16} />}
+              </button>
+            </div>
+          </li>
+        ))}
+        {staff.length === 0 && <li className="rdg-card p-6 text-center text-sm text-slate-400">No admin accounts yet.</li>}
+      </ul>
+
+      <div className="hidden overflow-hidden rounded-xl border border-slate-200 bg-white sm:block">
         <table className="w-full text-sm">
           <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-400">
             <tr>

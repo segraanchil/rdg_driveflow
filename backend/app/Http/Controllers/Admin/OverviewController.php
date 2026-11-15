@@ -33,6 +33,8 @@ class OverviewController extends Controller
                 'documents_to_verify' => FinancingDocument::where('verified', false)->count(),
                 'open_claims' => WarrantyClaim::whereIn('status', [WarrantyClaim::STATUS_SUBMITTED, WarrantyClaim::STATUS_UNDER_REVIEW])->count(),
                 'new_leads' => AcquisitionLead::where('status', AcquisitionLead::STATUS_SUBMITTED)->count(),
+                'cars_to_inspect' => Vehicle::where('status', Vehicle::STATUS_FOR_INSPECTION)->count(),
+                'chats_waiting' => \App\Models\SupportConversation::waitingForStaff()->count(),
                 'sales_this_month' => Sale::whereYear('sale_date', now()->year)->whereMonth('sale_date', now()->month)->count(),
                 'revenue_this_month' => (float) Sale::whereYear('sale_date', now()->year)->whereMonth('sale_date', now()->month)->sum('total_amount'),
             ],

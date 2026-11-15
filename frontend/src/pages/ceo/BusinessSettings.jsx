@@ -5,6 +5,7 @@ import apiClient, { backendUrl } from '../../api/client'
 import PageLoader from '../../components/ui/PageLoader'
 import { Field, PageHeader, Tabs } from '../../components/ui/kit'
 import { apiError, peso } from '../../lib/format'
+import PesoInput from '../../components/ui/PesoInput'
 import { toast } from '../../lib/toast'
 
 const TABS = [
@@ -45,7 +46,7 @@ export default function BusinessSettings() {
         <SettingsForm values={values} setValues={setValues} note="Each recorded sale adds this percentage of its amount to the Expansion Fund. Past entries are not recalculated."
           fields={[
             ['expansion_fund_percent', 'Contribution (% of each sale)', 'number'],
-            ['expansion_fund_goal', 'Fund goal (₱)', 'number'],
+            ['expansion_fund_goal', 'Fund goal', 'peso'],
           ]} />
       )}
       {tab === 'contact' && (
@@ -83,7 +84,11 @@ function SettingsForm({ values, setValues, fields, note, children }) {
       <div className="grid gap-4 sm:grid-cols-2">
         {fields.map(([key, label, type]) => (
           <Field key={key} label={label}>
-            <input type={type} step={type === 'number' ? '0.01' : undefined} min={type === 'number' ? 0 : undefined} value={form[key]} onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))} className="w-full" />
+            {type === 'peso' ? (
+              <PesoInput value={form[key]} onChange={(v) => setForm((f) => ({ ...f, [key]: v }))} hint="short" />
+            ) : (
+              <input type={type} step={type === 'number' ? '0.01' : undefined} min={type === 'number' ? 0 : undefined} value={form[key]} onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))} className="w-full" />
+            )}
           </Field>
         ))}
       </div>
@@ -111,7 +116,7 @@ function PaymentsPanel({ values, setValues }) {
     <div className="space-y-5">
       <SettingsForm values={values} setValues={setValues} note="Buyers choose GCash or bank transfer when reserving. GCash shows the QR below and the GCash number; bank transfer shows the bank, account name and account number. Payments are verified manually."
         fields={[
-          ['reservation_fee', 'Reservation fee (₱)', 'number'],
+          ['reservation_fee', 'Reservation fee', 'peso'],
           ['payment_bank_name', 'Bank name', 'text'],
           ['payment_account_name', 'Account name', 'text'],
           ['payment_account_number', 'Account number', 'text'],

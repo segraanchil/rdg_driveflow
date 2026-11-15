@@ -6,6 +6,7 @@ import VehicleCard from '../../components/vehicles/VehicleCard'
 import { Modal } from '../../components/ui/Modal'
 import { peso } from '../../lib/format'
 import Select from '../../components/ui/Select'
+import PesoInput from '../../components/ui/PesoInput'
 
 const FILTER_KEYS = ['q', 'make', 'min_price', 'max_price', 'min_year', 'transmission', 'fuel_type', 'body_type']
 const SORTS = [
@@ -84,10 +85,10 @@ export default function Inventory() {
       <FilterSelect label="Brand" value={filters.make} onChange={(v) => update({ make: v })} options={[['', 'All brands'], ...(facets?.makes ?? []).map((m) => [m, m])]} />
       <FilterSelect label="Budget" value={filters.max_price} onChange={(v) => update({ max_price: v })} options={BUDGETS} />
       <div>
-        <span className="rdg-label">Price range (₱)</span>
+        <span className="rdg-label">Price range</span>
         <div className="grid grid-cols-2 gap-2">
-          <input type="number" min="0" placeholder="Min" value={filters.min_price} onChange={(e) => update({ min_price: e.target.value })} className="w-full text-sm" />
-          <input type="number" min="0" placeholder="Max" value={filters.max_price} onChange={(e) => update({ max_price: e.target.value })} className="w-full text-sm" />
+          <PesoInput value={filters.min_price} onChange={(v) => update({ min_price: v })} placeholder="Min" aria-label="Minimum price" hint="short" className="text-sm" />
+          <PesoInput value={filters.max_price} onChange={(v) => update({ max_price: v })} placeholder="Max" aria-label="Maximum price" hint="short" className="text-sm" />
         </div>
       </div>
       <FilterSelect label="Model year" value={filters.min_year} onChange={(v) => update({ min_year: v })}

@@ -39,6 +39,7 @@ class DashboardController extends Controller
                 'reserved' => Vehicle::where('status', Vehicle::STATUS_RESERVED)->count(),
                 'sold' => Vehicle::where('status', Vehicle::STATUS_SOLD)->count(),
                 'under_repair' => Vehicle::where('status', Vehicle::STATUS_UNDER_REPAIR)->count(),
+                'for_inspection' => Vehicle::where('status', Vehicle::STATUS_FOR_INSPECTION)->count(),
                 'stock_value' => (float) Vehicle::whereIn('status', [Vehicle::STATUS_AVAILABLE, Vehicle::STATUS_RESERVED, Vehicle::STATUS_UNDER_REPAIR])->sum('selling_price'),
             ],
             'sales' => [

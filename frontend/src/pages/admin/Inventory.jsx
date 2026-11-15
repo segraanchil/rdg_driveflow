@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
-  Plus, Pencil, Trash2, ExternalLink, CarFront, Rotate3d, Image as ImageIcon, Armchair, ChevronLeft, ChevronRight, Upload, Info, X,
+  Plus, Pencil, Trash2, ExternalLink, CarFront, Rotate3d, Image as ImageIcon, Armchair, ChevronLeft, ChevronRight, Upload, Info, X, Check, Eye,
 } from 'lucide-react'
 import apiClient, { backendUrl } from '../../api/client'
 import { Modal, useConfirm } from '../../components/ui/Modal'
@@ -9,7 +9,7 @@ import { EmptyState, Field, ListSkeleton, PageHeader, SearchInput, StatusBadge, 
 import { apiError, formatDate, km, peso } from '../../lib/format'
 import { toast } from '../../lib/toast'
 import Select from '../../components/ui/Select'
-import PesoInput from '../../components/ui/PesoInput'
+import PesoInput, { KmInput } from '../../components/ui/PesoInput'
 
 const BLANK = {
   make: '', model: '', year: '', mileage: '', transmission: '', fuel_type: '', body_type: '', color: '',
@@ -85,6 +85,7 @@ export default function Inventory() {
   const total = Object.values(counts).reduce((a, b) => a + Number(b), 0)
   const tabs = [
     { key: '', label: `All (${total})` },
+    { key: 'for_inspection', label: 'For inspection', n: counts.for_inspection },
     { key: 'available', label: 'Available', count: 0, n: counts.available },
     { key: 'reserved', label: 'Reserved', n: counts.reserved },
     { key: 'under_repair', label: 'In repair', n: counts.under_repair },
@@ -149,7 +150,7 @@ export default function Inventory() {
                   <td>
                     <span className="flex justify-end gap-1">
                       <IconBtn label="Edit" onClick={() => setEditing(v)}><Pencil size={15} /></IconBtn>
-                      <IconBtn label="View in showroom" as={Link} to={`/inventory/${v.id}`} target="_blank"><ExternalLink size={15} /></IconBtn>
+                      {v.status !== 'for_inspection' && <IconBtn label="View in showroom" as={Link} to={`/inventory/${v.id}`} target="_blank"><ExternalLink size={15} /></IconBtn>}
                       <IconBtn label="Delete" danger onClick={() => remove(v)}><Trash2 size={15} /></IconBtn>
                     </span>
                   </td>
@@ -284,7 +285,7 @@ function VehicleForm({ vehicle, globalMargin, onClose, onSaved }) {
               <Field label="Make" error={errors.make}><input required value={form.make} onChange={set('make')} placeholder="Toyota" className="w-full" /></Field>
               <Field label="Model" error={errors.model}><input required value={form.model} onChange={set('model')} placeholder="Vios 1.3 E" className="w-full" /></Field>
               <Field label="Year" error={errors.year}><input required type="number" min="1980" max={new Date().getFullYear() + 1} value={form.year} onChange={set('year')} className="w-full" /></Field>
-              <Field label="Mileage (km)" error={errors.mileage}><input required type="number" min="0" value={form.mileage} onChange={set('mileage')} className="w-full" /></Field>
+              <Field label="Mileage" error={errors.mileage}><KmInput required value={form.mileage} onChange={(v) => setForm((f) => ({ ...f, mileage: v }))} placeholder="45,000" hint="short" /></Field>
               <Field label="Transmission" error={errors.transmission}>
                 <Select value={form.transmission ?? ''} onChange={set('transmission')} className="w-full"><option value="">—</option>{TRANSMISSIONS.map((t) => <option key={t}>{t}</option>)}</Select>
               </Field>
@@ -405,7 +406,9 @@ function VehicleForm({ vehicle, globalMargin, onClose, onSaved }) {
           </Section>
 
           <Section title="Status">
-            {locked ? (
+            {vehicle?.status === 'for_inspection' ? (
+              <PublishPanel vehicle={vehicle} media={media} price={price} onPublished={(data) => onSaved(data, false)} />
+            ) : locked ? (
               <p className="flex items-center gap-2 text-sm text-slate-600"><StatusBadge kind="vehicle" status={vehicle.status} /> Changes through its reservation or sale.</p>
             ) : (
               <div className="grid grid-cols-2 gap-2">
@@ -422,6 +425,60 @@ function VehicleForm({ vehicle, globalMargin, onClose, onSaved }) {
         </div>
       </form>
     </Modal>
+  )
+}
+
+const MIN_FRAMES = 8 // same as Vehicle::MIN_FRAMES_TO_PUBLISH
+
+/**
+ * A car bought through Sell Your Car stays hidden until it passes this checklist:
+ * inspected in person, real exterior 360° frames uploaded, price set. Then "Publish to showroom".
+ */
+function PublishPanel({ vehicle, media, price, onPublished }) {
+  const [inspected, setInspected] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const frames = media.filter((m) => m.type === '360_frame' && !m.is_sample).length
+  const checks = [
+    [inspected, 'Inspected in person', 'Engine, body, papers and test drive checked at the lot.'],
+    [frames >= MIN_FRAMES, `Exterior 360° photos (${frames}/${MIN_FRAMES}+)`, 'Upload them under Photos & 360° frames, then save.'],
+    [price > 0, 'Price set', 'Acquisition cost (the accepted offer) plus repairs and margin.'],
+  ]
+  const ready = checks.every(([ok]) => ok)
+
+  async function publish() {
+    setBusy(true)
+    try {
+      const { data } = await apiClient.post(`/admin/inventory/${vehicle.id}/publish`, { inspected: true }, { loadingText: 'Publishing…', quietErrors: true })
+      toast.success('Published. The car is now in the public showroom.')
+      onPublished(data)
+    } catch (err) {
+      toast.error(apiError(err))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="space-y-3">
+      <p className="flex gap-2 rounded-xl bg-sky-50 p-3 text-xs text-sky-900">
+        <Info size={14} className="mt-0.5 shrink-0" />
+        <span><strong>For inspection:</strong> bought from a seller{vehicle.acquisition_lead_id ? <> (<Link to="/admin/acquisition-leads" className="underline">lead #{vehicle.acquisition_lead_id}</Link>)</> : ''}. Buyers can’t see it until you publish it.</span>
+      </p>
+      <ul className="space-y-2">
+        {checks.map(([ok, label, hint], i) => (
+          <li key={label} className={`flex gap-3 rounded-xl border p-3 transition-colors ${ok ? 'border-green-200 bg-green-50/60' : 'border-slate-200'}`}>
+            {i === 0 ? (
+              <input type="checkbox" checked={inspected} onChange={(e) => setInspected(e.target.checked)} aria-label="Inspected in person" className="mt-0.5 h-4 w-4 shrink-0" />
+            ) : (
+              <span className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full ${ok ? 'bg-green-600 text-white' : 'bg-slate-200'}`}>{ok && <Check size={11} strokeWidth={3} />}</span>
+            )}
+            <span className="text-sm"><span className="block font-semibold text-slate-900">{label}</span><span className="text-xs text-slate-500">{hint}</span></span>
+          </li>
+        ))}
+      </ul>
+      <button type="button" onClick={publish} disabled={!ready || busy} className="rdg-btn w-full"><Eye size={16} /> Publish to showroom</button>
+      {!ready && <p className="text-center text-xs text-slate-500">Complete the checklist to publish.</p>}
+    </div>
   )
 }
 

@@ -85,6 +85,11 @@ class InventoryController extends Controller
             throw ValidationException::withMessages(['status' => ["This car is {$vehicle->status}; its status changes through the reservation or sale, not here."]]);
         }
 
+        // A car bought from a seller goes live only through publish(): inspection + real 360° photos first.
+        if (isset($data['status']) && $vehicle->status === Vehicle::STATUS_FOR_INSPECTION && $data['status'] !== $vehicle->status) {
+            throw ValidationException::withMessages(['status' => ['This car is waiting for inspection. Inspect it, upload its 360° photos, then use “Publish to showroom”.']]);
+        }
+
         $vehicle->fill($data);
 
         if ($vehicle->isDirty(['acquisition_cost', 'repair_fees', 'margin_percent'])) {
@@ -95,6 +100,32 @@ class InventoryController extends Controller
         $vehicle->save();
 
         $this->storePhotos($vehicle, $photos, $mediaType);
+
+        return response()->json($vehicle->load('media')->makeVisible(Vehicle::STAFF_FIELDS));
+    }
+
+    /**
+     * Puts a car bought through Sell Your Car on the public showroom, once staff confirm they
+     * inspected it in person and it has real (non-sample) exterior 360° frames.
+     */
+    public function publish(Request $request, Vehicle $vehicle)
+    {
+        $request->validate(['inspected' => ['accepted']], ['inspected.accepted' => 'Confirm that the car was inspected in person.']);
+
+        if ($vehicle->status !== Vehicle::STATUS_FOR_INSPECTION) {
+            throw ValidationException::withMessages(['status' => ['Only cars waiting for inspection can be published here.']]);
+        }
+        $frames = $vehicle->media()->where('type', VehicleMedia::TYPE_360_FRAME)->where('is_sample', false)->count();
+        if ($frames < Vehicle::MIN_FRAMES_TO_PUBLISH) {
+            throw ValidationException::withMessages(['photos' => ['Upload at least '.Vehicle::MIN_FRAMES_TO_PUBLISH." exterior 360° frames first (this car has {$frames})."]]);
+        }
+
+        $vehicle->update([
+            'status' => Vehicle::STATUS_AVAILABLE,
+            'inspected_at' => now(),
+            'inspected_by' => $request->user()->id,
+            'last_updated' => now(),
+        ]);
 
         return response()->json($vehicle->load('media')->makeVisible(Vehicle::STAFF_FIELDS));
     }

@@ -14,6 +14,9 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\MfaController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\Admin\SupportInboxController;
+use App\Http\Controllers\SupportChatController;
+use App\Http\Controllers\UserNotificationController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Buyer\ChatController;
 use App\Http\Controllers\Buyer\FinancingApplicationController;
@@ -51,6 +54,11 @@ Route::get('/financing/checklist/{employmentProfile}', [FinancingApplicationCont
 Route::post('/chat/message', [ChatController::class, 'sendMessage'])->middleware('throttle:30,1');
 Route::post('/chat/escalate', [ChatController::class, 'escalate'])->middleware('throttle:5,1');
 
+// "Talk to a person": live chat with staff (guests use a per-chat token header).
+Route::post('/support/conversations', [SupportChatController::class, 'start'])->middleware('throttle:5,1');
+Route::get('/support/conversations/{conversation}', [SupportChatController::class, 'show'])->middleware('throttle:120,1');
+Route::post('/support/conversations/{conversation}/messages', [SupportChatController::class, 'send'])->middleware('throttle:30,1');
+
 /*
 |--------------------------------------------------------------------------
 | Auth
@@ -72,6 +80,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // My account (every role can change the password; profile/email/delete are buyer + seller only,
     // checked in the controller).
+    // Buyer/seller bell + their latest support chat.
+    Route::middleware('mfa')->group(function () {
+        Route::get('/notifications', [UserNotificationController::class, 'index']);
+        Route::post('/notifications/read-all', [UserNotificationController::class, 'readAll']);
+        Route::post('/notifications/{id}/read', [UserNotificationController::class, 'read']);
+        Route::get('/support/mine', [SupportChatController::class, 'mine']);
+    });
+
     Route::middleware('mfa')->prefix('account')->group(function () {
         Route::put('/profile', [AccountController::class, 'updateProfile']);
         Route::put('/password', [AccountController::class, 'updatePassword'])->middleware('throttle:10,1');
@@ -135,6 +151,7 @@ Route::middleware('auth:sanctum')->group(function () {
             ->only(['index', 'store', 'update', 'destroy']);
         Route::delete('/inventory/{vehicle}/media/{media}', [InventoryController::class, 'destroyMedia']);
         Route::put('/inventory/{vehicle}/media/order', [InventoryController::class, 'reorderMedia']);
+        Route::post('/inventory/{vehicle}/publish', [InventoryController::class, 'publish']);
 
         Route::get('/overview', [OverviewController::class, 'index']);
 
@@ -197,5 +214,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/notifications', [NotificationController::class, 'index']);
         Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead']);
         Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead']);
+
+        // Support inbox ("Talk to a person" chats).
+        Route::get('/support', [SupportInboxController::class, 'index']);
+        Route::get('/support/{conversation}', [SupportInboxController::class, 'show']);
+        Route::post('/support/{conversation}/messages', [SupportInboxController::class, 'reply'])->middleware('throttle:60,1');
+        Route::patch('/support/{conversation}', [SupportInboxController::class, 'update']);
     });
 });

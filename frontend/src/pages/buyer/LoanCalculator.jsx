@@ -6,6 +6,7 @@ import { estimateMonthlyAmortization } from '../../lib/loanCalculator'
 import { loanRateFor, useSettings } from '../../lib/useSettings'
 import { PROFILE_LABELS, peso, vehicleName } from '../../lib/format'
 import RequirementsList from '../../components/vehicles/RequirementsList'
+import PesoInput from '../../components/ui/PesoInput'
 
 const TERMS = [12, 24, 36, 48, 60]
 const DOWN_PCTS = [20, 30, 40, 50]
@@ -64,8 +65,8 @@ export default function LoanCalculator() {
           </div>
 
           <label className="block">
-            <span className="rdg-label">Vehicle price (₱)</span>
-            <input type="number" min="0" step="1000" value={price} onChange={(e) => setPrice(Math.max(0, Number(e.target.value)))} disabled={Boolean(vehicle)} className="w-full text-lg font-bold" />
+            <span className="rdg-label">Vehicle price</span>
+            <PesoInput value={price} onChange={(v) => setPrice(Number(v) || 0)} disabled={Boolean(vehicle)} hint="short" className="text-lg" aria-label="Vehicle price" />
           </label>
 
           <div>

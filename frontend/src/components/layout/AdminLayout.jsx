@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import {
   Car, ClipboardCheck, CalendarClock, Landmark, Receipt, FileText, FileSignature, ShieldCheck, Users,
-  LayoutDashboard, TrendingUp, Settings, UserCog, LogOut, Menu, X, Gauge, ExternalLink, KeyRound,
+  LayoutDashboard, TrendingUp, Settings, UserCog, LogOut, Menu, X, Gauge, ExternalLink, KeyRound, MessagesSquare,
 } from 'lucide-react'
 import apiClient from '../../api/client'
 import { useAuth } from '../../context/AuthContext'
@@ -34,6 +34,7 @@ const ADMIN_SECTIONS = [
       { to: '/admin/financing', label: 'Financing', icon: Landmark, badgeKey: 'documents_to_verify' },
       { to: '/admin/warranty-claims', label: 'Warranty Claims', icon: ShieldCheck, badgeKey: 'open_claims' },
       { to: '/admin/acquisition-leads', label: 'Acquisitions', icon: Users, badgeKey: 'new_leads', badgeType: 'new' },
+      { to: '/admin/support', label: 'Support Chat', icon: MessagesSquare, badgeKey: 'chats_waiting' },
     ],
   },
 ]
@@ -45,6 +46,7 @@ const CEO_SECTIONS = [
       { to: '/ceo/dashboard', label: 'Dashboard', icon: LayoutDashboard },
       { to: '/ceo/expansion-fund', label: 'Expansion Fund', icon: TrendingUp },
       { to: '/admin/acquisition-leads', label: 'Acquisitions', icon: Users, badgeKey: 'new_leads', badgeType: 'new' },
+      { to: '/admin/support', label: 'Support Chat', icon: MessagesSquare, badgeKey: 'chats_waiting' },
     ],
   },
   {
@@ -63,7 +65,10 @@ function useSidebarCounts(isCeo, pathname) {
   useEffect(() => {
     if (isCeo) {
       apiClient.get('/shared/acquisition-leads', { silent: true })
-        .then(({ data }) => setCounts({ new_leads: (data.data ?? []).filter((l) => l.status === 'submitted').length }))
+        .then(({ data }) => setCounts((c) => ({ ...c, new_leads: (data.data ?? []).filter((l) => l.status === 'submitted').length })))
+        .catch(() => {})
+      apiClient.get('/shared/support', { params: { status: 'open' }, silent: true })
+        .then(({ data }) => setCounts((c) => ({ ...c, chats_waiting: data.counts?.waiting ?? 0 })))
         .catch(() => {})
     } else {
       apiClient.get('/admin/overview', { silent: true }).then(({ data }) => setCounts(data.counts ?? {})).catch(() => {})

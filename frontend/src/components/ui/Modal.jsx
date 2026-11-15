@@ -27,8 +27,9 @@ export function Modal({ open, onClose, title, children, footer, size = 'md' }) {
 
   // Portal to <body>: an animated (transformed) page wrapper would otherwise trap position:fixed.
   return createPortal(
-    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-slate-900/60 backdrop-blur-[2px] sm:items-center sm:p-4" onMouseDown={(e) => e.target === e.currentTarget && onClose?.()}>
-      <div ref={panel} role="dialog" aria-modal="true" aria-label={title} className={`flex max-h-[92dvh] w-full animate-rdg-fade-up flex-col overflow-hidden rounded-t-2xl bg-white shadow-lift sm:rounded-2xl ${width}`}>
+    <div className="fixed inset-0 z-[60] flex animate-rdg-fade-in items-end justify-center bg-slate-900/60 backdrop-blur-[2px] sm:items-center sm:p-4" onMouseDown={(e) => e.target === e.currentTarget && onClose?.()}>
+      {/* Phones: slides up as a bottom sheet. Larger screens: fades up in the centre. */}
+      <div ref={panel} role="dialog" aria-modal="true" aria-label={title} className={`flex max-h-[92dvh] w-full animate-rdg-sheet flex-col overflow-hidden rounded-t-2xl bg-white shadow-lift sm:animate-rdg-fade-up sm:rounded-2xl ${width}`}>
         {title && (
           <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
             <h3 className="text-base font-extrabold text-slate-900">{title}</h3>

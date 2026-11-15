@@ -150,7 +150,11 @@ function PasswordCard() {
   return (
     <Section icon={KeyRound} title="Change password" text="Use a password you don’t use on other websites.">
       <form onSubmit={save} className="space-y-4">
-        <Field label="Current password" className="sm:max-w-sm"><PasswordInput required autoComplete="current-password" value={form.current_password} onChange={(e) => setForm({ ...form, current_password: e.target.value })} /></Field>
+        {/* Same 2-column grid for all three, so every field has the same width and edges line up. */}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Current password"><PasswordInput required autoComplete="current-password" value={form.current_password} onChange={(e) => setForm({ ...form, current_password: e.target.value })} /></Field>
+          <div className="hidden sm:block" aria-hidden />
+        </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="New password"><PasswordInput required autoComplete="new-password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} /></Field>
           <Field label="Confirm new password"><PasswordInput required autoComplete="new-password" value={form.password_confirmation} onChange={(e) => setForm({ ...form, password_confirmation: e.target.value })} /></Field>

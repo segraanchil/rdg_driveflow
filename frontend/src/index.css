@@ -65,7 +65,7 @@
 }
 
 @layer components {
-  .rdg-card { @apply rounded-2xl border border-slate-200 bg-white shadow-card; }
+  .rdg-card { @apply rounded-2xl border border-slate-200 bg-white shadow-card transition-[box-shadow,transform,border-color] duration-300; }
   .rdg-btn { @apply inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-black/20 hover:bg-black; }
   .rdg-btn-dark { @apply inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800; }
   .rdg-btn-ghost { @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-900 hover:text-slate-900; }

@@ -76,6 +76,9 @@ class VehicleController extends Controller
     /** Vehicle detail + 360 viewer payload, including the "Last Updated" stamp and similar cars. */
     public function show(Vehicle $vehicle)
     {
+        // Cars bought from sellers stay private until staff inspect and publish them.
+        abort_if($vehicle->status === Vehicle::STATUS_FOR_INSPECTION, 404);
+
         Reservation::expireOverdue();
         $vehicle->refresh()->load('media');
 
