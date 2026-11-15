@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
-  Plus, Pencil, Trash2, ExternalLink, CarFront, Rotate3d, Image as ImageIcon, Armchair, ChevronLeft, ChevronRight, Upload, Info, X, Check, Eye,
+  Plus, Pencil, Trash2, ExternalLink, CarFront, Rotate3d, Image as ImageIcon, Armchair, ChevronLeft, ChevronRight, Upload, Info, X, Check, Eye, Camera,
 } from 'lucide-react'
 import apiClient, { backendUrl } from '../../api/client'
 import { Modal, useConfirm } from '../../components/ui/Modal'
@@ -150,6 +150,7 @@ export default function Inventory() {
                   <td>
                     <span className="flex justify-end gap-1">
                       <IconBtn label="Edit" onClick={() => setEditing(v)}><Pencil size={15} /></IconBtn>
+                      <IconBtn label="Capture 360° with a phone" as={Link} to={`/admin/inventory/${v.id}/capture`}><Camera size={15} /></IconBtn>
                       {v.status !== 'for_inspection' && <IconBtn label="View in showroom" as={Link} to={`/inventory/${v.id}`} target="_blank"><ExternalLink size={15} /></IconBtn>}
                       <IconBtn label="Delete" danger onClick={() => remove(v)}><Trash2 size={15} /></IconBtn>
                     </span>
@@ -252,7 +253,7 @@ function VehicleForm({ vehicle, globalMargin, onClose, onSaved }) {
   }
 
   function toggleType(index) {
-    const cycle = { photo: '360_frame', '360_frame': 'interior_360', interior_360: 'photo' }
+    const cycle = { photo: '360_frame', '360_frame': 'interior_frame', interior_frame: 'interior_360', interior_360: 'photo' }
     const next = media.map((m, i) => (i === index ? { ...m, type: cycle[m.type] ?? 'photo' } : m))
     saveOrder(next)
   }
@@ -327,7 +328,7 @@ function VehicleForm({ vehicle, globalMargin, onClose, onSaved }) {
                     <img src={backendUrl(`/storage/${m.file_path}`)} alt="" className="aspect-[4/3] w-full object-cover" loading="lazy" />
                     <button type="button" onClick={() => toggleType(i)} title="Click to change: photo → exterior 360° → interior 360°"
                       className={`absolute left-1 top-1 rounded px-1.5 py-0.5 text-[10px] font-bold ${m.type === 'photo' ? 'bg-white/90 text-slate-700' : 'bg-slate-900/80 text-white'}`}>
-                      {m.type === 'photo' ? 'Photo' : m.type === 'interior_360' ? 'Interior 360°' : `360° #${media.slice(0, i + 1).filter((x) => x.type === '360_frame').length}`}{m.is_sample ? ' · sample' : ''}
+                      {m.type === 'photo' ? 'Photo' : m.type === 'interior_360' ? 'Interior pano' : m.type === 'interior_frame' ? `Interior #${media.slice(0, i + 1).filter((x) => x.type === 'interior_frame').length}` : `360° #${media.slice(0, i + 1).filter((x) => x.type === '360_frame').length}`}{m.is_sample ? ' · sample' : ''}
                     </button>
                     <div className="absolute inset-x-0 bottom-0 flex justify-between bg-gradient-to-t from-black/60 p-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100">
                       <span className="flex gap-0.5">
@@ -341,6 +342,12 @@ function VehicleForm({ vehicle, globalMargin, onClose, onSaved }) {
               </div>
             )}
 
+            {vehicle && (
+              <Link to={`/admin/inventory/${vehicle.id}/capture`} className="mb-3 flex items-center gap-3 rounded-xl bg-slate-900 p-3 text-white transition hover:bg-black">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/10"><Camera size={19} /></span>
+                <span className="min-w-0 flex-1 text-sm"><strong className="block">Capture 360° with a phone</strong><span className="text-xs text-slate-300">Guided walk-around and interior look-around. The phone takes each shot at the right angle.</span></span>
+              </Link>
+            )}
             <div className="rounded-xl border-2 border-dashed border-slate-200 p-4">
               <div className="mb-3 flex flex-wrap items-center gap-2">
                 <span className="text-sm font-semibold text-slate-700">Upload as</span>

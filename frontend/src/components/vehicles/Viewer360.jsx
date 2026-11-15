@@ -17,10 +17,12 @@ export default function Viewer360({ vehicle, compact = false, autoSpin = false }
   const media = vehicle?.media ?? []
   const frames = media.filter((m) => m.type === '360_frame')
   const interior = media.find((m) => m.type === 'interior_360')
+  // Interior taken with the guided capture page: a set of frames, turned like the exterior.
+  const interiorFrames = media.filter((m) => m.type === 'interior_frame')
   const photos = media.filter((m) => m.type === 'photo')
   const modes = [
     frames.length > 1 && { key: 'exterior', label: 'Exterior 360°', icon: Rotate3d },
-    interior && { key: 'interior', label: 'Interior 360°', icon: Armchair },
+    (interiorFrames.length > 1 || interior) && { key: 'interior', label: 'Interior 360°', icon: Armchair },
     photos.length > 0 && { key: 'photos', label: `Photos (${photos.length})`, icon: Images },
   ].filter(Boolean)
   const [mode, setMode] = useState(modes[0]?.key ?? 'photos')
@@ -42,7 +44,7 @@ export default function Viewer360({ vehicle, compact = false, autoSpin = false }
     )
   }
 
-  const current = mode === 'exterior' ? frames : mode === 'interior' ? [interior] : photos.length ? photos : frames
+  const current = mode === 'exterior' ? frames : mode === 'interior' ? (interiorFrames.length > 1 ? interiorFrames : [interior]) : photos.length ? photos : frames
   const isSample = current.some((m) => m?.is_sample)
   const updatedAt = media.reduce((latest, m) => (!latest || new Date(m.updated_at ?? m.created_at) > new Date(latest) ? m.updated_at ?? m.created_at : latest), null)
   const toggleFull = () => (document.fullscreenElement ? document.exitFullscreen() : box.current?.requestFullscreen?.())
@@ -62,7 +64,9 @@ export default function Viewer360({ vehicle, compact = false, autoSpin = false }
 
       <div ref={box} className={`relative overflow-hidden rounded-xl bg-slate-200 ${full ? 'flex items-center bg-black' : ''}`}>
         {mode === 'exterior' && <Spin frames={frames} vehicle={vehicle} full={full} autoSpin={autoSpin} />}
-        {mode === 'interior' && <Pano image={interior} full={full} />}
+        {mode === 'interior' && (interiorFrames.length > 1
+          ? <Spin frames={interiorFrames} vehicle={vehicle} full={full} hint="Drag to look around" label="Interior 360° view" />
+          : <Pano image={interior} full={full} />)}
         {mode === 'photos' && <Gallery photos={current} vehicle={vehicle} full={full} />}
 
         {isSample && (
@@ -89,7 +93,7 @@ export default function Viewer360({ vehicle, compact = false, autoSpin = false }
   )
 }
 
-function Spin({ frames, vehicle, full, autoSpin }) {
+function Spin({ frames, vehicle, full, autoSpin, hint = 'Drag to rotate', label = 'Exterior 360° view' }) {
   const [index, setIndex] = useState(0)
   const [spinning, setSpinning] = useState(autoSpin)
   const [touched, setTouched] = useState(false)
@@ -107,7 +111,7 @@ function Spin({ frames, vehicle, full, autoSpin }) {
   const stop = () => { setSpinning(false); setTouched(true) }
 
   return (
-    <div className="w-full" tabIndex={0} aria-label="Exterior 360° view. Drag or use the arrow keys to rotate."
+    <div className="w-full" tabIndex={0} aria-label={`${label}. Drag or use the arrow keys to turn.`}
       onKeyDown={(e) => { if (e.key === 'ArrowLeft') { stop(); step(-1) } if (e.key === 'ArrowRight') { stop(); step(1) } }}>
       <img
         src={url(frames[index])}
@@ -121,7 +125,7 @@ function Spin({ frames, vehicle, full, autoSpin }) {
       />
       {!touched && (
         <span className="pointer-events-none absolute inset-x-0 bottom-14 mx-auto flex w-max animate-pulse items-center gap-2 rounded-full bg-slate-900/75 px-4 py-2 text-sm font-semibold text-white backdrop-blur">
-          <Hand size={16} /> Drag to rotate
+          <Hand size={16} /> {hint}
         </span>
       )}
       <button type="button" onClick={() => { stop(); step(-1) }} aria-label="Rotate left" className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 text-slate-800 shadow hover:bg-white"><ChevronLeft size={18} /></button>

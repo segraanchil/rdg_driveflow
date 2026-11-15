@@ -148,10 +148,11 @@ Route::middleware('auth:sanctum')->group(function () {
         // Vehicle $vehicle type-hint, since implicit route-model binding matches by name.
         Route::apiResource('inventory', InventoryController::class)
             ->parameters(['inventory' => 'vehicle'])
-            ->only(['index', 'store', 'update', 'destroy']);
+            ->only(['index', 'show', 'store', 'update', 'destroy']);
         Route::delete('/inventory/{vehicle}/media/{media}', [InventoryController::class, 'destroyMedia']);
         Route::put('/inventory/{vehicle}/media/order', [InventoryController::class, 'reorderMedia']);
         Route::post('/inventory/{vehicle}/publish', [InventoryController::class, 'publish']);
+        Route::post('/inventory/{vehicle}/capture', [InventoryController::class, 'capture']);
 
         Route::get('/overview', [OverviewController::class, 'index']);
 

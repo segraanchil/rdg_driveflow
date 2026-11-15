@@ -28,6 +28,7 @@ const ResetPassword = lazy(() => import('./pages/auth/ResetPassword'))
 const Account = lazy(() => import('./pages/Account'))
 const AdminOverview = lazy(() => import('./pages/admin/Overview'))
 const AdminInventory = lazy(() => import('./pages/admin/Inventory'))
+const Capture360 = lazy(() => import('./pages/admin/Capture360'))
 const AdminReservations = lazy(() => import('./pages/admin/Reservations'))
 const Sales = lazy(() => import('./pages/admin/Sales'))
 const Financing = lazy(() => import('./pages/admin/Financing'))
@@ -111,6 +112,7 @@ export default function App() {
         <Route path="/admin" element={<Navigate to="/admin/overview" replace />} />
         <Route path="/admin/overview" element={<AdminOverview />} />
         <Route path="/admin/inventory" element={<AdminInventory />} />
+        <Route path="/admin/inventory/:id/capture" element={<Capture360 />} />
         <Route path="/admin/reservations" element={<AdminReservations />} />
         <Route path="/admin/test-drives" element={<AdminTestDrives />} />
         <Route path="/admin/sales" element={<Sales />} />

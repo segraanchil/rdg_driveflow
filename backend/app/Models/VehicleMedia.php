@@ -17,7 +17,10 @@ class VehicleMedia extends Model
     /** One wide look-around panorama of the cabin (drag left/right). */
     public const TYPE_INTERIOR_360 = 'interior_360';
 
-    public const TYPES = [self::TYPE_360_FRAME, self::TYPE_INTERIOR_360, self::TYPE_PHOTO];
+    /** Interior look-around taken frame by frame with the guided capture page (no stitching). */
+    public const TYPE_INTERIOR_FRAME = 'interior_frame';
+
+    public const TYPES = [self::TYPE_360_FRAME, self::TYPE_INTERIOR_360, self::TYPE_INTERIOR_FRAME, self::TYPE_PHOTO];
 
     protected $table = 'vehicle_media';
 

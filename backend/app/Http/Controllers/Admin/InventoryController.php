@@ -48,6 +48,11 @@ class InventoryController extends Controller
         ]);
     }
 
+    public function show(Vehicle $vehicle)
+    {
+        return response()->json($vehicle->load('media')->makeVisible(Vehicle::STAFF_FIELDS));
+    }
+
     public function store(Request $request)
     {
         $data = $this->validated($request, true);
@@ -100,6 +105,34 @@ class InventoryController extends Controller
         $vehicle->save();
 
         $this->storePhotos($vehicle, $photos, $mediaType);
+
+        return response()->json($vehicle->load('media')->makeVisible(Vehicle::STAFF_FIELDS));
+    }
+
+    /**
+     * Guided 360° capture upload (Admin → Inventory → Capture 360°). The phone sends the frames in
+     * small batches; the first batch has `replace` set, which removes the car's previous set of the
+     * same kind so a re-shoot never mixes old and new angles.
+     */
+    public function capture(Request $request, Vehicle $vehicle)
+    {
+        $data = $request->validate([
+            'kind' => ['required', Rule::in(['exterior', 'interior'])],
+            'replace' => ['nullable', 'boolean'],
+            'frames' => ['required', 'array', 'min:1', 'max:12'],
+            'frames.*' => ['file', 'image', 'max:10240'],
+        ]);
+        $type = $data['kind'] === 'exterior' ? VehicleMedia::TYPE_360_FRAME : VehicleMedia::TYPE_INTERIOR_FRAME;
+
+        if ($request->boolean('replace')) {
+            foreach ($vehicle->media()->where('type', $type)->where('is_sample', false)->get() as $old) {
+                Storage::disk('public')->delete($old->file_path);
+                $old->delete();
+            }
+        }
+
+        $this->storePhotos($vehicle, $request->file('frames', []), $type);
+        $vehicle->update(['last_updated' => now()]);
 
         return response()->json($vehicle->load('media')->makeVisible(Vehicle::STAFF_FIELDS));
     }
