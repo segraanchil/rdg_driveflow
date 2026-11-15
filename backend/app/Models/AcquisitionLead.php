@@ -57,6 +57,12 @@ class AcquisitionLead extends Model
         'offer_amount' => 'decimal:2',
     ];
 
+    /** The inventory record created when this car was accepted (see LeadToInventory). */
+    public function vehicle(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Vehicle::class, 'acquisition_lead_id');
+    }
+
     public function isClosed(): bool
     {
         return in_array($this->status, self::CLOSED, true);

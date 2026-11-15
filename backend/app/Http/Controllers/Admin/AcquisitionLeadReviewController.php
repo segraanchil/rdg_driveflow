@@ -17,7 +17,24 @@ class AcquisitionLeadReviewController extends Controller
 {
     public function index(Request $request)
     {
-        return response()->json(AcquisitionLead::with('seller')->latest()->paginate(50));
+        return response()->json(AcquisitionLead::with(['seller', 'vehicle:id,acquisition_lead_id,status'])->latest()->paginate(50));
+    }
+
+    /**
+     * Adds an accepted car to Inventory ("for inspection") when that didn't happen automatically,
+     * e.g. leads accepted before this step existed.
+     */
+    public function addToInventory(AcquisitionLead $lead)
+    {
+        if ($lead->status !== AcquisitionLead::STATUS_ACCEPTED) {
+            throw ValidationException::withMessages(['lead' => ['Only accepted cars can be added to Inventory.']]);
+        }
+        $vehicle = \App\Support\LeadToInventory::create($lead);
+        if (! $vehicle) {
+            throw ValidationException::withMessages(['lead' => ['This car is already in Inventory.']]);
+        }
+
+        return response()->json($vehicle, 201);
     }
 
     /** Which status each status may move to. Accepted and declined leads are closed for good. */

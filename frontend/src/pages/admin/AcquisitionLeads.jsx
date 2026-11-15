@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom'
 import apiClient, { backendUrl } from '../../api/client'
 import { useConfirm } from '../../components/ui/Modal'
 import { ProgressSteps } from '../../components/ui/kit'
+import { useAuth } from '../../context/AuthContext'
 import PesoInput, { pesoInWords } from '../../components/ui/PesoInput'
 import { toast } from '../../lib/toast'
 
@@ -238,11 +239,7 @@ function LeadCard({ lead, onSaved, onPhoto }) {
                       : { seller: `The seller declined the ${peso(lead.offer_amount)} offer`, staff: 'Declined by staff' }[lead.closed_by] ?? 'Declined'}
                   </p>
                   <p className="text-slate-500">{lead.status === 'accepted' ? 'Call the seller to schedule the inspection and hand-over.' : 'This lead is closed.'} <span className="inline-flex items-center gap-1 text-slate-400"><Lock size={12} /> Can’t be edited anymore.</span></p>
-                  {lead.status === 'accepted' && (
-                    <Link to="/admin/inventory?status=for_inspection" className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-bold text-white hover:bg-black">
-                      <CarFront size={13} /> In Inventory as “For inspection” <ArrowRight size={13} />
-                    </Link>
-                  )}
+                  {lead.status === 'accepted' && <InventoryLink lead={lead} onAdded={onSaved} />}
                   {lead.admin_notes && <p className="mt-2 rounded-lg bg-slate-50 p-2 text-xs text-slate-600"><StickyNote size={12} className="mr-1 inline" />{lead.admin_notes}</p>}
                 </div>
               </div>
@@ -303,6 +300,48 @@ function LeadCard({ lead, onSaved, onPhoto }) {
       {confirmUi}
     </article>
   )
+}
+
+const VEHICLE_STATE = { for_inspection: 'In Inventory · For inspection', available: 'On sale in the showroom', reserved: 'Reserved by a buyer', sold: 'Sold', under_repair: 'In Inventory · In repair' }
+
+/**
+ * Where an accepted car is now. Links to the exact car in Inventory (Admin), or offers
+ * "Add to Inventory" for cars accepted before that happened automatically.
+ */
+function InventoryLink({ lead, onAdded }) {
+  const { user } = useAuth()
+  const [busy, setBusy] = useState(false)
+  const v = lead.vehicle
+  const isAdmin = user?.role === 'admin'
+
+  async function add() {
+    setBusy(true)
+    try {
+      await apiClient.post(`/shared/acquisition-leads/${lead.id}/to-inventory`, {}, { loadingText: 'Adding to Inventory…', quietErrors: true })
+      toast.success('Added to Inventory as “For inspection”')
+      onAdded()
+    } catch (err) {
+      toast.error(err.response?.data?.errors ? Object.values(err.response.data.errors)[0][0] : 'Could not add the car.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  if (!v) {
+    return isAdmin ? (
+      <div className="mt-2 rounded-lg bg-amber-50 p-2.5 text-xs text-amber-900">
+        <p>This car isn’t in Inventory yet{lead.offer_amount ? '' : ' (no offer amount on file; set its cost after adding)'}.</p>
+        <button onClick={add} disabled={busy} className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 font-bold text-white hover:bg-black"><CarFront size={13} /> Add to Inventory</button>
+      </div>
+    ) : <p className="mt-2 text-xs text-slate-500">Not in Inventory yet. An admin can add it from this card.</p>
+  }
+
+  const label = VEHICLE_STATE[v.status] ?? 'In Inventory'
+  return isAdmin ? (
+    <Link to={`/admin/inventory?status=${v.status}&edit=${v.id}`} className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-bold text-white hover:bg-black">
+      <CarFront size={13} /> {label} <ArrowRight size={13} />
+    </Link>
+  ) : <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700"><CarFront size={13} /> {label}</p>
 }
 
 /**

@@ -210,6 +210,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware(['role:admin,ceo', 'mfa'])->prefix('shared')->group(function () {
         Route::get('/acquisition-leads', [AcquisitionLeadReviewController::class, 'index']);
         Route::patch('/acquisition-leads/{lead}', [AcquisitionLeadReviewController::class, 'update']);
+        Route::post('/acquisition-leads/{lead}/to-inventory', [AcquisitionLeadReviewController::class, 'addToInventory']);
         Route::get('/margin-setting', [MarginSettingController::class, 'show']); // default margin for new cars
 
         Route::get('/notifications', [NotificationController::class, 'index']);

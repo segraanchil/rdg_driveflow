@@ -42,10 +42,11 @@ class LeadToInventory
             'fuel_type' => $s['fuel_type'] ?? null,
             'color' => $s['color'] ?? null,
             'description' => $notes !== '' ? mb_substr($notes, 0, 3000) : null,
-            'acquisition_cost' => $cost,
-            'repair_fees' => 0,
-            'margin_percent' => $margin,
-            'selling_price' => round($cost * (1 + $margin / 100), 2),
+            // Decimal columns: pass strings so the money cast doesn't round-trip through floats.
+            'acquisition_cost' => number_format($cost, 2, '.', ''),
+            'repair_fees' => '0.00',
+            'margin_percent' => number_format((float) $margin, 2, '.', ''),
+            'selling_price' => number_format(round($cost * (1 + $margin / 100), 2), 2, '.', ''),
             'status' => Vehicle::STATUS_FOR_INSPECTION,
             'last_updated' => now(),
         ]);
