@@ -15,7 +15,7 @@ class SupportConversation extends Model
 
     public const STATUS_CLOSED = 'closed';
 
-    protected $fillable = ['user_id', 'guest_token', 'name', 'contact', 'page', 'status', 'assigned_to', 'last_message_at', 'staff_read_at', 'visitor_read_at'];
+    protected $fillable = ['user_id', 'guest_token', 'name', 'contact', 'page', 'source', 'assistant_session', 'status', 'assigned_to', 'last_message_at', 'staff_read_at', 'visitor_read_at'];
 
     protected $hidden = ['guest_token'];
 
@@ -34,7 +34,7 @@ class SupportConversation extends Model
     public function lastMessage(): HasOne
     {
         return $this->hasOne(SupportMessage::class, 'conversation_id')
-            ->ofMany(['id' => 'max'], fn ($q) => $q->where('sender', '!=', SupportMessage::SENDER_SYSTEM));
+            ->ofMany(['id' => 'max'], fn ($q) => $q->whereNotIn('sender', [SupportMessage::SENDER_SYSTEM, SupportMessage::SENDER_BOT]));
     }
 
     public function user(): BelongsTo
@@ -53,13 +53,13 @@ class SupportConversation extends Model
         return $q->where('status', self::STATUS_OPEN)
             ->whereIn('id', SupportMessage::query()
                 ->selectRaw('conversation_id')
-                ->whereIn('id', SupportMessage::query()->selectRaw('max(id)')->where('sender', '!=', SupportMessage::SENDER_SYSTEM)->groupBy('conversation_id'))
+                ->whereIn('id', SupportMessage::query()->selectRaw('max(id)')->whereNotIn('sender', [SupportMessage::SENDER_SYSTEM, SupportMessage::SENDER_BOT])->groupBy('conversation_id'))
                 ->where('sender', SupportMessage::SENDER_VISITOR));
     }
 
-    public function post(string $sender, string $body, ?int $staffId = null): SupportMessage
+    public function post(string $sender, string $body, ?int $staffId = null, bool $fromAssistant = false): SupportMessage
     {
-        $message = $this->messages()->create(['sender' => $sender, 'body' => $body, 'staff_id' => $staffId, 'created_at' => now()]);
+        $message = $this->messages()->create(['sender' => $sender, 'body' => $body, 'staff_id' => $staffId, 'from_assistant' => $fromAssistant, 'created_at' => now()]);
         $this->forceFill(['last_message_at' => now()])->save();
 
         return $message;

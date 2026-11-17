@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { ArrowLeft, Send, Phone, Mail, UserRound, Lock, Unlock, MessagesSquare, Globe, Headset, Search } from 'lucide-react'
+import { ArrowLeft, Send, Phone, Mail, UserRound, Lock, Unlock, MessagesSquare, Globe, Headset, Search, Bot } from 'lucide-react'
 import apiClient from '../../api/client'
 import { PageHeader } from '../../components/ui/kit'
 import { useConfirm } from '../../components/ui/Modal'
@@ -102,6 +102,7 @@ export default function SupportInbox() {
                     <span className="mt-1 flex flex-wrap gap-1">
                       {c.waiting && <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700">Waiting</span>}
                       {c.status === 'closed' && <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">Closed</span>}
+                      {c.source === 'assistant' && <span className="inline-flex items-center gap-1 rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-bold text-violet-700"><Bot size={10} /> High intent</span>}
                       {c.account && <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold capitalize text-slate-600">{c.account.role}</span>}
                     </span>
                   </span>
@@ -200,6 +201,7 @@ function Conversation({ id, onBack, onChanged }) {
               </a>
             )}
             {conv.account ? <span className="inline-flex items-center gap-1"><UserRound size={12} /> {conv.account.role} account</span> : <span>Guest</span>}
+            {conv.source === 'assistant' && <span className="inline-flex items-center gap-1 font-semibold text-violet-700"><Bot size={12} /> Flagged by the assistant</span>}
             {conv.page && <span className="hidden items-center gap-1 sm:inline-flex"><Globe size={12} /> {conv.page}</span>}
           </p>
         </div>
@@ -235,14 +237,20 @@ function Conversation({ id, onBack, onChanged }) {
 }
 
 function StaffBubble({ m }) {
-  if (m.sender === 'system') return <p className="mx-auto max-w-[85%] animate-rdg-fade-in rounded-lg bg-white/80 px-3 py-1.5 text-center text-xs text-slate-500 ring-1 ring-slate-200">{m.body}</p>
-  const mine = m.sender === 'staff'
+  if (m.sender === 'system') {
+    // The "Flagged as a high-intent buyer…" / "Buying signal…" notes stand out; other system lines stay quiet.
+    const flag = /^(Flagged|Buying signal)/.test(m.body)
+    return <p className={`mx-auto max-w-[85%] animate-rdg-fade-in rounded-lg px-3 py-1.5 text-center text-xs ${flag ? 'bg-violet-50 font-semibold text-violet-800 ring-1 ring-violet-200' : 'bg-white/80 text-slate-500 ring-1 ring-slate-200'}`}>{m.body}</p>
+  }
+  // Dealership side (staff and the assistant) on the right, the visitor on the left.
+  const ours = m.sender === 'staff' || m.sender === 'bot'
+  const bot = m.sender === 'bot'
   const time = new Date(m.at).toLocaleString('en-PH', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
   return (
-    <div className={`flex animate-rdg-fade-up ${mine ? 'justify-end' : ''}`}>
-      <div className={`max-w-[80%] ${mine ? 'text-right' : ''}`}>
-        <p className={`inline-block whitespace-pre-line rounded-2xl px-3 py-2 text-left ${mine ? 'rounded-br-sm bg-slate-900 text-white' : 'rounded-bl-sm bg-white text-slate-800 shadow-sm ring-1 ring-slate-100'}`}>{m.body}</p>
-        <p className="mt-0.5 text-[10px] text-slate-400">{mine ? `${m.staff_name ?? 'Staff'} · ` : ''}{time}</p>
+    <div className={`flex animate-rdg-fade-up ${ours ? 'justify-end' : ''}`}>
+      <div className={`max-w-[80%] ${ours ? 'text-right' : ''}`}>
+        <p className={`inline-block whitespace-pre-line rounded-2xl px-3 py-2 text-left ${bot ? 'rounded-br-sm bg-slate-100 text-slate-700 ring-1 ring-slate-200' : ours ? 'rounded-br-sm bg-slate-900 text-white' : 'rounded-bl-sm bg-white text-slate-800 shadow-sm ring-1 ring-slate-100'}`}>{m.body}</p>
+        <p className="mt-0.5 text-[10px] text-slate-400">{bot ? 'RDG assistant (automatic) · ' : ours ? `${m.staff_name ?? 'Staff'} · ` : ''}{time}</p>
       </div>
     </div>
   )

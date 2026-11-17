@@ -99,6 +99,7 @@ class SupportInboxController extends Controller
             'name' => $c->name,
             'contact' => $c->contact,
             'status' => $c->status,
+            'source' => $c->source ?? 'visitor',
             'account' => $c->user ? ['name' => $c->user->name, 'email' => $c->user->email, 'role' => $c->user->role] : null,
             'assignee' => $c->assignee?->name,
             'last_message' => $last ? ['sender' => $last->sender, 'body' => \Illuminate\Support\Str::limit($last->body, 120), 'at' => $last->created_at] : null,

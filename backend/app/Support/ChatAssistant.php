@@ -32,16 +32,17 @@ class ChatAssistant
         'available pa', 'kukunin', 'bibilhin', 'bilhin', 'kunin ko', 'gusto ko', 'magpa-reserve', 'pareserve',
     ];
 
-    /** @return array{text: string, links: array<int, array{label: string, to: string}>, high_intent: bool} */
+    /** @return array{text: string, links: array<int, array{label: string, to: string}>, high_intent: bool, intent_terms: string[]} */
     public function reply(string $message): array
     {
         $text = Str::lower(trim($message));
         $settings = Setting::allValues();
-        $highIntent = $this->has($text, self::HIGH_INTENT);
+        $intentTerms = $this->matches($text, self::HIGH_INTENT);
+        $highIntent = $intentTerms !== [];
 
         $answer = match (true) {
             $this->has($text, ['human', 'agent', 'person', 'staff', 'tao', 'kausap']) => $this->say(
-                'Sure. Tap "Talk to a human agent" below and our staff will be alerted to join this chat.'),
+                'Sure. Tap "Talk to a person" below and our staff will join this chat.'),
             $this->has($text, ['sell my', 'sell a car', 'trade in', 'trade-in', 'ibenta', 'benta ko', 'appraise', 'appraisal']) => $this->say(
                 'We buy cars too! Submit your car’s details and photos in our Sell Your Car portal and our team will send you an offer.',
                 [['label' => 'Sell your car', 'to' => '/sell-your-car']]),
@@ -61,7 +62,7 @@ class ChatAssistant
             default => $this->vehicleAnswer($text) ?? $this->fallback($text),
         };
 
-        return [...$answer, 'high_intent' => $highIntent];
+        return [...$answer, 'high_intent' => $highIntent, 'intent_terms' => $intentTerms];
     }
 
     private function vehicleAnswer(string $text): ?array
@@ -202,7 +203,13 @@ class ChatAssistant
             return $this->say('You’re welcome! Anything else I can help with?');
         }
 
-        return $this->say('I’m not sure I got that. You can ask things like "Do you have a Vios?", "cars under 600k", "financing requirements" or "how to reserve". Or tap "Talk to a human agent" below.');
+        return $this->say('I’m not sure I got that. You can ask things like "Do you have a Vios?", "cars under 600k", "financing requirements" or "how to reserve". Or tap "Talk to a person" below.');
+    }
+
+    /** The phrases from $needles that appear in the message (whole words), e.g. ['reserve', 'test drive']. */
+    private function matches(string $text, array $needles): array
+    {
+        return array_values(array_filter($needles, fn ($n) => (bool) preg_match('/(^|[^a-z])'.preg_quote($n, '/').'s?([^a-z]|$)/u', $text)));
     }
 
     private function has(string $text, array $needles): bool

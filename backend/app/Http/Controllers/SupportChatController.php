@@ -83,7 +83,8 @@ class SupportChatController extends Controller
 
     private function payload(SupportConversation $conversation, ?int $after): array
     {
-        $messages = $conversation->messages()->with('staff:id,name')
+        // Lines copied from the assistant chat stay staff-only: the visitor already sees them in the Assistant tab.
+        $messages = $conversation->messages()->with('staff:id,name')->where('from_assistant', false)
             ->when($after, fn ($q) => $q->where('id', '>', $after))
             ->get()
             ->map(fn (SupportMessage $m) => [

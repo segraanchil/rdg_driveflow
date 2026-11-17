@@ -123,8 +123,16 @@ export default function ChatWidget() {
     push({ sender: 'user', text: message })
     setTyping(true)
     try {
-      const { data } = await apiClient.post('/chat/message', { session_id: sessionId, text: message, page: pathname }, { silent: true })
+      // The chat so far goes along, so if this message is a buying signal staff can read the whole conversation.
+      const history = messages.slice(1).filter((m) => m.sender === 'user' || m.sender === 'bot').slice(-12).map((m) => ({ sender: m.sender, text: String(m.text).slice(0, 2000) }))
+      const { data } = await apiClient.post('/chat/message', { session_id: sessionId, text: message, page: pathname, history }, { silent: true })
       push(data.reply)
+      // Flagged as a likely buyer: staff can now reply, and their messages arrive in the Staff chat tab.
+      if (data.support && !support) {
+        const v = { id: data.support.id, token: data.support.token }
+        saveSupport(v)
+        setSupport(v)
+      }
     } catch {
       push({ sender: 'bot', text: 'Sorry, I can’t reply right now. Please try again, or tap “Talk to a person”.' })
     } finally {
@@ -208,7 +216,11 @@ export default function ChatWidget() {
             {staffMode ? (
               <>
                 {live.messages.map((m) => <LiveBubble key={m.id} m={m} />)}
-                {live.messages.length === 0 && <p className="py-6 text-center text-xs text-slate-400">Loading your chat…</p>}
+                {live.messages.length === 0 && (
+                  <p className="mx-auto max-w-[90%] rounded-lg bg-slate-100 px-3 py-2 text-center text-xs text-slate-600">
+                    Our staff can see your chat with the assistant and may join to help. Write here to talk to a person.
+                  </p>
+                )}
               </>
             ) : (
               <>

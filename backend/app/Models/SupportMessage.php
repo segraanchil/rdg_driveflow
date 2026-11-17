@@ -17,9 +17,9 @@ class SupportMessage extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['conversation_id', 'sender', 'staff_id', 'body', 'created_at'];
+    protected $fillable = ['conversation_id', 'sender', 'staff_id', 'body', 'from_assistant', 'created_at'];
 
-    protected $casts = ['created_at' => 'datetime'];
+    protected $casts = ['created_at' => 'datetime', 'from_assistant' => 'boolean'];
 
     public function conversation(): BelongsTo
     {
