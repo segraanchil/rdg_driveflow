@@ -4,7 +4,7 @@
 // notifications (see App\Services\Firebase\FirebaseService). Core business
 // data (vehicles, reservations, sales, etc.) always lives in MySQL.
 //
-// No project is configured yet — ask before creating one. Until
+// Setup: docs/FIREBASE_SETUP.md, then `php artisan rdg:firebase-check`. Until
 // FIREBASE_CREDENTIALS is set, FirebaseService no-ops instead of throwing,
 // so the rest of the app runs fine without it.
 

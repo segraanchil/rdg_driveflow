@@ -39,3 +39,7 @@ Thumbs.db
 /docu.txt
 /to_add.txt
 /CLAUDE.md
+
+# Firebase service-account key (secret, never commit)
+backend/storage/app/firebase/
+*firebase-adminsdk*.json
