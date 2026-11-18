@@ -15,7 +15,9 @@ class AdminAlert
     public static function notify(string $type, string $title, ?string $body = null, ?string $link = null, string $audience = 'admin'): void
     {
         try {
-            AdminNotification::create(compact('audience', 'type', 'title', 'body', 'link'));
+            // actor_id: whoever's request raised the alert (buyer, seller, signed-in visitor); null for guests.
+            $actor_id = request()?->user('sanctum')?->id ?? auth()->id();
+            AdminNotification::create(compact('audience', 'actor_id', 'type', 'title', 'body', 'link'));
             app(FirebaseService::class)->pushDashboardNotification($audience, compact('type', 'title', 'body', 'link') + ['at' => now()->toIso8601String()]);
         } catch (\Throwable $e) {
             report($e);

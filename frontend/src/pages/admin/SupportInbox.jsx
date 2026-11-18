@@ -5,6 +5,7 @@ import apiClient from '../../api/client'
 import { PageHeader } from '../../components/ui/kit'
 import { useConfirm } from '../../components/ui/Modal'
 import { toast } from '../../lib/toast'
+import { listen } from '../../lib/live'
 
 const FILTERS = [['open', 'Open'], ['closed', 'Closed'], ['all', 'All']]
 const QUICK = [
@@ -47,8 +48,9 @@ export default function SupportInbox() {
 
   useEffect(() => {
     const first = setTimeout(loadList, q ? 250 : 0)
-    const id = setInterval(() => { if (!document.hidden) loadList() }, 10000)
-    return () => { clearTimeout(first); clearInterval(id) }
+    const off = listen('support_feed', loadList) // instant with Firebase; the timer is the fallback
+    const id = setInterval(() => { if (!document.hidden) loadList() }, off ? 30000 : 10000)
+    return () => { clearTimeout(first); clearInterval(id); off?.() }
   }, [loadList, q])
 
   const select = (id) => setParams(id ? { c: String(id) } : {}, { replace: false })
@@ -149,8 +151,9 @@ function Conversation({ id, onBack, onChanged }) {
 
   useEffect(() => {
     load().then(onChanged)
-    const t = setInterval(() => { if (!document.hidden) load() }, 4000)
-    return () => clearInterval(t)
+    const off = listen('support_feed', load) // any new message: fetch what's new for this chat
+    const t = setInterval(() => { if (!document.hidden) load() }, off ? 20000 : 4000)
+    return () => { clearInterval(t); off?.() }
   }, [load]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' }) }, [messages.length])

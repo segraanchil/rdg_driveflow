@@ -19,7 +19,7 @@ class Setting extends Model
 
     protected $keyType = 'string';
 
-    protected $fillable = ['key', 'value'];
+    protected $fillable = ['key', 'value', 'updated_by'];
 
     private const CACHE_KEY = 'settings.all';
 
@@ -88,7 +88,7 @@ class Setting extends Model
             if (! array_key_exists($key, self::DEFAULTS)) {
                 continue;
             }
-            static::query()->updateOrCreate(['key' => $key], ['value' => $value === null ? '' : (string) $value]);
+            static::query()->updateOrCreate(['key' => $key], ['value' => $value === null ? '' : (string) $value, 'updated_by' => auth()->id()]);
         }
         Cache::forget(self::CACHE_KEY);
     }

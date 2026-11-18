@@ -4,6 +4,7 @@ import { MessageCircle, X, Send, UserRound, Bot, ArrowRight, Headset } from 'luc
 import apiClient from '../../api/client'
 import { useAuth } from '../../context/AuthContext'
 import { chatKey, readJson, supportKey, writeJson } from '../../lib/chatStorage'
+import { listen } from '../../lib/live'
 
 const SUGGESTIONS = ['What cars do you have?', 'Cars under ₱600K', 'Financing requirements', 'How do I reserve?', 'Where are you located?']
 const WELCOME = { sender: 'bot', text: 'Hi! I’m the RDG assistant. Ask me about our cars, prices, financing, reservations or test drives, any time of day.' }
@@ -104,8 +105,11 @@ export default function ChatWidget() {
   useEffect(() => {
     if (!support) return
     poll()
-    const id = setInterval(() => { if (!document.hidden) poll() }, open && mode === 'staff' ? 4000 : 30000)
-    return () => clearInterval(id)
+    // Firebase (when configured) pushes each new message instantly; the timer is the fallback.
+    const off = support.token ? listen(`support/${support.token}/messages`, poll) : null
+    const fallback = off ? 30000 : open && mode === 'staff' ? 4000 : 30000
+    const id = setInterval(() => { if (!document.hidden) poll() }, fallback)
+    return () => { clearInterval(id); off?.() }
   }, [support, open, mode, poll])
 
   useEffect(() => { if (open && mode === 'staff') setUnread(false) }, [open, mode])

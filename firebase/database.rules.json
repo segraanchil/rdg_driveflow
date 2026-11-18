@@ -1,0 +1,20 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "chats": {
+      "$sessionId": { ".read": "$sessionId.length >= 32" }
+    },
+    "support": {
+      "$guestToken": { ".read": "$guestToken.length >= 40" }
+    },
+    "support_feed": {
+      ".read": true,
+      ".indexOn": ["at"]
+    },
+    "alerts": {
+      "$role": { ".read": true }
+    }
+  }
+}

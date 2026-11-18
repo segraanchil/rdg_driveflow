@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Bell, ClipboardCheck, Landmark, ShieldCheck, CalendarClock, Users, MessageCircle, CheckCheck, Info } from 'lucide-react'
 import apiClient from '../../api/client'
 import { useAuth } from '../../context/AuthContext'
+import { listen } from '../../lib/live'
 
 const ICONS = {
   reservation: [ClipboardCheck, 'bg-amber-100 text-amber-600'],
@@ -54,10 +55,12 @@ export default function NotificationBell({ tone = 'dark', endpoint = '/shared/no
 
   useEffect(() => {
     load()
+    // Staff bells hear new alerts instantly through Firebase (alerts/{role}); the timer is the fallback.
+    const offs = endpoint.startsWith('/shared') && user ? [listen(`alerts/${user.role}`, load), listen('alerts/both', load)] : []
     const id = setInterval(load, 45000)
     document.addEventListener('visibilitychange', load)
-    return () => { clearInterval(id); document.removeEventListener('visibilitychange', load) }
-  }, [load])
+    return () => { clearInterval(id); document.removeEventListener('visibilitychange', load); offs.forEach((off) => off?.()) }
+  }, [load, endpoint, user])
 
   useEffect(() => {
     const close = (e) => { if (box.current && !box.current.contains(e.target)) setOpen(false) }

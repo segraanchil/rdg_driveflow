@@ -61,6 +61,8 @@ class SupportConversation extends Model
     {
         $message = $this->messages()->create(['sender' => $sender, 'body' => $body, 'staff_id' => $staffId, 'from_assistant' => $fromAssistant, 'created_at' => now()]);
         $this->forceFill(['last_message_at' => now()])->save();
+        // Live channel: stream the message to open chat windows and the staff inbox.
+        app(\App\Services\Firebase\FirebaseService::class)->pushSupportMessage($this, $message);
 
         return $message;
     }
