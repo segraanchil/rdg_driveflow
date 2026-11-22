@@ -1,0 +1,9 @@
+# Same line endings on Windows and Mac (the repo stores LF; each computer checks out its own)
+* text=auto
+*.sh  text eol=lf
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Notes for developers, not part of the website: left out of git archive (the deploy zips)
+CLAUDE.md      export-ignore
+.gitattributes export-ignore
