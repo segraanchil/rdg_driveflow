@@ -19,6 +19,7 @@ class Sale extends Model
         'vehicle_id',
         'buyer_id',
         'reservation_id',
+        'intended_owner_id',
         'payment_type',
         'total_amount',
         'sale_date',
@@ -42,6 +43,12 @@ class Sale extends Model
     public function reservation(): BelongsTo
     {
         return $this->belongsTo(Reservation::class);
+    }
+
+    /** Who the Deed of Sale names when it isn't the buyer (validated by staff); null = the buyer. */
+    public function intendedOwner(): BelongsTo
+    {
+        return $this->belongsTo(IntendedOwner::class);
     }
 
     public function legalDocuments(): HasMany

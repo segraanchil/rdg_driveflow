@@ -58,7 +58,7 @@ export default function SupportInbox() {
   return (
     <div>
       <div className={selected ? 'hidden lg:block' : ''}>
-        <PageHeader title="Support Chat" subtitle="Visitors who tapped “Talk to a person” in the chat. Replies appear in their chat window within a few seconds." />
+        <PageHeader title="Support Chat" />
       </div>
       <div className="grid gap-4 lg:h-[calc(100dvh-13rem)] lg:min-h-[32rem] lg:grid-cols-[22rem_minmax(0,1fr)]">
         {/* Conversation list */}

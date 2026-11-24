@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Ceo\MarginSettingController;
 use App\Http\Controllers\Controller;
+use App\Models\IntendedOwner;
 use App\Models\Reservation;
 use App\Models\Vehicle;
 use App\Models\VehicleMedia;
@@ -176,6 +177,7 @@ class InventoryController extends Controller
         foreach ($vehicle->media as $media) {
             Storage::disk('public')->delete($media->file_path);
         }
+        IntendedOwner::where('vehicle_id', $vehicle->id)->get()->each->delete(); // with their license photos
         $vehicle->delete();
 
         return response()->json(null, 204);
@@ -216,7 +218,7 @@ class InventoryController extends Controller
     {
         $required = $creating ? 'required' : 'sometimes';
 
-        return $request->validate([
+        $data = $request->validate([
             'make' => [$required, 'string', 'max:60'],
             'model' => [$required, 'string', 'max:60'],
             'year' => [$required, 'integer', 'min:1980', 'max:'.(now()->year + 1)],
@@ -237,9 +239,21 @@ class InventoryController extends Controller
             'plate_number' => ['sometimes', 'nullable', 'string', 'max:20'],
             'engine_number' => ['sometimes', 'nullable', 'string', 'max:40'],
             'chassis_number' => ['sometimes', 'nullable', 'string', 'max:40'],
+            // Sent as tags[]; a single empty "tags" clears them.
+            'tags' => ['sometimes', 'nullable', 'array', 'max:'.Vehicle::MAX_TAGS],
+            'tags.*' => ['nullable', 'string', 'max:'.Vehicle::MAX_TAG_LENGTH],
             'media_type' => ['sometimes', Rule::in(VehicleMedia::TYPES)],
             'photos.*' => ['nullable', 'image', 'max:10240'],
+        ], [
+            'tags.max' => 'Use up to '.Vehicle::MAX_TAGS.' tags.',
+            'tags.*.max' => 'Keep each tag to '.Vehicle::MAX_TAG_LENGTH.' characters.',
         ]);
+
+        if (array_key_exists('tags', $data)) {
+            $data['tags'] = Vehicle::cleanTags($data['tags']);
+        }
+
+        return $data;
     }
 
     private function calculateSellingPrice(float $acquisitionCost, float $repairFees, float $marginPercent): float

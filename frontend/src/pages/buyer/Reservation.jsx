@@ -1,15 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { Clock, ShieldCheck, Upload, Store, FileCheck2, CarFront, Copy, Landmark, Smartphone, X, Check, QrCode, Hash } from 'lucide-react'
+import { Clock, ShieldCheck, Upload, Store, FileCheck2, CarFront, Copy, Landmark, Smartphone, X, Check, QrCode, Hash, Lock } from 'lucide-react'
 import apiClient, { backendUrl } from '../../api/client'
 import PageLoader from '../../components/ui/PageLoader'
+import { BLANK_OWNER, DeedNameChoice, OwnerFields, OwnerSummary, appendOwner, ownerProblem } from '../../components/vehicles/DeedOwner'
+import { useAuth } from '../../context/AuthContext'
 import { useSettings } from '../../lib/useSettings'
-import { apiError, peso, vehicleName } from '../../lib/format'
+import { MIN_OWNER_AGE, apiError, peso, vehicleName } from '../../lib/format'
 import { toast } from '../../lib/toast'
 
 /**
  * Reservation (Stories 09–10): choose a payment channel (GCash shows the QR, bank transfer shows
- * the account number), pay the fee, upload the receipt, then a live 48-hour hold timer.
+ * the account number), pay the fee, say whose name goes on the Deed of Sale, agree to the terms, upload
+ * the receipt, then a live 48-hour hold timer.
  * Payments are verified manually by staff.
  */
 export default function Reservation() {
@@ -26,9 +29,22 @@ export default function Reservation() {
   const preview = useMemo(() => (file ? URL.createObjectURL(file) : null), [file])
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview) }, [preview])
 
+  const { user } = useAuth()
+  const [deedName, setDeedName] = useState('self') // 'self' | 'other'
+  const [owner, setOwner] = useState(BLANK_OWNER)
+  const [existingOwner, setExistingOwner] = useState(null) // already sent with the financing application
+  const [replaceOwner, setReplaceOwner] = useState(false)
+  const [agreed, setAgreed] = useState(false)
+
   useEffect(() => {
     if (!vehicleId) { setVehicle(null); return }
     apiClient.get(`/vehicles/${vehicleId}`).then(({ data }) => setVehicle(data)).catch(() => setVehicle(null))
+    apiClient.get('/buyer/intended-owners', { params: { vehicle_id: vehicleId }, silent: true }).then(({ data }) => {
+      if (!data.owner) return
+      setExistingOwner(data.owner)
+      setReplaceOwner(data.owner.status === 'rejected')
+      setDeedName('other')
+    }).catch(() => {})
   }, [vehicleId])
 
   async function submit(e) {
@@ -40,6 +56,14 @@ export default function Reservation() {
     form.append('payment_channel', channel)
     if (reference.trim()) form.append('payment_reference', reference.trim())
     form.append('payment_proof', file)
+    form.append('terms_accepted', agreed ? '1' : '0')
+    const keepOwner = deedName === 'other' && existingOwner && !replaceOwner
+    form.append('deed_name', keepOwner ? 'keep' : deedName)
+    if (deedName === 'other' && !keepOwner) {
+      const problem = ownerProblem(owner)
+      if (problem) { setError(problem); return }
+      appendOwner(form, owner)
+    }
     try {
       const { data } = await apiClient.post('/buyer/reservations', form, { headers: { 'Content-Type': 'multipart/form-data' }, loadingText: 'Reserving your car…', quietErrors: true })
       setReservation(data)
@@ -96,6 +120,7 @@ export default function Reservation() {
           <ol className="rdg-card space-y-3 p-5 text-sm text-slate-600">
             {[
               'Choose GCash or bank transfer and pay the reservation fee.',
+              'Say whose name goes on the Deed of Sale, and agree to the terms and conditions.',
               'Upload a clear screenshot or photo of your receipt.',
               'The car is held for you right away. Our staff verifies the payment manually within 48 hours and emails you.',
               'Pay the balance when you claim the car. Your invoice, Deed of Sale and Official Receipt are prepared on the spot.',
@@ -165,18 +190,51 @@ export default function Reservation() {
           </div>
 
           <div className="rdg-card p-5">
-            <p className="mb-3 font-bold text-slate-900">2. Upload your receipt <span className="text-red-500" aria-label="required">*</span></p>
+            <p className="mb-1 font-bold text-slate-900">2. Whose name goes on the Deed of Sale? <span className="text-red-500" aria-label="required">*</span></p>
+            <p className="mb-3 text-sm text-slate-500">The owner must be at least {MIN_OWNER_AGE} years old.</p>
+            <DeedNameChoice value={deedName} onChange={setDeedName} buyerName={user?.name} />
+            {deedName === 'other' && (
+              <div className="mt-4 animate-rdg-fade-up">
+                {existingOwner && !replaceOwner ? (
+                  <>
+                    <OwnerSummary owner={existingOwner} />
+                    <button type="button" onClick={() => setReplaceOwner(true)} className="mt-2 text-xs font-bold text-slate-900 underline underline-offset-2">Change this person</button>
+                  </>
+                ) : (
+                  <>
+                    <p className="mb-4 rounded-lg bg-slate-50 p-3 text-sm text-slate-600">You stay the buyer and the one paying. Our staff validate this person’s driver’s license, then their details are printed on the Deed of Sale.</p>
+                    <OwnerFields value={owner} onChange={setOwner} />
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="rdg-card p-5">
+            <p className="mb-3 font-bold text-slate-900">3. Terms and conditions <span className="text-red-500" aria-label="required">*</span></p>
+            <div tabIndex={0} role="region" aria-label="Terms and conditions" className="max-h-60 overflow-y-auto overscroll-contain space-y-2.5 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-relaxed text-slate-600">
+              {(s.reservation_terms || 'Loading the terms…').split('\n').filter((line) => line.trim()).map((line, i) => <p key={i}>{line}</p>)}
+            </div>
+            <label className={`mt-3 flex cursor-pointer items-start gap-3 rounded-xl border p-3 text-sm ${agreed ? 'border-slate-900 bg-slate-50' : 'border-slate-300 hover:border-slate-400'}`}>
+              <input type="checkbox" checked={agreed} disabled={!s.reservation_terms} onChange={(e) => setAgreed(e.target.checked)} className="mt-0.5 h-4 w-4 shrink-0" />
+              <span className="font-semibold text-slate-800">I have read and agree to the terms and conditions, and I confirm that the owner named on the Deed of Sale is at least {MIN_OWNER_AGE} years old.</span>
+            </label>
+          </div>
+
+          <div className="rdg-card p-5">
+            <p className="mb-3 font-bold text-slate-900">4. Upload your receipt <span className="text-red-500" aria-label="required">*</span></p>
+            {!agreed && <p className="mb-3 flex items-start gap-2 rounded-lg bg-amber-50 p-3 text-sm text-amber-900"><Lock size={15} className="mt-0.5 shrink-0" /> Agree to the terms and conditions first to upload your payment screenshot.</p>}
             {preview ? (
               <div className="relative">
                 <img src={preview} alt="Your receipt" className="max-h-72 w-full rounded-xl bg-slate-100 object-contain" />
                 <button type="button" onClick={() => setFile(null)} className="absolute right-2 top-2 rounded-full bg-black/60 p-1.5 text-white" aria-label="Remove"><X size={14} /></button>
               </div>
             ) : (
-              <label className="flex cursor-pointer flex-col items-center gap-1 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500 hover:border-slate-900">
+              <label className={`flex flex-col items-center gap-1 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500 ${agreed ? 'cursor-pointer hover:border-slate-900' : 'cursor-not-allowed opacity-50'}`}>
                 <Upload size={22} className="text-slate-900" />
                 <span className="font-semibold text-slate-700">Tap to choose a screenshot or photo</span>
                 <span className="text-xs">The amount, date and reference number must be readable.</span>
-                <input type="file" accept="image/*" required className="sr-only" onChange={(e) => setFile(e.target.files[0] ?? null)} />
+                <input type="file" accept="image/*" required disabled={!agreed} className="sr-only" aria-label="Payment screenshot" onChange={(e) => setFile(e.target.files[0] ?? null)} />
               </label>
             )}
             <label className="mt-4 block">
@@ -187,7 +245,7 @@ export default function Reservation() {
               </span>
             </label>
             {error && <p role="alert" className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
-            <button type="submit" className="rdg-btn mt-4 w-full py-3" disabled={!file || vehicle.status !== 'available'}>Submit reservation</button>
+            <button type="submit" className="rdg-btn mt-4 w-full py-3" disabled={!file || !agreed || vehicle.status !== 'available'}>Submit reservation</button>
             <p className="mt-3 flex items-start gap-1.5 text-xs text-slate-500"><ShieldCheck size={14} className="mt-0.5 shrink-0" /> Payments are checked manually by our staff. If it can’t be verified, the car is released and you’ll be emailed the reason.</p>
           </div>
         </form>

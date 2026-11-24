@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import {
   Car, ClipboardCheck, CalendarClock, Landmark, Receipt, FileText, FileSignature, ShieldCheck, Users,
-  LayoutDashboard, TrendingUp, Settings, UserCog, LogOut, Menu, X, Gauge, ExternalLink, KeyRound, MessagesSquare,
+  LayoutDashboard, TrendingUp, Settings, UserCog, LogOut, Menu, X, Gauge, ExternalLink, KeyRound, MessagesSquare, IdCard,
 } from 'lucide-react'
 import apiClient from '../../api/client'
 import { useAuth } from '../../context/AuthContext'
@@ -24,6 +24,7 @@ const ADMIN_SECTIONS = [
     label: 'Sales & Documents',
     links: [
       { to: '/admin/sales', label: 'Sales', icon: Receipt, badgeKey: 'ready_to_sell' },
+      { to: '/admin/vehicle-owners', label: 'Vehicle Owners', icon: IdCard, badgeKey: 'owners_to_validate' },
       { to: '/admin/invoices', label: 'Invoices', icon: FileText },
       { to: '/admin/legal-documents', label: 'Legal Documents', icon: FileSignature },
     ],

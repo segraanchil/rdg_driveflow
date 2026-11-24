@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\ExpansionFundLedger;
 use App\Models\FinancingApplication;
+use App\Models\IntendedOwner;
 use App\Models\Reservation;
 use App\Models\Sale;
 use App\Models\Setting;
@@ -26,7 +27,7 @@ class SaleController extends Controller
         $like = fn (string $value) => '%'.addcslashes($value, '%_\\').'%';
 
         return response()->json(
-            Sale::with(['vehicle', 'buyer:id,name,email', 'reservation:id,fee_amount,payment_method', 'legalDocuments'])
+            Sale::with(['vehicle', 'buyer:id,name,email', 'reservation:id,fee_amount,payment_method', 'legalDocuments', 'intendedOwner'])
                 ->when($request->filled('q'), fn ($q) => $q->where(fn ($w) => $w
                     ->whereHas('buyer', fn ($b) => $b->where('name', 'like', $like($request->string('q'))))
                     ->orWhereHas('vehicle', fn ($v) => $v->where('make', 'like', $like($request->string('q')))
@@ -49,6 +50,7 @@ class SaleController extends Controller
                 ->map(fn (Reservation $r) => [
                     ...$r->toArray(),
                     'down_payment' => $this->financingDownPayment($r->buyer_id, $r->vehicle_id),
+                    'intended_owner' => IntendedOwner::findFor($r->buyer_id, $r->vehicle_id),
                 ]),
             'vehicles' => Vehicle::where('status', Vehicle::STATUS_AVAILABLE)->orderBy('make')->orderBy('model')->get(),
             'buyers' => User::where('role', User::ROLE_BUYER)->orderBy('name')->get(['id', 'name', 'email']),
@@ -84,10 +86,18 @@ class SaleController extends Controller
                 throw ValidationException::withMessages(['vehicle_id' => ['This car is reserved. Finalize it from its verified reservation instead.']]);
             }
 
+            // Someone else named on the Deed of Sale: their license must be validated first. A rejected
+            // request falls back to the buyer's own name.
+            $owner = IntendedOwner::findFor((int) $data['buyer_id'], $vehicle->id);
+            if ($owner?->status === IntendedOwner::STATUS_PENDING) {
+                throw ValidationException::withMessages(['vehicle_id' => ["Validate {$owner->full_name} in Vehicle Owners first: the buyer wants the Deed of Sale in that name."]]);
+            }
+
             $sale = Sale::create([
                 'vehicle_id' => $vehicle->id,
                 'buyer_id' => $data['buyer_id'],
                 'reservation_id' => $reservation?->id,
+                'intended_owner_id' => $owner?->status === IntendedOwner::STATUS_APPROVED ? $owner->id : null,
                 'payment_type' => $data['payment_type'],
                 'total_amount' => $data['total_amount'],
                 'sale_date' => now()->toDateString(),
@@ -110,7 +120,7 @@ class SaleController extends Controller
             return $sale;
         });
 
-        return response()->json($sale->load(['vehicle', 'buyer:id,name,email', 'legalDocuments']), 201);
+        return response()->json($sale->load(['vehicle', 'buyer:id,name,email', 'legalDocuments', 'intendedOwner']), 201);
     }
 
     /** Down payment from the buyer's latest financing application for this car, if any. */

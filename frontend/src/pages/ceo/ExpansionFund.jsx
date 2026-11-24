@@ -20,7 +20,7 @@ export default function ExpansionFund() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Expansion Fund" subtitle="Capital set aside from every sale for the 2026 Service Center."
+      <PageHeader title="Expansion Fund"
         actions={<Link to="/ceo/settings?tab=fund" className="rdg-btn-ghost"><Percent size={15} /> Change % or goal</Link>} />
 
       <div className="rdg-card overflow-hidden">

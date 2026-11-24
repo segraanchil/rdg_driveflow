@@ -4,12 +4,15 @@ namespace App\Http\Controllers\Buyer;
 
 use App\Support\AdminAlert;
 use App\Support\ImageShrinker;
+use App\Support\OwnerRequests;
 use App\Http\Controllers\Controller;
+use App\Models\IntendedOwner;
 use App\Models\Reservation;
 use App\Models\Setting;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 /** Vehicle reservation with proof-of-payment upload + 48-hour countdown timer. Auth required. */
@@ -35,9 +38,48 @@ class ReservationController extends Controller
             // Where the reservation fee was paid; staff verify it manually against that channel.
             'payment_channel' => ['required', 'in:gcash,bank_transfer'],
             'payment_reference' => ['nullable', 'string', 'max:60'],
-        ], ['payment_channel.required' => 'Choose how you paid: GCash or bank transfer.']);
+            'terms_accepted' => ['accepted'],
+            // Whose name goes on the Deed of Sale: the buyer's, someone else's (their driver's license is
+            // required), or "keep" the owner the buyer already submitted for this car.
+            'deed_name' => ['required', 'in:self,other,keep'],
+            ...OwnerRequests::buyerRules('required_if:deed_name,other'),
+        ], [
+            'payment_channel.required' => 'Choose how you paid: GCash or bank transfer.',
+            'terms_accepted.accepted' => 'Read and agree to the terms and conditions first.',
+            'deed_name.required' => 'Choose whose name goes on the Deed of Sale.',
+            ...OwnerRequests::messages(),
+        ]);
 
-        $reservation = DB::transaction(function () use ($data, $request) {
+        $path = null;
+        try {
+            $reservation = $this->reserve($data, $request, $path);
+        } catch (\Throwable $e) {
+            // Not reserved: don't leave the uploaded receipt behind.
+            if ($path) {
+                Storage::disk('public')->delete($path);
+            }
+            throw $e;
+        }
+
+        $v = $reservation->vehicle;
+        $this->saveDeedName($data['deed_name'], $v, $request);
+        AdminAlert::notify('reservation', 'New reservation to verify', "{$request->user()->name} reserved the {$v->year} {$v->make} {$v->model}. Check the proof of payment within 48 hours.", '/admin/reservations');
+
+        return response()->json($reservation, 201);
+    }
+
+    private function saveDeedName(string $choice, Vehicle $vehicle, Request $request): void
+    {
+        if ($choice === 'other') {
+            OwnerRequests::submit($request->user(), $vehicle, $request);
+        } elseif ($choice === 'self') {
+            IntendedOwner::findFor($request->user()->id, $vehicle->id)?->delete();
+        }
+    }
+
+    private function reserve(array $data, Request $request, ?string &$path): Reservation
+    {
+        return DB::transaction(function () use ($data, $request, &$path) {
             // lockForUpdate closes the race between two buyers reserving the
             // same car in the same instant — whoever's transaction commits
             // first wins, the second sees status already flipped.
@@ -59,6 +101,7 @@ class ReservationController extends Controller
                 'payment_channel' => $data['payment_channel'],
                 'payment_reference' => $data['payment_reference'] ?? null,
                 'payment_proof_path' => $path,
+                'terms_accepted_at' => now(),
                 'status' => Reservation::STATUS_PENDING,
                 'expires_at' => now()->addHours(48),
             ]);
@@ -71,11 +114,6 @@ class ReservationController extends Controller
 
             return $reservation;
         });
-
-        $v = $reservation->vehicle;
-        AdminAlert::notify('reservation', 'New reservation to verify', "{$request->user()->name} reserved the {$v->year} {$v->make} {$v->model}. Check the proof of payment within 48 hours.", '/admin/reservations');
-
-        return response()->json($reservation, 201);
     }
 
     public function show(Reservation $reservation)

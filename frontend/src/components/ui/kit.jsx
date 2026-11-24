@@ -31,6 +31,7 @@ const STATUS = {
   test_drive: { pending: ['Awaiting confirmation', 'amber'], confirmed: ['Confirmed', 'green'], declined: ['Declined', 'red'], completed: ['Done', 'blue'], cancelled: ['Cancelled', 'slate'] },
   financing: { pending: ['Submitted', 'amber'], documents_review: ['With the bank', 'blue'], approved: ['Approved', 'green'], rejected: ['Not approved', 'red'] },
   warranty: { submitted: ['Submitted', 'amber'], under_review: ['Under review', 'blue'], approved: ['Approved', 'green'], rejected: ['Not approved', 'red'], refunded: ['Refunded', 'violet'] },
+  owner: { pending: ['To validate', 'amber'], approved: ['Validated', 'green'], rejected: ['Rejected', 'red'] },
   lead: { submitted: ['New', 'amber'], under_appraisal: ['Under appraisal', 'blue'], offer_made: ['Offer made', 'violet'], accepted: ['Accepted', 'green'], declined: ['Declined', 'slate'] },
 }
 

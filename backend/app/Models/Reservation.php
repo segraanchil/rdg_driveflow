@@ -29,11 +29,13 @@ class Reservation extends Model
         'payment_channel',
         'payment_reference',
         'payment_proof_path',
+        'terms_accepted_at',
         'status',
         'expires_at',
     ];
 
     protected $casts = [
+        'terms_accepted_at' => 'datetime',
         'expires_at' => 'datetime',
         'fee_amount' => 'decimal:2',
     ];

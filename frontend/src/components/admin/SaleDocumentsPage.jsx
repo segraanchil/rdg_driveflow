@@ -7,7 +7,7 @@ import DocumentButtons from './DocumentButtons'
 import { formatDate, peso, vehicleName } from '../../lib/format'
 
 /** Shared list for the Invoices and Legal Documents pages: every sale + its documents of `types`. */
-export default function SaleDocumentsPage({ title, subtitle, types, tip }) {
+export default function SaleDocumentsPage({ title, types, tip }) {
   const [sales, setSales] = useState(null)
   const [q, setQ] = useState('')
   const [tab, setTab] = useState('missing')
@@ -27,7 +27,7 @@ export default function SaleDocumentsPage({ title, subtitle, types, tip }) {
 
   return (
     <div>
-      <PageHeader title={title} subtitle={subtitle} actions={<SearchInput value={q} onChange={setQ} placeholder="Search buyer or car…" />} />
+      <PageHeader title={title} actions={<SearchInput value={q} onChange={setQ} placeholder="Search buyer or car…" />} />
       {tip && <p className="mb-5 flex gap-2 rounded-xl bg-sky-50 p-3 text-sm text-sky-800"><Info size={16} className="mt-0.5 shrink-0" /> {tip}</p>}
       <Tabs value={tab} onChange={setTab} tabs={[{ key: 'missing', label: 'To generate', count: missing.length }, { key: 'all', label: 'All sales' }]} />
 
@@ -47,6 +47,7 @@ export default function SaleDocumentsPage({ title, subtitle, types, tip }) {
               <div className="min-w-0 flex-1">
                 <p className="font-bold text-slate-900">{vehicleName(s.vehicle)}</p>
                 <p className="text-sm text-slate-500">{s.buyer?.name} · {peso(s.total_amount)} · {s.payment_type === 'financing' ? 'Bank financing' : 'Straight cash'} · sold {formatDate(s.sale_date)}</p>
+                {s.intended_owner && <p className="mt-0.5 text-xs font-semibold text-slate-700">Named to {s.intended_owner.full_name}</p>}
               </div>
               <DocumentButtons sale={s} types={types} onChange={(docs) => setSales((all) => all.map((x) => (x.id === s.id ? { ...x, legal_documents: docs } : x)))} />
             </li>

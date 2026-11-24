@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AcquisitionLead;
 use App\Models\FinancingDocument;
+use App\Models\IntendedOwner;
 use App\Models\Reservation;
 use App\Models\Sale;
 use App\Models\TestDrive;
@@ -31,6 +32,7 @@ class OverviewController extends Controller
                 'ready_to_sell' => Reservation::readyToSell()->count(),
                 'pending_test_drives' => TestDrive::where('status', TestDrive::STATUS_PENDING)->count(),
                 'documents_to_verify' => FinancingDocument::where('verified', false)->count(),
+                'owners_to_validate' => IntendedOwner::relevant()->where('status', IntendedOwner::STATUS_PENDING)->count(),
                 'open_claims' => WarrantyClaim::whereIn('status', [WarrantyClaim::STATUS_SUBMITTED, WarrantyClaim::STATUS_UNDER_REVIEW])->count(),
                 'new_leads' => AcquisitionLead::where('status', AcquisitionLead::STATUS_SUBMITTED)->count(),
                 'cars_to_inspect' => Vehicle::where('status', Vehicle::STATUS_FOR_INSPECTION)->count(),

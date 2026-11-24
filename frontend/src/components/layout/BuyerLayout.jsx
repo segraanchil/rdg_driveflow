@@ -3,6 +3,7 @@ import { Link, Outlet, useLocation } from 'react-router-dom'
 import { MapPin, Clock, ShieldCheck, Phone, Mail, Landmark } from 'lucide-react'
 import Navbar from './Navbar'
 import ChatWidget from '../chatbot/ChatWidget'
+import { CompareTray } from '../vehicles/CompareControls'
 import { useSettings } from '../../lib/useSettings'
 import Logo from '../ui/Logo'
 
@@ -33,6 +34,7 @@ export default function BuyerLayout() {
           <div className="space-y-2 text-sm">
             <p className="text-xs font-bold uppercase tracking-wider text-slate-300">Shop</p>
             <FooterLink to="/inventory">Browse cars</FooterLink>
+            <FooterLink to="/compare">Compare cars</FooterLink>
             <FooterLink to="/loan-calculator">Loan calculator</FooterLink>
             <FooterLink to="/sell-your-car">Sell your car</FooterLink>
             <FooterLink to="/garage">My Garage</FooterLink>
@@ -54,6 +56,7 @@ export default function BuyerLayout() {
         </div>
         <p className="border-t border-white/10 py-4 text-center text-xs">© {new Date().getFullYear()} RDG Car Deals &amp; Services</p>
       </footer>
+      <CompareTray />
       <ChatWidget />
     </div>
   )

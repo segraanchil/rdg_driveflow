@@ -8,6 +8,7 @@ import PageLoader from '../../components/ui/PageLoader'
 import { StatusBadge, Tabs } from '../../components/ui/kit'
 import { useAuth } from '../../context/AuthContext'
 import { docLabel, formatDate, formatDateTime, initials, peso, timeLeft, vehicleName } from '../../lib/format'
+import { DeedOwnerCard } from '../../components/vehicles/DeedOwner'
 import { toast } from '../../lib/toast'
 
 /** "My Garage": saved cars, reservations, test drives, financing, purchases & documents, warranty claims. */
@@ -41,6 +42,7 @@ export default function MyGarage() {
 
   if (!garage) return <PageLoader />
 
+  const ownerOf = (vehicleId) => garage.intended_owners?.[vehicleId] ?? null
   const upcomingDrives = testDrives.filter((t) => ['pending', 'confirmed'].includes(t.status))
   const openLoans = garage.loan_history.filter((l) => l.status !== 'rejected')
   const nothingActive = garage.active_reservations.length + upcomingDrives.length + openLoans.length === 0
@@ -89,6 +91,7 @@ export default function MyGarage() {
                     <p className="text-sm text-emerald-700">Payment verified. The car is reserved for you. Our staff will contact you about the balance and release.</p>
                   )}
                   <p className="text-xs text-slate-400">Reservation fee {r.fee_amount ? peso(r.fee_amount) : ''} · {r.payment_method === 'financing' ? 'Bank financing' : 'Straight cash'} · submitted {formatDateTime(r.created_at)}</p>
+                  <DeedOwnerCard vehicleId={r.vehicle_id} owner={ownerOf(r.vehicle_id)} onChanged={loadGarage} className="border-t border-slate-100 pt-2" />
                 </Card>
               ))}
             </Section>
@@ -119,6 +122,10 @@ export default function MyGarage() {
                         {missing.length} document{missing.length === 1 ? '' : 's'} still needed: {missing.map(docLabel).join(', ')} <ArrowRight size={14} />
                       </Link>
                     ) : <p className="text-xs text-slate-400">All {required.length} documents uploaded</p>}
+                    {/* Already shown on the reservation card when the car is also reserved. */}
+                    {l.status !== 'rejected' && l.vehicle?.status !== 'sold' && !garage.active_reservations.some((r) => r.vehicle_id === l.vehicle_id) && (
+                      <DeedOwnerCard vehicleId={l.vehicle_id} owner={ownerOf(l.vehicle_id)} onChanged={loadGarage} className="border-t border-slate-100 pt-2" />
+                    )}
                   </Card>
                 )
               })}

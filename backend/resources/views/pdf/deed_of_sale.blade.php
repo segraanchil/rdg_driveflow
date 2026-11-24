@@ -24,6 +24,13 @@
     </style>
 </head>
 <body>
+    @php
+        // Named on the Deed: the owner staff validated from a driver's license, else the buyer.
+        $owner = $sale->intendedOwner;
+        $vendee = strtoupper($owner?->full_name ?? $sale->buyer->name);
+        $nationality = $owner?->nationality ?: 'Filipino';
+    @endphp
+
     <h1>DEED OF SALE OF MOTOR VEHICLE</h1>
 
     <p>KNOW ALL MEN BY THESE PRESENTS:</p>
@@ -33,8 +40,10 @@
         Officer, <strong>ALBANI GALO</strong>, Filipino, of legal age, with principal address at
         143 Commonwealth Avenue, Quezon City, Philippines, for and in consideration of the sum
         hereinafter stated, do hereby SELL, TRANSFER and CONVEY by way of Absolute Sale unto
-        <strong>{{ strtoupper($sale->buyer->name) }}</strong>, Filipino, of legal age, his/her heirs,
-        successors and assigns, the following described motor vehicle, to wit:
+        <strong>{{ $vendee }}</strong>, {{ $nationality }}, of legal age,
+        @if ($owner?->civil_status) {{ $owner->civil_status }}, @endif
+        @if ($owner?->address) with residence and postal address at {{ $owner->address }}, @endif
+        his/her heirs, successors and assigns, the following described motor vehicle, to wit:
     </p>
 
     <table class="specs">
@@ -66,8 +75,8 @@
         <strong>{{ \App\Support\NumberToWords::pesos((float) $sale->total_amount) }}</strong>
         (&#8369;{{ number_format($sale->total_amount, 2) }}), Philippine Currency, receipt of which is
         hereby acknowledged to its entire satisfaction, and the SELLER hereby sells, transfers and
-        conveys by way of Absolute Sale unto <strong>{{ strtoupper($sale->buyer->name) }}</strong>,
-        Filipino, of legal age, his/her heirs, successors and assigns, the above-described motor
+        conveys by way of Absolute Sale unto <strong>{{ $vendee }}</strong>,
+        {{ $nationality }}, of legal age, his/her heirs, successors and assigns, the above-described motor
         vehicle, free from all liens and encumbrances.
     </p>
 
@@ -80,7 +89,7 @@
 
     <table class="sign-block">
         <tr>
-            <td><div class="sign-line">{{ strtoupper($sale->buyer->name) }}<br>VENDEE</div></td>
+            <td><div class="sign-line">{{ $vendee }}<br>VENDEE</div></td>
             <td><div class="sign-line">RDG CAR DEALS &amp; SERVICES<br>by: ALBANI GALO, CEO<br>VENDOR</div></td>
         </tr>
     </table>
@@ -115,8 +124,12 @@
             <th>DATE/PLACE ISSUED</th>
         </tr>
         <tr>
-            <td>{{ strtoupper($sale->buyer->name) }}</td>
-            <td class="blank">&nbsp;</td>
+            <td>{{ $vendee }}</td>
+            @if ($owner?->license_number)
+                <td>Driver&rsquo;s License No. {{ strtoupper($owner->license_number) }} (valid until {{ $owner->license_expiry?->format('F j, Y') }})</td>
+            @else
+                <td class="blank">&nbsp;</td>
+            @endif
             <td class="blank">&nbsp;</td>
         </tr>
         <tr>

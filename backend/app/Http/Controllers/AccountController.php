@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Mail\BuyerUpdateMail;
 use App\Mail\VerifyEmailMail;
+use App\Models\IntendedOwner;
 use App\Models\Reservation;
+use App\Models\Sale;
 use App\Models\User;
 use App\Support\PasswordRules;
 use Illuminate\Http\Request;
@@ -111,6 +113,8 @@ class AccountController extends Controller
         }
 
         $user->savedVehicles()->detach();
+        // Other people's license photos go too, unless a recorded sale's Deed names them.
+        IntendedOwner::where('buyer_id', $user->id)->whereNotIn('id', Sale::whereNotNull('intended_owner_id')->select('intended_owner_id'))->get()->each->delete();
         $user->forceFill([
             'name' => 'Deleted user',
             'email' => "deleted-{$user->id}-".Str::lower(Str::random(6)).'@deleted.invalid',

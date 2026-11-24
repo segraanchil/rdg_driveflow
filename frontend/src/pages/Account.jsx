@@ -22,7 +22,7 @@ export default function Account() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <PageHeader title="My Account" subtitle={customer ? 'Your details, sign-in email and password.' : 'Change the password you use to sign in.'} />
+      <PageHeader title="My Account" subtitle={customer ? 'Your details, sign-in email and password.' : undefined} />
 
       <div className="rdg-card mb-5 flex items-center gap-4 p-5">
         <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-slate-900 text-lg font-bold text-white">{initials(user.name)}</span>

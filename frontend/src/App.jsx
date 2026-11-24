@@ -8,6 +8,7 @@ import PageLoader from './components/ui/PageLoader'
 const Home = lazy(() => import('./pages/buyer/Home'))
 const Inventory = lazy(() => import('./pages/buyer/Inventory'))
 const VehicleDetail = lazy(() => import('./pages/buyer/VehicleDetail'))
+const Compare = lazy(() => import('./pages/buyer/Compare'))
 const LoanCalculator = lazy(() => import('./pages/buyer/LoanCalculator'))
 const FinancingApplication = lazy(() => import('./pages/buyer/FinancingApplication'))
 const Reservation = lazy(() => import('./pages/buyer/Reservation'))
@@ -31,6 +32,7 @@ const AdminInventory = lazy(() => import('./pages/admin/Inventory'))
 const Capture360 = lazy(() => import('./pages/admin/Capture360'))
 const AdminReservations = lazy(() => import('./pages/admin/Reservations'))
 const Sales = lazy(() => import('./pages/admin/Sales'))
+const VehicleOwners = lazy(() => import('./pages/admin/VehicleOwners'))
 const Financing = lazy(() => import('./pages/admin/Financing'))
 const Invoices = lazy(() => import('./pages/admin/Invoices'))
 const LegalDocuments = lazy(() => import('./pages/admin/LegalDocuments'))
@@ -54,6 +56,7 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/inventory" element={<Inventory />} />
         <Route path="/inventory/:id" element={<VehicleDetail />} />
+        <Route path="/compare" element={<Compare />} />
         <Route path="/loan-calculator" element={<LoanCalculator />} />
         <Route
           path="/financing-application"
@@ -116,6 +119,7 @@ export default function App() {
         <Route path="/admin/reservations" element={<AdminReservations />} />
         <Route path="/admin/test-drives" element={<AdminTestDrives />} />
         <Route path="/admin/sales" element={<Sales />} />
+        <Route path="/admin/vehicle-owners" element={<VehicleOwners />} />
         <Route path="/admin/financing" element={<Financing />} />
         <Route path="/admin/invoices" element={<Invoices />} />
         <Route path="/admin/legal-documents" element={<LegalDocuments />} />

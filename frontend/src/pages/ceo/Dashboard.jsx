@@ -40,7 +40,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Executive Dashboard" subtitle="Live view of sales, stock and progress toward the Service Center expansion." />
+      <PageHeader title="Executive Dashboard" />
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatTile icon={Car} label="Cars sold this month" value={thisMonth.count}

@@ -33,6 +33,7 @@ class VehicleController extends Controller
                 foreach (preg_split('/\s+/', trim($request->string('q'))) as $word) {
                     $q->where(fn ($w) => $w->where('make', 'like', $like($word))
                         ->orWhere('model', 'like', $like($word))
+                        ->orWhere('tags', 'like', $like(mb_strtoupper($word))) // stored in capitals; JSON columns compare case-sensitively
                         ->orWhere('year', $word));
                 }
             })

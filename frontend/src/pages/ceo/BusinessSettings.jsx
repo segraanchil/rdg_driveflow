@@ -11,6 +11,7 @@ import { toast } from '../../lib/toast'
 const TABS = [
   { key: 'pricing', label: 'Pricing' },
   { key: 'payments', label: 'Payments' },
+  { key: 'terms', label: 'Terms' },
   { key: 'loans', label: 'Loan rates' },
   { key: 'fund', label: 'Expansion Fund' },
   { key: 'contact', label: 'Contact info' },
@@ -30,10 +31,14 @@ export default function BusinessSettings() {
 
   return (
     <div className="max-w-3xl">
-      <PageHeader title="Business Settings" subtitle="Figures used across the showroom, invoices and dashboards. Changes apply right away." />
+      <PageHeader title="Business Settings" />
       <Tabs tabs={TABS} value={tab} onChange={(k) => setParams({ tab: k }, { replace: true })} />
       {tab === 'pricing' && <MarginPanel initial={values.global_margin_percent} />}
       {tab === 'payments' && <PaymentsPanel values={values} setValues={setValues} />}
+      {tab === 'terms' && (
+        <SettingsForm values={values} setValues={setValues} note="Buyers must agree to these terms before they can upload their payment screenshot."
+          fields={[['reservation_terms', 'Terms and conditions', 'textarea']]} />
+      )}
       {tab === 'loans' && (
         <SettingsForm values={values} setValues={setValues} note="Annual interest rates used for buyers’ monthly estimates. These are placeholders until the partner bank’s rate table is confirmed."
           fields={[
@@ -83,8 +88,10 @@ function SettingsForm({ values, setValues, fields, note, children }) {
       {note && <p className="flex gap-2 rounded-xl bg-slate-50 p-3 text-sm text-slate-600"><Info size={16} className="mt-0.5 shrink-0 text-slate-400" /> {note}</p>}
       <div className="grid gap-4 sm:grid-cols-2">
         {fields.map(([key, label, type]) => (
-          <Field key={key} label={label}>
-            {type === 'peso' ? (
+          <Field key={key} label={label} className={type === 'textarea' ? 'sm:col-span-2' : ''}>
+            {type === 'textarea' ? (
+              <textarea required rows={18} maxLength={10000} value={form[key]} onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))} className="w-full text-sm leading-relaxed" />
+            ) : type === 'peso' ? (
               <PesoInput value={form[key]} onChange={(v) => setForm((f) => ({ ...f, [key]: v }))} hint="short" />
             ) : (
               <input type={type} step={type === 'number' ? '0.01' : undefined} min={type === 'number' ? 0 : undefined} value={form[key]} onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))} className="w-full" />

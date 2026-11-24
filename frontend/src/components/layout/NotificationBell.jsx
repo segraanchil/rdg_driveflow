@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bell, ClipboardCheck, Landmark, ShieldCheck, CalendarClock, Users, MessageCircle, CheckCheck, Info } from 'lucide-react'
+import { Bell, ClipboardCheck, Landmark, ShieldCheck, CalendarClock, Users, MessageCircle, CheckCheck, Info, IdCard } from 'lucide-react'
 import apiClient from '../../api/client'
 import { useAuth } from '../../context/AuthContext'
 import { listen } from '../../lib/live'
@@ -12,12 +12,14 @@ const ICONS = {
   test_drive: [CalendarClock, 'bg-violet-100 text-violet-600'],
   lead: [Users, 'bg-emerald-100 text-emerald-600'],
   chat: [MessageCircle, 'bg-pink-100 text-pink-600'],
-  general: [Info, 'bg-slate-100 text-slate-600'],
+  owner: [IdCard, 'bg-slate-200 text-slate-800'],
+  general: [Info,'bg-slate-100 text-slate-600'],
 }
 
 const STAFF_PAGES = {
   chat: '/admin/support', lead: '/admin/acquisition-leads', reservation: '/admin/reservations',
   financing: '/admin/financing', warranty: '/admin/warranty-claims', test_drive: '/admin/test-drives',
+  owner: '/admin/vehicle-owners',
 }
 const USER_PAGES = { lead: '/my-leads', chat: '/?chat=open', test_drive: '/garage', financing: '/garage', warranty: '/garage', reservation: '/garage' }
 const CEO_ALLOWED = ['/ceo', '/admin/acquisition-leads', '/admin/support']

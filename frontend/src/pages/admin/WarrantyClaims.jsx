@@ -34,7 +34,7 @@ export default function WarrantyClaims() {
 
   return (
     <div>
-      <PageHeader title="Warranty Claims" subtitle="1-month money-back guarantee tickets. Changing the status emails the buyer; internal notes stay private." />
+      <PageHeader title="Warranty Claims" />
       <Tabs value={tab} onChange={setTab} tabs={[
         { key: 'open', label: 'Open', count: (claims ?? []).filter(isOpen).length },
         { key: 'closed', label: 'Closed' },

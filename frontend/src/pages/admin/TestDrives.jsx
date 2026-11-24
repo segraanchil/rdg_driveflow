@@ -54,17 +54,17 @@ export default function TestDrives() {
 
   return (
     <div>
-      <PageHeader title="Test Drives" subtitle="Confirm or decline requests. A confirmed test drive does not reserve the car." />
+      <PageHeader title="Test Drives" />
       <Tabs value={tab} onChange={setTab} tabs={[
         { key: 'pending', label: 'Requests', count: count('pending') },
         { key: 'upcoming', label: 'Confirmed', count: count('confirmed') },
-        { key: 'past', label: 'Past' },
+        { key: 'records', label: 'Records' },
       ]} />
 
       {rows === null ? (
         <ListSkeleton />
       ) : filtered.length === 0 ? (
-        <EmptyState icon={CalendarClock} title={tab === 'pending' ? 'No new requests' : 'Nothing here'} text="Buyers request test drives from a car’s page." />
+        <EmptyState icon={CalendarClock} title={tab === 'pending' ? 'No new requests' : tab === 'records' ? 'No records yet' : 'Nothing here'} text="Buyers request test drives from a car’s page." />
       ) : (
         <div className="space-y-6">
           {groups.map(([day, items]) => (

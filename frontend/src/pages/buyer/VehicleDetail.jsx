@@ -8,6 +8,8 @@ import apiClient from '../../api/client'
 import { useAuth } from '../../context/AuthContext'
 import Viewer360 from '../../components/vehicles/Viewer360'
 import VehicleCard from '../../components/vehicles/VehicleCard'
+import { CompareButton } from '../../components/vehicles/CompareControls'
+import VehicleTags from '../../components/vehicles/VehicleTags'
 import PageLoader from '../../components/ui/PageLoader'
 import { estimateMonthlyAmortization } from '../../lib/loanCalculator'
 import { useSettings } from '../../lib/useSettings'
@@ -115,6 +117,7 @@ export default function VehicleDetail() {
                 </div>
               ))}
             </dl>
+            <VehicleTags tags={vehicle.tags} className="mt-4" />
             {features.length > 0 && (
               <>
                 <h3 className="mb-2 mt-5 text-xs font-bold uppercase tracking-wide text-slate-500">Features</h3>
@@ -172,6 +175,7 @@ export default function VehicleDetail() {
             {user && !isBuyer && <p className="mt-5 rounded-lg bg-slate-50 p-3 text-xs text-slate-500">You’re signed in as {user.role}. Reserving and financing are for buyer accounts.</p>}
 
             <Link to={`/loan-calculator?vehicle_id=${vehicle.id}`} className="mt-4 flex items-center justify-center gap-1.5 text-sm font-bold text-emerald-700 hover:underline"><Calculator size={15} /> Calculate my monthly payment</Link>
+            <CompareButton vehicle={vehicle} size="md" className="mt-4 w-full" />
           </div>
 
           <ul className="rdg-card space-y-3 p-5 text-sm text-slate-600">

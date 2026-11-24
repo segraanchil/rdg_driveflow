@@ -61,6 +61,10 @@
                 <div class="label">Billed To</div>
                 {{ $sale->buyer->name }}<br>
                 {{ $sale->buyer->email }}
+                @if ($sale->intendedOwner)
+                    <div class="label" style="margin-top: 8px;">Vehicle To Be Named To</div>
+                    {{ $sale->intendedOwner->full_name }}
+                @endif
             </td>
         </tr>
     </table>

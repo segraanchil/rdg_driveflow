@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Receipt, CheckCircle2, Store, ClipboardCheck } from 'lucide-react'
+import { Receipt, CheckCircle2, Store, ClipboardCheck, IdCard } from 'lucide-react'
 import apiClient from '../../api/client'
 import { Modal } from '../../components/ui/Modal'
-import { Chip, EmptyState, Field, ListSkeleton, PageHeader, SearchInput } from '../../components/ui/kit'
+import { Chip, EmptyState, Field, ListSkeleton, PageHeader, SearchInput, StatusBadge } from '../../components/ui/kit'
 import DocumentButtons from '../../components/admin/DocumentButtons'
+import OwnerModal from '../../components/admin/OwnerModal'
 import { apiError, formatDate, peso, vehicleName } from '../../lib/format'
 import { toast } from '../../lib/toast'
 import Select from '../../components/ui/Select'
@@ -20,6 +21,7 @@ export default function Sales() {
   const [options, setOptions] = useState({ reservations: [], vehicles: [], buyers: [] })
   const [q, setQ] = useState('')
   const [draft, setDraft] = useState(null) // { reservation? } | { walkIn: true }
+  const [ownerFor, setOwnerFor] = useState(null) // reservation or sale whose Deed of Sale name is being set
 
   const loadSales = useCallback(() => {
     apiClient.get('/admin/sales', { params: { q: q || undefined }, silent: sales !== null }).then(({ data }) => setSales(data.data ?? []))
@@ -39,7 +41,9 @@ export default function Sales() {
   useEffect(() => {
     const id = params.get('reservation')
     const r = id && options.reservations.find((x) => String(x.id) === id)
-    if (r) setDraft({ reservation: r })
+    if (!r) return
+    if (r.intended_owner?.status === 'pending') setOwnerFor(r) // has to be validated before the sale
+    else setDraft({ reservation: r })
   }, [params, options.reservations])
 
   function close() {
@@ -51,7 +55,6 @@ export default function Sales() {
     <div className="space-y-8">
       <PageHeader
         title="Sales"
-        subtitle="Finalize a verified reservation into an official sale. The car is marked Sold and its invoice, Deed of Sale and Official Receipt can then be generated."
         actions={<button onClick={() => setDraft({ walkIn: true })} className="rdg-btn-ghost"><Store size={16} /> Walk-in sale</button>}
       />
 
@@ -74,7 +77,10 @@ export default function Sales() {
                   <div className="rounded-lg bg-slate-50 p-2"><dt className="text-slate-400">Price</dt><dd className="font-bold text-slate-800">{peso(r.vehicle?.selling_price)}</dd></div>
                   <div className="rounded-lg bg-slate-50 p-2"><dt className="text-slate-400">Reservation paid</dt><dd className="font-bold text-slate-800">{r.fee_amount ? peso(r.fee_amount) : '—'}</dd></div>
                 </dl>
-                <button onClick={() => setDraft({ reservation: r })} className="rdg-btn mt-3"><Receipt size={16} /> Record sale</button>
+                <DeedName record={r} onEdit={() => setOwnerFor(r)} className="mb-3 mt-3" />
+                {r.intended_owner?.status === 'pending'
+                  ? <button onClick={() => setOwnerFor(r)} className="rdg-btn mt-auto"><IdCard size={16} /> Validate owner first</button>
+                  : <button onClick={() => setDraft({ reservation: r })} className="rdg-btn mt-auto"><Receipt size={16} /> Record sale</button>}
               </div>
             ))}
           </div>
@@ -97,7 +103,7 @@ export default function Sales() {
               {sales.map((s) => (
                 <tr key={s.id}>
                   <td><p className="font-semibold text-slate-900">{vehicleName(s.vehicle)}</p><p className="font-mono text-[11px] text-slate-400">INV-{String(s.id).padStart(6, '0')}</p></td>
-                  <td>{s.buyer?.name}<p className="text-xs text-slate-400">{s.buyer?.email}</p></td>
+                  <td>{s.buyer?.name}<p className="text-xs text-slate-400">{s.buyer?.email}</p><DeedName record={s} onEdit={() => setOwnerFor(s)} className="mt-1" compact /></td>
                   <td><Chip tone={s.payment_type === 'financing' ? 'blue' : 'green'}>{s.payment_type === 'financing' ? 'Bank financing' : 'Straight cash'}</Chip></td>
                   <td className="text-right font-bold tabular-nums">{peso(s.total_amount)}</td>
                   <td className="text-sm text-slate-500">{formatDate(s.sale_date)}</td>
@@ -121,6 +127,31 @@ export default function Sales() {
           }}
         />
       )}
+
+      {ownerFor && (
+        <OwnerModal
+          owner={ownerFor.intended_owner ? { ...ownerFor.intended_owner, buyer: ownerFor.buyer, vehicle: ownerFor.vehicle } : null}
+          target={ownerFor}
+          onClose={() => setOwnerFor(null)}
+          onSaved={() => {
+            setOwnerFor(null)
+            loadSales()
+            loadOptions()
+          }}
+        />
+      )}
+    </div>
+  )
+}
+
+/** Who the Deed of Sale names for a reservation or sale, with a button to change it. */
+function DeedName({ record, onEdit, compact, className = '' }) {
+  const o = record.intended_owner
+  const inBuyerName = !o || o.status === 'rejected'
+  return (
+    <div className={`flex items-center justify-between gap-2 text-xs ${compact ? '' : 'rounded-lg bg-slate-50 p-2'} ${className}`}>
+      <span className="min-w-0 text-slate-500">Deed of Sale: <strong className="text-slate-800">{inBuyerName ? 'buyer’s name' : o.full_name}</strong>{o && o.status !== 'approved' && <StatusBadge kind="owner" status={o.status} className="ml-1.5" />}</span>
+      <button type="button" onClick={onEdit} className="shrink-0 font-bold text-slate-900 underline underline-offset-2">{o?.status === 'pending' ? 'Validate' : 'Change'}</button>
     </div>
   )
 }
@@ -186,6 +217,7 @@ function RecordSaleModal({ draft, options, onClose, onSaved }) {
           <div className="rounded-xl bg-slate-50 p-4">
             <p className="font-bold text-slate-900">{vehicleName(r.vehicle)}</p>
             <p className="text-sm text-slate-500">{r.buyer?.name} · {r.buyer?.email}</p>
+            <p className="mt-1 text-sm text-slate-500">Deed of Sale: <strong className="text-slate-800">{r.intended_owner?.status === 'approved' ? r.intended_owner.full_name : r.buyer?.name}</strong></p>
           </div>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">

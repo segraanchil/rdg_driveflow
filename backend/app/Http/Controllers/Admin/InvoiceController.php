@@ -18,7 +18,12 @@ class InvoiceController extends Controller
 {
     public function store(Sale $sale)
     {
-        $sale->load(['vehicle', 'buyer', 'reservation']);
+        return response()->json(self::generate($sale));
+    }
+
+    public static function generate(Sale $sale): LegalDocument
+    {
+        $sale->load(['vehicle', 'buyer', 'reservation', 'intendedOwner']);
 
         $pdf = Pdf::loadView('pdf.invoice', [
             'sale' => $sale,
@@ -30,11 +35,9 @@ class InvoiceController extends Controller
         Storage::disk('public')->put($path, $pdf->output());
 
         // Invoices share the legal_documents table with the Deed of Sale / Official Receipt.
-        $document = LegalDocument::updateOrCreate(
+        return LegalDocument::updateOrCreate(
             ['sale_id' => $sale->id, 'doc_type' => LegalDocument::TYPE_INVOICE],
             ['file_path' => $path, 'generated_at' => now()],
         );
-
-        return response()->json($document);
     }
 }

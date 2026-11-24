@@ -8,6 +8,7 @@ import { estimateMonthlyAmortization } from '../../lib/loanCalculator'
 import { loanRateFor, useSettings } from '../../lib/useSettings'
 import { PROFILE_LABELS, apiError, docLabel, peso, vehicleName } from '../../lib/format'
 import RequirementsList, { useRequirements } from '../../components/vehicles/RequirementsList'
+import { DeedOwnerCard } from '../../components/vehicles/DeedOwner'
 import { toast } from '../../lib/toast'
 
 const TERMS = [12, 24, 36, 48, 60]
@@ -156,6 +157,8 @@ export default function FinancingApplication() {
             </div>
             <StatusBadge kind="financing" status={application.status} />
           </div>
+
+          <DeedOwnerCard vehicleId={vehicle.id} className="rdg-card p-5" />
 
           <div className="rdg-card p-5">
             <p className="mb-3 font-bold text-slate-900">Documents ({required.filter((d) => uploaded.has(d)).length}/{required.length})</p>

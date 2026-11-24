@@ -60,7 +60,6 @@ export default function StaffManagement() {
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
           <h1>Manage Admin Accounts</h1>
-          <p className="mt-1 text-sm text-slate-500">Add, edit, or deactivate Administrative Staff access.</p>
         </div>
         <button onClick={openCreate} className="rdg-btn w-full shrink-0 whitespace-nowrap sm:w-auto">
           <UserPlus size={16} /> Add admin

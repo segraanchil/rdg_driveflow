@@ -4,6 +4,8 @@ import { backendUrl } from '../../api/client'
 import { estimateMonthlyAmortization } from '../../lib/loanCalculator'
 import { useSettings } from '../../lib/useSettings'
 import { km, peso } from '../../lib/format'
+import { CompareButton } from './CompareControls'
+import VehicleTags from './VehicleTags'
 
 const STATUS_CHIP = {
   reserved: ['Reserved', 'bg-amber-500 text-white'],
@@ -21,7 +23,8 @@ export default function VehicleCard({ vehicle }) {
   const chip = STATUS_CHIP[vehicle.status]
 
   return (
-    <Link to={`/inventory/${vehicle.id}`} className="group block overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card transition hover:-translate-y-1 hover:shadow-lift">
+    <div className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card transition hover:-translate-y-1 hover:shadow-lift">
+    <Link to={`/inventory/${vehicle.id}`} className="block">
       <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200">
         {thumbnail ? (
           <img src={backendUrl(`/storage/${thumbnail}`)} alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`} loading="lazy" decoding="async"
@@ -40,11 +43,15 @@ export default function VehicleCard({ vehicle }) {
           {vehicle.transmission && <span className="flex items-center gap-1"><Cog size={13} /> {vehicle.transmission}</span>}
           {vehicle.fuel_type && <span className="flex items-center gap-1"><Fuel size={13} /> {vehicle.fuel_type}</span>}
         </p>
+        <VehicleTags tags={vehicle.tags} limit={3} className="mt-2.5" />
         <div className="mt-4 flex items-end justify-between border-t border-slate-100 pt-3">
           <p className="text-xl font-extrabold text-slate-900">{peso(price)}</p>
           {Number.isFinite(monthly) && monthly > 0 && <p className="text-right text-xs text-slate-500">from <strong className="text-emerald-700">{peso(monthly)}</strong>/mo</p>}
         </div>
       </div>
     </Link>
+    {/* Outside the link: a button can't sit inside one. Takes the status chip's corner (only cars on sale are compared). */}
+    {!chip && <CompareButton vehicle={vehicle} className="absolute left-3 top-3" />}
+    </div>
   )
 }

@@ -33,6 +33,7 @@ class SettingController extends Controller
             'payment_account_number' => ['sometimes', 'nullable', 'string', 'max:40'],
             'payment_ewallet_name' => ['sometimes', 'nullable', 'string', 'max:40'],
             'payment_ewallet_number' => ['sometimes', 'nullable', 'string', 'max:40'],
+            'reservation_terms' => ['sometimes', 'required', 'string', 'max:10000'],
             'loan_rate_employed' => ['sometimes', 'numeric', 'min:0', 'max:40'],
             'loan_rate_ofw' => ['sometimes', 'numeric', 'min:0', 'max:40'],
             'loan_rate_business_owner' => ['sometimes', 'numeric', 'min:0', 'max:40'],

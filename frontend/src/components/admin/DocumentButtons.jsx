@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FileText, FileSignature, Receipt, RefreshCw, Download } from 'lucide-react'
 import apiClient, { backendUrl } from '../../api/client'
 import { formatDateTime } from '../../lib/format'
@@ -13,6 +13,7 @@ export const DOC_TYPES = {
 /** Generate / open / regenerate buttons for a sale's documents. */
 export default function DocumentButtons({ sale, types = Object.keys(DOC_TYPES), onChange, compact = false }) {
   const [docs, setDocs] = useState(sale.legal_documents ?? [])
+  useEffect(() => { setDocs(sale.legal_documents ?? []) }, [sale.legal_documents]) // e.g. regenerated after the owner changed
 
   async function generate(type, open) {
     const def = DOC_TYPES[type]

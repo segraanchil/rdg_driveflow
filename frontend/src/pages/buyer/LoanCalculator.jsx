@@ -57,7 +57,6 @@ export default function LoanCalculator() {
                 <button key={key} onClick={() => setProfile(key)}
                   className={`rounded-xl border px-3 py-2.5 text-sm font-semibold ${profile === key ? 'border-emerald-500 bg-emerald-50 text-emerald-800 ring-2 ring-emerald-500/20' : 'border-slate-300 text-slate-600 hover:border-slate-400'}`}>
                   {label}
-                  <span className="block text-[11px] font-normal text-slate-500">{loanRateFor(settings, key)}% / yr</span>
                 </button>
               ))}
             </div>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ClipboardCheck, Receipt, CalendarClock, Landmark, ShieldCheck, Users, ArrowRight, ImageOff, Clock, CheckCircle2, Plus, PartyPopper, MessagesSquare, SearchCheck } from 'lucide-react'
+import { ClipboardCheck, Receipt, CalendarClock, Landmark, ShieldCheck, Users, ArrowRight, ImageOff, Clock, CheckCircle2, Plus, PartyPopper, MessagesSquare, SearchCheck, IdCard } from 'lucide-react'
 import apiClient from '../../api/client'
 import PageLoader from '../../components/ui/PageLoader'
 import { useAuth } from '../../context/AuthContext'
@@ -28,6 +28,7 @@ export default function Overview() {
     [c.chats_waiting, MessagesSquare, 'chat', 'waiting for a reply', '/admin/support', 'Reply'],
     [c.pending_reservations, ClipboardCheck, 'reservation payment', 'to verify', '/admin/reservations', 'Verify'],
     [c.cars_to_inspect, SearchCheck, 'car bought from a seller', 'to inspect and publish', '/admin/inventory?status=for_inspection', 'Inspect'],
+    [c.owners_to_validate, IdCard, 'vehicle owner', 'to validate', '/admin/vehicle-owners', 'Validate'],
     [c.ready_to_sell, Receipt, 'verified reservation', 'ready to record as sold', '/admin/sales', 'Record sale'],
     [c.pending_test_drives, CalendarClock, 'test drive request', 'to confirm', '/admin/test-drives', 'Review'],
     [c.documents_to_verify, Landmark, 'financing document', 'to check', '/admin/financing', 'Check'],

@@ -43,8 +43,7 @@ export default function AcquisitionLeads() {
 
   return (
     <div>
-      <h1 className="mb-1">Acquisition Leads</h1>
-      <p className="mb-4 text-sm text-slate-500">Cars sellers offered through &ldquo;Sell Your Car&rdquo;. Each card shows the one next step to take.</p>
+      <h1 className="mb-6">Acquisition Leads</h1>
 
       <ol className="mb-5 grid gap-2 rounded-2xl bg-white p-3 text-xs text-slate-600 ring-1 ring-slate-200 sm:grid-cols-4">
         {[

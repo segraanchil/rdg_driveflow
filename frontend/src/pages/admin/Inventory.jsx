@@ -10,11 +10,12 @@ import { apiError, formatDate, km, peso } from '../../lib/format'
 import { toast } from '../../lib/toast'
 import Select from '../../components/ui/Select'
 import PesoInput, { KmInput } from '../../components/ui/PesoInput'
+import VehicleTags, { MAX_TAGS, MAX_TAG_LENGTH, TAG_PRESETS } from '../../components/vehicles/VehicleTags'
 
 const BLANK = {
   make: '', model: '', year: '', mileage: '', transmission: '', fuel_type: '', body_type: '', color: '',
   acquisition_cost: '', repair_fees: '', margin_percent: 12, status: 'available',
-  plate_number: '', engine_number: '', chassis_number: '', description: '', engine: '', seats: '', drivetrain: '', features: '',
+  plate_number: '', engine_number: '', chassis_number: '', description: '', engine: '', seats: '', drivetrain: '', features: '', tags: [],
 }
 const TRANSMISSIONS = ['Automatic', 'Manual', 'CVT']
 const FUELS = ['Gasoline', 'Diesel', 'Hybrid', 'Electric']
@@ -96,7 +97,6 @@ export default function Inventory() {
     <div>
       <PageHeader
         title="Inventory"
-        subtitle="Selling prices are computed from acquisition cost + repairs + margin. Photos and 360° frames appear in the public showroom."
         actions={
           <>
             <SearchInput value={q} onChange={setQ} placeholder="Search make, model, plate…" />
@@ -131,6 +131,7 @@ export default function Inventory() {
                       <div className="min-w-0">
                         <p className="font-semibold text-slate-900">{v.year} {v.make} {v.model}</p>
                         <p className="text-xs text-slate-500">{[km(v.mileage), v.transmission, v.plate_number?.toUpperCase()].filter(Boolean).join(' · ')}</p>
+                        <VehicleTags tags={v.tags} limit={3} className="mt-1" />
                       </div>
                     </div>
                   </td>
@@ -179,6 +180,44 @@ export default function Inventory() {
   )
 }
 
+/** Tap the ready-made tags, or "Others" to type one. Shown to buyers just below the specs. */
+function TagPicker({ value, onChange, error }) {
+  const [other, setOther] = useState(false)
+  const [text, setText] = useState('')
+  const full = value.length >= MAX_TAGS
+  const custom = value.filter((t) => !TAG_PRESETS.includes(t))
+
+  const toggle = (t) => onChange(value.includes(t) ? value.filter((x) => x !== t) : [...value, t])
+
+  function addOther() {
+    const t = text.trim().replace(/\s+/g, ' ').toUpperCase()
+    if (!t || full) return
+    if (!value.includes(t)) onChange([...value, t])
+    setText('')
+  }
+
+  const chip = (on) => `flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold disabled:opacity-40 ${on ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`
+
+  return (
+    <div className="mt-3">
+      <div className="flex items-end justify-between"><span className="rdg-label">Tags (shown below the specs)</span><span className="mb-1 text-xs text-slate-400">{value.length}/{MAX_TAGS}</span></div>
+      <div className="flex flex-wrap gap-1.5">
+        {TAG_PRESETS.map((t) => <button key={t} type="button" aria-pressed={value.includes(t)} disabled={full && !value.includes(t)} onClick={() => toggle(t)} className={chip(value.includes(t))}>{t}</button>)}
+        {custom.map((t) => <button key={t} type="button" onClick={() => toggle(t)} aria-label={`Remove ${t}`} className={chip(true)}>{t} <X size={12} /></button>)}
+        <button type="button" aria-expanded={other} onClick={() => setOther((o) => !o)} className={chip(other)}><Plus size={12} /> OTHERS</button>
+      </div>
+      {other && (
+        <div className="mt-2 flex gap-2">
+          <input autoFocus value={text} maxLength={MAX_TAG_LENGTH} onChange={(e) => setText(e.target.value)} disabled={full} aria-label="Other tag"
+            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addOther() } }} className="w-full text-sm uppercase" placeholder={full ? `Up to ${MAX_TAGS} tags` : 'Type a tag, e.g. SMOKE FREE'} />
+          <button type="button" onClick={addOther} disabled={!text.trim() || full} className="rdg-btn-ghost shrink-0 py-2">Add</button>
+        </div>
+      )}
+      {error && <p className="mt-1 text-xs font-semibold text-red-600">{error}</p>}
+    </div>
+  )
+}
+
 function IconBtn({ label, danger, as: As = 'button', children, ...rest }) {
   return (
     <As title={label} aria-label={label} className={`rounded-lg p-2 ${danger ? 'text-slate-400 hover:bg-red-50 hover:text-red-600' : 'text-slate-500 hover:bg-emerald-50 hover:text-emerald-700'}`} {...rest}>
@@ -212,9 +251,11 @@ function VehicleForm({ vehicle, globalMargin, onClose, onSaved }) {
     setSaving(true)
     const body = new FormData()
     Object.entries(form).forEach(([k, v]) => {
-      if (locked && k === 'status') return
+      if ((locked && k === 'status') || k === 'tags') return
       body.append(k, v ?? '')
     })
+    if (form.tags.length) form.tags.forEach((t) => body.append('tags[]', t))
+    else body.append('tags', '') // clears them
     body.append('media_type', mediaType === 'photo' ? 'photo' : mediaType === 'interior' ? 'interior_360' : '360_frame')
     files.forEach((f) => body.append('photos[]', f))
     if (vehicle) body.append('_method', 'PATCH')
@@ -304,6 +345,7 @@ function VehicleForm({ vehicle, globalMargin, onClose, onSaved }) {
                 <Select value={form.drivetrain ?? ''} onChange={set('drivetrain')} className="w-full"><option value="">—</option>{['FWD', 'RWD', 'AWD', '4x2', '4x4'].map((d) => <option key={d}>{d}</option>)}</Select>
               </Field>
             </div>
+            <TagPicker value={form.tags} onChange={(tags) => setForm((f) => ({ ...f, tags }))} error={errors.tags} />
             <Field label="Description (shown to buyers)" className="mt-3" error={errors.description}>
               <textarea rows={3} value={form.description ?? ''} onChange={set('description')} className="w-full" placeholder="Casa-maintained, first owner, new tires, complete papers…" />
             </Field>

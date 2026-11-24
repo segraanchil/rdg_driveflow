@@ -92,6 +92,19 @@ export function docLabel(key) {
 
 export const PROFILE_LABELS = { employed: 'Employed', ofw: 'OFW', business_owner: 'Business Owner' }
 
+/** How the person named on the Deed of Sale is related to the buyer (IntendedOwner::RELATIONSHIPS). */
+export const RELATIONSHIP_LABELS = { child: 'Child', spouse: 'Spouse', parent: 'Parent', sibling: 'Sibling', relative: 'Other relative', other: 'Other person' }
+
+/** The owner named on the Deed of Sale must be above 17 (IntendedOwner::MIN_AGE). */
+export const MIN_OWNER_AGE = 18
+
+/** Age in full years for a "YYYY-MM-DD" birthdate. */
+export function ageOn(birthdate, today = new Date()) {
+  const [y, m, d] = birthdate.split('-').map(Number)
+  const hadBirthday = today.getMonth() + 1 > m || (today.getMonth() + 1 === m && today.getDate() >= d)
+  return today.getFullYear() - y - (hadBirthday ? 0 : 1)
+}
+
 /** Laravel validation/abort message from an axios error. */
 export function apiError(err, fallback = 'Something went wrong. Please try again.') {
   const data = err?.response?.data

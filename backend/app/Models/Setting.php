@@ -23,6 +23,18 @@ class Setting extends Model
 
     private const CACHE_KEY = 'settings.all';
 
+    private const DEFAULT_TERMS = <<<'TXT'
+1. Reservation. The reservation fee holds this one car under your name for 48 hours from the time you submit, while our staff verify your payment. It is not the full price of the car.
+2. Deducted from the price. Once your payment is verified, the reservation fee is deducted from the price on your invoice.
+3. Proof of payment. The receipt you upload must be genuine and show your own payment of the exact reservation fee. Edited or reused receipts cancel the reservation.
+4. Unverified payments. If we cannot verify the payment within 48 hours, the reservation ends and the car becomes available to other buyers.
+5. Cancellation. If you change your mind after the payment is verified, the reservation fee is not refundable. If RDG Car Deals & Services cannot release the car to you, the fee is returned in full.
+6. Balance. The remaining balance (or the down payment, for bank financing) must be paid before the car is released. For bank financing, approval and the final rate and terms are decided by the bank.
+7. Name on the Deed of Sale. The owner named on the Deed of Sale must be at least 18 years old. If it is someone other than you, you must upload their driver's license and our staff must validate their details first.
+8. Secondhand car. The car is sold secondhand. It is covered by our 1-month money-back guarantee through a warranty claim.
+9. Your data. The details, receipts and IDs you upload are used only to process your reservation, financing and documents, in line with the Data Privacy Act of 2012 (RA 10173).
+TXT;
+
     public const DEFAULTS = [
         // Pricing
         'global_margin_percent' => '12',
@@ -34,6 +46,8 @@ class Setting extends Model
         'payment_ewallet_name' => 'GCash',
         'payment_ewallet_number' => '',
         'payment_qr_path' => '',
+        // Terms the buyer must accept before uploading their receipt (wording to confirm with the business)
+        'reservation_terms' => self::DEFAULT_TERMS,
         // Loan estimate: annual interest rate per employment profile (placeholders)
         'loan_rate_employed' => '9.5',
         'loan_rate_ofw' => '10.5',
@@ -51,7 +65,7 @@ class Setting extends Model
     /** Keys anyone may read (buyer-facing pages). Everything else is staff-only. */
     public const PUBLIC_KEYS = [
         'reservation_fee', 'payment_bank_name', 'payment_account_name', 'payment_account_number',
-        'payment_ewallet_name', 'payment_ewallet_number', 'payment_qr_path',
+        'payment_ewallet_name', 'payment_ewallet_number', 'payment_qr_path', 'reservation_terms',
         'loan_rate_employed', 'loan_rate_ofw', 'loan_rate_business_owner',
         'business_address', 'business_hours', 'business_phone', 'business_email',
     ];

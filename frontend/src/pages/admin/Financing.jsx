@@ -29,7 +29,7 @@ export default function Financing() {
 
   return (
     <div>
-      <PageHeader title="Financing" subtitle="Verify each buyer’s requirements, download them for the partner bank, then record the bank’s decision. The buyer is emailed when it’s approved or declined." />
+      <PageHeader title="Financing" />
       <Tabs value={tab} onChange={(k) => { setApps(null); setTab(k) }} tabs={[
         { key: '', label: 'All' },
         { key: 'pending', label: 'Collecting documents' },

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AcquisitionLeadReviewController;
 use App\Http\Controllers\Admin\FinancingReviewController;
+use App\Http\Controllers\Admin\IntendedOwnerController as AdminIntendedOwnerController;
 use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Admin\NotificationController;
@@ -21,6 +22,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Buyer\ChatController;
 use App\Http\Controllers\Buyer\FinancingApplicationController;
 use App\Http\Controllers\Buyer\GarageController;
+use App\Http\Controllers\Buyer\IntendedOwnerController as BuyerIntendedOwnerController;
 use App\Http\Controllers\Buyer\LoanCalculatorController;
 use App\Http\Controllers\Buyer\ReservationController;
 use App\Http\Controllers\Admin\TestDriveController as AdminTestDriveController;
@@ -108,6 +110,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/reservations', [ReservationController::class, 'store']);
         Route::get('/reservations/{reservation}', [ReservationController::class, 'show']);
 
+        // Whose name goes on the Deed of Sale, when it isn't the buyer's own.
+        Route::get('/intended-owners', [BuyerIntendedOwnerController::class, 'index']);
+        Route::post('/intended-owners', [BuyerIntendedOwnerController::class, 'store']);
+        Route::delete('/intended-owners/{owner}', [BuyerIntendedOwnerController::class, 'destroy']);
+        Route::get('/intended-owners/{owner}/license/{side}', [BuyerIntendedOwnerController::class, 'license'])->whereIn('side', ['front', 'back']);
+
         Route::get('/test-drives', [BuyerTestDriveController::class, 'index']);
         Route::post('/test-drives', [BuyerTestDriveController::class, 'store']);
 
@@ -175,6 +183,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/sales', [SaleController::class, 'store']);
         Route::post('/sales/{sale}/invoice', [InvoiceController::class, 'store']);
         Route::post('/sales/{sale}/legal-documents', [LegalDocumentController::class, 'store']);
+
+        Route::get('/intended-owners', [AdminIntendedOwnerController::class, 'index']);
+        Route::post('/intended-owners', [AdminIntendedOwnerController::class, 'store']);
+        Route::put('/intended-owners/{owner}/approve', [AdminIntendedOwnerController::class, 'approve']);
+        Route::post('/intended-owners/{owner}/reject', [AdminIntendedOwnerController::class, 'reject']);
+        Route::delete('/intended-owners/{owner}', [AdminIntendedOwnerController::class, 'destroy']);
+        Route::get('/intended-owners/{owner}/license/{side}', [AdminIntendedOwnerController::class, 'license'])->whereIn('side', ['front', 'back']);
 
         Route::get('/warranty-claims', [WarrantyClaimReviewController::class, 'index']);
         Route::patch('/warranty-claims/{claim}', [WarrantyClaimReviewController::class, 'update']);

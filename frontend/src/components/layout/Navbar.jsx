@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import {
-  Car, Calculator, CarFront, Warehouse, ClipboardList, LogIn, LogOut, Menu, X, UserPlus, ChevronDown, LayoutDashboard, ShieldCheck, UserCog, ArrowLeft,
+  Car, Calculator, CarFront, Warehouse, ClipboardList, LogIn, LogOut, Menu, X, UserPlus, ChevronDown, LayoutDashboard, ShieldCheck, UserCog, ArrowLeft, ArrowLeftRight,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { initials } from '../../lib/format'
@@ -30,6 +30,7 @@ export default function Navbar() {
   const goBack = () => ((window.history.state?.idx ?? 0) > 0 ? navigate(-1) : navigate('/'))
   const links = [
     { to: '/inventory', label: 'Browse Cars', icon: Car },
+    { to: '/compare', label: 'Compare', icon: ArrowLeftRight },
     { to: '/loan-calculator', label: 'Loan Calculator', icon: Calculator },
     user?.role === 'seller' ? { to: '/my-leads', label: 'My Submissions', icon: ClipboardList } : { to: '/sell-your-car', label: 'Sell Your Car', icon: CarFront },
     ...(user?.role === 'buyer' ? [{ to: '/garage', label: 'My Garage', icon: Warehouse }] : []),

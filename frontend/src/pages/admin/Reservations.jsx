@@ -61,10 +61,7 @@ export default function Reservations() {
 
   return (
     <div>
-      <PageHeader
-        title="Reservations"
-        subtitle="Check each proof of payment. Cars are held for 48 hours from submission and released automatically if not verified."
-      />
+      <PageHeader title="Reservations" />
       <Tabs
         value={tab}
         onChange={setTab}

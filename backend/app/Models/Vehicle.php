@@ -39,6 +39,7 @@ class Vehicle extends Model
         'seats',
         'drivetrain',
         'features',
+        'tags',
         'body_type',
         'color',
         'description',
@@ -65,7 +66,23 @@ class Vehicle extends Model
         'selling_price' => 'decimal:2',
         'last_updated' => 'datetime',
         'inspected_at' => 'datetime',
+        'tags' => 'array',
     ];
+
+    /** Short selling points under the specs, e.g. LADY OWNED, CASA MAINTAINED. */
+    public const MAX_TAGS = 6;
+
+    public const MAX_TAG_LENGTH = 30;
+
+    /** Upper-cased, trimmed, no blanks or duplicates; null when there are none. */
+    public static function cleanTags(?array $tags): ?array
+    {
+        $clean = collect($tags)
+            ->map(fn ($t) => mb_strtoupper(trim(preg_replace('/\s+/', ' ', (string) $t))))
+            ->filter()->unique()->values()->take(self::MAX_TAGS)->all();
+
+        return $clean ?: null;
+    }
 
     public function acquisitionLead(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {

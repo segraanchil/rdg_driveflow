@@ -6,6 +6,8 @@ backend/.env.production
 backend/.phpunit.result.cache
 backend/storage/*.key
 backend/storage/app/public/*
+# Driver's licenses and other private uploads: never commit
+backend/storage/app/private/
 backend/storage/framework/cache/*
 backend/storage/framework/sessions/*
 backend/storage/framework/testing/*
