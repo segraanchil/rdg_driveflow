@@ -34,10 +34,19 @@ export default function AppraisalStatus() {
     toast.success(decision === 'accept' ? 'Offer accepted. We’ll contact you soon.' : 'Offer declined.')
   }
 
+  const [missing, setMissing] = useState(false)
   useEffect(() => {
-    apiClient.get(`/seller/acquisition-leads/${id}`).then(({ data }) => setLead(data))
+    apiClient.get(`/seller/acquisition-leads/${id}`).then(({ data }) => setLead(data)).catch(() => setMissing(true))
   }, [id])
 
+  if (missing) {
+    return (
+      <div className="rdg-card mx-auto max-w-md p-10 text-center">
+        <p className="font-bold text-slate-900">We couldn’t find that submission.</p>
+        <Link to="/my-leads" className="rdg-btn mt-5">My submissions</Link>
+      </div>
+    )
+  }
   if (!lead) return <PageLoader />
 
   const specs = lead.vehicle_specs ?? {}

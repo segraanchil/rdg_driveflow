@@ -24,6 +24,7 @@ export default function FinancingApplication() {
   const settings = useSettings()
 
   const [vehicle, setVehicle] = useState(null)
+  const [missing, setMissing] = useState(false)
   const [application, setApplication] = useState(undefined)
   const [profile, setProfile] = useState(params.get('profile') ?? '')
   const [term, setTerm] = useState(Number(params.get('term')) || 36)
@@ -38,7 +39,7 @@ export default function FinancingApplication() {
     apiClient.get(`/vehicles/${vehicleId}`).then(({ data }) => {
       setVehicle(data)
       setDown((d) => d ?? Math.round(Number(data.selling_price) * 0.2))
-    })
+    }).catch(() => setMissing(true))
     apiClient.get('/buyer/financing-applications').then(({ data }) => {
       setApplication(data.find((a) => String(a.vehicle_id) === vehicleId && a.status !== 'rejected') ?? null)
     })
@@ -49,10 +50,10 @@ export default function FinancingApplication() {
     apiClient.get(`/financing/checklist/${profile}`, { silent: true }).then(({ data }) => setChecklist(data.documents))
   }, [profile])
 
-  if (!vehicleId) {
+  if (!vehicleId || missing) {
     return (
       <div className="rdg-card mx-auto max-w-md p-10 text-center">
-        <p className="font-bold text-slate-900">Choose a car first.</p>
+        <p className="font-bold text-slate-900">{missing ? 'This car isn’t listed anymore.' : 'Choose a car first.'}</p>
         <p className="mt-1 text-sm text-slate-500">Open a car and tap “Apply for financing”.</p>
         <Link to="/inventory" className="rdg-btn mt-5">Browse cars</Link>
       </div>

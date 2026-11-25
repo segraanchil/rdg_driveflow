@@ -53,13 +53,15 @@ Route::get('/settings/public', [SettingController::class, 'publicIndex']);
 Route::get('/vehicles/{vehicle}', [VehicleController::class, 'show']);
 Route::post('/loan-calculator', [LoanCalculatorController::class, 'calculate']);
 Route::get('/financing/checklist/{employmentProfile}', [FinancingApplicationController::class, 'checklist']);
-Route::post('/chat/message', [ChatController::class, 'sendMessage'])->middleware('throttle:30,1');
-Route::post('/chat/escalate', [ChatController::class, 'escalate'])->middleware('throttle:5,1');
+// The third throttle value names the limit: without it, Laravel counts every limited route together per
+// visitor, so a few assistant messages would also block "Talk to a person" and "Forgot password".
+Route::post('/chat/message', [ChatController::class, 'sendMessage'])->middleware('throttle:30,1,chat');
+Route::post('/chat/escalate', [ChatController::class, 'escalate'])->middleware('throttle:5,1,escalate');
 
 // "Talk to a person": live chat with staff (guests use a per-chat token header).
-Route::post('/support/conversations', [SupportChatController::class, 'start'])->middleware('throttle:5,1');
-Route::get('/support/conversations/{conversation}', [SupportChatController::class, 'show'])->middleware('throttle:120,1');
-Route::post('/support/conversations/{conversation}/messages', [SupportChatController::class, 'send'])->middleware('throttle:30,1');
+Route::post('/support/conversations', [SupportChatController::class, 'start'])->middleware('throttle:5,1,support-start');
+Route::get('/support/conversations/{conversation}', [SupportChatController::class, 'show'])->middleware('throttle:120,1,support-read');
+Route::post('/support/conversations/{conversation}/messages', [SupportChatController::class, 'send'])->middleware('throttle:30,1,support-send');
 
 /*
 |--------------------------------------------------------------------------
@@ -68,8 +70,8 @@ Route::post('/support/conversations/{conversation}/messages', [SupportChatContro
 */
 Route::post('/auth/register', [RegisterController::class, 'register']);
 Route::post('/auth/login', [LoginController::class, 'login']);
-Route::post('/auth/forgot-password', [PasswordResetController::class, 'sendLink'])->middleware('throttle:5,1');
-Route::post('/auth/reset-password', [PasswordResetController::class, 'reset'])->middleware('throttle:10,1');
+Route::post('/auth/forgot-password', [PasswordResetController::class, 'sendLink'])->middleware('throttle:5,1,forgot-password');
+Route::post('/auth/reset-password', [PasswordResetController::class, 'reset'])->middleware('throttle:10,1,reset-password');
 Route::get('/auth/verify-email/{id}/{hash}', [EmailVerificationController::class, 'verify'])
     ->middleware('signed')
     ->name('verification.verify');
@@ -92,9 +94,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware('mfa')->prefix('account')->group(function () {
         Route::put('/profile', [AccountController::class, 'updateProfile']);
-        Route::put('/password', [AccountController::class, 'updatePassword'])->middleware('throttle:10,1');
-        Route::put('/email', [AccountController::class, 'updateEmail'])->middleware('throttle:10,1');
-        Route::delete('/', [AccountController::class, 'destroy'])->middleware('throttle:5,1');
+        Route::put('/password', [AccountController::class, 'updatePassword'])->middleware('throttle:10,1,account-password');
+        Route::put('/email', [AccountController::class, 'updateEmail'])->middleware('throttle:10,1,account-email');
+        Route::delete('/', [AccountController::class, 'destroy'])->middleware('throttle:5,1,account-delete');
     });
 
     /*
@@ -235,7 +237,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Support inbox ("Talk to a person" chats).
         Route::get('/support', [SupportInboxController::class, 'index']);
         Route::get('/support/{conversation}', [SupportInboxController::class, 'show']);
-        Route::post('/support/{conversation}/messages', [SupportInboxController::class, 'reply'])->middleware('throttle:60,1');
+        Route::post('/support/{conversation}/messages', [SupportInboxController::class, 'reply'])->middleware('throttle:60,1,support-reply');
         Route::patch('/support/{conversation}', [SupportInboxController::class, 'update']);
     });
 });
